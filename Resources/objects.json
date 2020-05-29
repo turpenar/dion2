@@ -1,0 +1,181 @@
+{
+	"Door": {
+		"dochas_west_gate": {
+			"name": "The Dochas West Gate", 
+			"description": "Standing just over head-high, the town gate is a feeble attempt at keeping out intruders.", 
+			"handle": ["gate"],
+			"adjectives": ["town"],
+			"container": false,
+			"visibility": 100,
+			"location_1": {
+				"name": "Outside the West Gate",
+				"area": "Field",
+				"x": 5,
+				"y": 3
+			},
+			"location_2": {
+				"name": "West Gate",
+				"area": "Dochas",
+				"x": 0,
+				"y": 1
+			}
+		}, 
+		"dochas_south_gate": {
+			"name": "The Dochas South Gate", 
+			"description": "Standing just over head-high, the town gate is a feeble attempt at keeping out intruders.", 
+			"handle": ["gate"],
+			"adjectives": ["town"],
+			"container": false,
+			"visibility": 100,
+			"location_1": {
+				"name": "South Gate",
+				"area": "Dochas",
+				"x": 3,
+				"y": 7
+			},
+			"location_2": {
+				"name": "Outside Gate",
+				"area": "DochasGrounds",
+				"x": 2,
+				"y": 1
+			}
+		}, 
+		"dochas_leatherworks_door": {
+			"name": "Dochas Leatherworks door", 
+			"description": "You see a rickety door, worn by years of use.", 
+			"handle": ["door"],
+			"adjectives": [],
+			"container": false,
+			"visibility": 100,
+			"location_1": {
+				"name": "The North End",
+				"area": "Dochas",
+				"x": 4,
+				"y": 0
+			},
+			"location_2": {
+				"name": "Foyer",
+				"area": "DochasLeatherworks",
+				"x": 1,
+				"y": 2
+			}
+		}, 
+		"dochas_smallhouse_gate": {
+			"name": "Small House Gate", 
+			"description": "You see a small gate leading to the doorstep of the house.", 
+			"handle": ["gate"],
+			"adjectives": [],
+			"container": false,
+			"visibility": 100,
+			"location_1": {
+				"name": "A Small House",
+				"area": "Dochas",
+				"x": 2,
+				"y": 0
+			},
+			"location_2": {
+				"name": "Doorstep",
+				"area": "DochasSmallHouse",
+				"x": 0,
+				"y": 0
+				}
+			}, 
+		"dochas_smallhouse_door": {
+			"name": "Small House Door", 
+			"description": "You see a door, which fits awkwardly in the doorjam.", 
+			"handle": ["door"],
+			"adjectives": [],
+			"container": false,
+			"visibility": 100,
+			"location_1": {
+				"name": "Doorstep",
+				"area": "DochasSmallHouse",
+				"x": 0,
+				"y": 0
+			},
+			"location_2": {
+				"name": "Triage",
+				"area": "DochasSmallHouse",
+				"x": 0,
+				"y": 2
+			}
+		}, 
+		"edgwood_forest_path": {
+			"name": "a path", 
+			"description": "You see an unassuming path meant for foot traffic through the woods.", 
+			"handle": ["path"],
+			"adjectives": [],
+			"container": false,
+			"visibility": 100,
+			"location_1": {
+				"name": "A Depression",
+				"area": "DochasGrounds",
+				"x": 5,
+				"y": 1
+			},
+			"location_2": {
+				"name": "A Forest Path",
+				"area": "EdgewoodForest",
+				"x": 0,
+				"y": 1
+			}
+		}
+	},
+	"Furniture": {
+		"stool": {
+			"name": "a sturdy stool", 
+			"description": "A small stool sits on the ground.",
+			"handle": ["stool"], 
+			"adjectives": ["sturdy"],
+			"container": false,
+			"visibility": 100,
+			"location": ""
+		}
+	},
+	"Corpse": {
+		"kobold_corpse": {
+			"name": "a dead kobold",
+			"description": "The kill looks fresh. You may want to search it for loot before someone else does.",
+			"handle": ["kobold"],
+			"adjectives": ["dead"],
+			"container": false,
+			"level": 1,
+			"loot": {
+				"drop_rate": 100,
+				"items": ["clothing"],
+				"money": 20
+			},
+			"skin": ""
+		},
+		"goblin_corpse": {
+			"name": "a dead goblin",
+			"description": "The kill looks fresh. You may want to search it for loot before someone else does.",
+			"handle": ["goblin"],
+			"adjectives": ["dead"],
+			"container": false,
+			"visibility": 100,
+			"level": 1,
+			"loot": {
+				"drop_rate": 100,
+				"items": [],
+				"money": 20
+			},
+			"skin": ""
+		},
+		"wild_boar_corpse": {
+			"name": "a body of a wild boar",
+			"description": "The kill looks fresh. You may want to search it for loot before someone else does.",
+			"handle": ["boar"],
+			"adjectives": ["dead"],
+			"container": false,
+			"visibility": 100,
+			"level": 0,
+			"loot": {
+				"drop_rate": 100,
+				"items": [],
+				"money": 10
+			},
+			"skin": "boar_hide"
+		}
+	}
+}
