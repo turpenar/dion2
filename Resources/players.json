@@ -47,11 +47,29 @@
 			"physical_fitness": 0,
 			"perception": 0
 			},
+		"skills_bonus": {
+			"edged_weapons": 0,
+			"blunt_weapons": 0,
+			"polearm_weapons": 0,
+			"thrown_weapons": 0,
+			"ranged_weapons": 0,
+			"armor": 0,
+			"shield": 0,
+			"dodging": 0,
+			"physical_fitness": 0,
+			"perception": 0
+			},
 		"health": 0,
 		"mana": 0,
 		"defense": 0,
-		"right_hand": "",
-		"left_hand": "",
+		"right_hand": {
+			"item_category": [],
+			"item_name": []
+			},
+		"left_hand": {
+			"item_category": [],
+			"item_name": []
+			},
 		"dominance": "",
 		"money": 0,
 		"inventory": {

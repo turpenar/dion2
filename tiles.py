@@ -128,7 +128,7 @@ class MapTile(mixins.DataFileMixin):
     def fill_room(self, character):
         if not self.room_filled:
             for door in self.room_data['doors']:
-                self.objects.append(objects.Door(object_name=door, room=self))
+                self.objects.append(objects.create_object(object_category='door', object_name=door, room=self))
             for category in self.room_data['items']:
                 for item in self.room_data['items'][category]:
                     self.items.append(items.create_item(item_category=category, item_name=item))

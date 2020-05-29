@@ -19,9 +19,10 @@ enemies = mixins.enemies
 
 adjectives = []
 
-for object in objects:
-    nouns.extend(objects[object]['handle'])
-    adjectives.extend(objects[object]['adjectives'])
+for category in objects:
+    for object in objects[category]:
+        nouns.extend(objects[category][object]['handle'])
+        adjectives.extend(objects[category][object]['adjectives'])
 
 for category in items:
     for item in items[category]:

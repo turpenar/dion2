@@ -1,7 +1,7 @@
 
 """
 
-TODO:  add containter limitation
+TODO:  add container limitation
 TODO:  Define dominant hand. Current default dominant hand is right hand
 TODO:  Define health leveling function after 0.
 """
@@ -74,6 +74,7 @@ class Player(mixins.ReprMixin, mixins.DataFileMixin):
 
         self.skills_base = self.player_data['skills']
         self.skills = self.player_data['skills']
+        self.skills_bonus = self.player_data['skills_bonus']
         
         self.health = self.player_data['health']
         self.health_max = self.player_data['health']
@@ -94,16 +95,16 @@ class Player(mixins.ReprMixin, mixins.DataFileMixin):
             for item in self.player_data['inventory'][category]:
                 self.inventory.append(items.create_item(item_category=category, item_name=item))
 
-        self.right_hand_inv = []
+        self.right_hand_inv = None
+        if len(self.player_data['right_hand']['item_name']) != 0:
+            self.right_hand_inv.append(items.create_item(item_category=player_data['right_hand']['item_category'], item_name=player_data['right_hand']['item_name']))
 
-        if len(self.player_data['right_hand']) != 0:
-            self.right_hand_inv.append(getattr(__import__('items'), all_items[self.player_data['right_hand']]['category'])(item_name=self.player_data['right_hand']))
-
-        self.left_hand_inv = []
-        if len(self.player_data['left_hand']) != 0:
-            self.left_hand_inv.append(getattr(__import__('items'), all_items[self.player_data['left_hand']]['category'])(item_name=self.player_data['left_hand']))
+        self.left_hand_inv = None
+        if len(self.player_data['left_hand']['item_name']) != 0:
+            self.left_hand_inv.append(items.create_item(item_category=player_data['left_hand']['item_category'], item_name=player_data['left_hand']['item_name']))
 
         self.dominance = "right_hand"
+        self.non_dominance = "left_hand"
 
         self.location_x, self.location_y = world.starting_position
         self.room = world.tile_exists(x=self.location_x, y=self.location_y, area='Field')
@@ -193,10 +194,22 @@ class Player(mixins.ReprMixin, mixins.DataFileMixin):
             self.rt_start = time.time()
             self.rt_end = self.rt_start + seconds
         return
-
-    def get_attack_modifier(self):
+    
+    def get_stat(self, stat):
         with lock:
-            return self.right_hand_inv[0].attack_modifier
+            return self.stats[stat]
+        
+    def get_stat_bonus(self, stat):
+        with lock:
+            return self.stats_bonus[stat]
+    
+    def get_skill(self, skill):
+        with lock:
+            return self.skills[skill]
+
+    def get_skill_bonus(self, skill):
+        with lock:
+            return self.skills_bonus[skill]
 
     def check_inventory_for_item(self, item):
         with lock:
@@ -208,10 +221,10 @@ class Player(mixins.ReprMixin, mixins.DataFileMixin):
                         if sub_inv_item == item:
                             return True
             if len(self.right_hand_inv) == 1:
-                if item == self.right_hand_inv[0]:
+                if item == self.get_right_hand_inv():
                     return True
             if len(self.left_hand_inv) == 1:
-                if item == self.left_hand_inv[0]:
+                if item == self.get_left_hand_inv():
                     return True
             return False
 
@@ -258,7 +271,67 @@ class Player(mixins.ReprMixin, mixins.DataFileMixin):
 
     def load(self, state):
         self.__setstate__(state)
-
+        
+    def get_right_hand_inv(self):
+        with lock:
+            if self.right_hand_inv:
+                return self.right_hand_inv
+            else: return None
+    
+    def get_left_hand_inv(self):
+        with lock:
+            if self.left_hand_inv:
+                return self.seft_hand_inv
+            else: return None
+        
+    def get_dominant_hand_inv(self):
+        if self.dominance == 'right_hand':
+            return self.get_right_hand_inv()
+        if self.dominance == 'left_hand':
+            return self.get_left_hand_inv()
+        
+    def get_non_dominant_hand_inv(self):
+        if self.dominance == 'right_hand':
+            return self.get_left_hand_inv()
+        if self.dominance == 'left_hand':
+            return self.get_right_hand_inv()
+    
+    def set_right_hand_inv(self, item):
+        with lock:
+            self.right_hand_inv = item
+    
+    def set_left_hand_inv(self, item):
+        with lock:
+            self.left_hand_inv = item
+            
+    def set_dominant_hand_inv(self, item):
+        if self.dominance == 'right_hand':
+            self.set_right_hand_inv(item)
+        if self.dominance == 'left_hand':
+            self.set_left_hand_inv(item)
+            
+    def set_non_dominant_hand_inv(self, item):
+        if self.dominance == 'right_hand':
+            self.set_left_hand_inv(item)
+        if self.dominance == 'left_hand':
+            self.set_right_hand_inv(item)
+            
+    def get_attack_strength_base(self):
+        with lock:
+            return self.attack_strength_base
+        
+    def get_defense_strength_evade_base(self):
+        with lock:
+            return self.defense_strength_evade_base
+        
+    def get_defense_strength_block_base(self):
+        with lock:
+            return self.defense_strength_block_base
+        
+    def get_defense_strength_parry_base(self):
+        with lock:
+            return self.defense_strength_parry_base
+        
 
 ############### VERBS ####################
 
@@ -305,7 +378,7 @@ Attribute:  {}
             for enemy in self.room.enemies:
                 if set(enemy.handle) & set(self.target):
                     enemy_found = True
-                    combat.do_physical_damage_to_enemy(self, enemy)
+                    combat.melee_attack(self, enemy)
                     self.set_round_time(3)
                     return
             if not enemy_found:
@@ -320,16 +393,16 @@ Attribute:  {}
         elif not kwargs['direct_object']:
             terminal_output.print_text("I'm sorry, I could not understand what you wanted.")
             return
-        elif len(self.right_hand_inv) == 0:
+        elif self.get_dominant_hand_inv() is None:
             terminal_output.print_text("You do not have that item in your hand")
             return
-        elif not set(self.right_hand_inv[0].handle) & set(kwargs['direct_object']):
+        elif not set(self.get_dominant_hand_inv().handle) & set(kwargs['direct_object']):
             terminal_output.print_text("You do not have that item in your right hand.")
             return
         else:
-            self.room.items.append(self.right_hand_inv[0])
-            terminal_output.print_text("You drop " + self.right_hand_inv[0].name)
-            del self.right_hand_inv[0]
+            self.room.items.append(self.get_dominant_hand_inv())
+            terminal_output.print_text("You drop " + self.get_dominant_hand_inv().name)
+            self.get_dominant_hand_inv()
             return
 
     def flee(self, **kwargs):
@@ -355,11 +428,11 @@ Attribute:  {}
             if set(room_object.handle) & set(kwargs['direct_object']):
                 terminal_output.print_text("Perhaps picking up {} is not a good idea.".format(room_object.name))
                 return
-        if len(self.right_hand_inv) == 0:
+        if self.get_dominant_hand_inv() is None:
             item_found = False
             for room_item in self.room.items:
                 if set(room_item.handle) & set(kwargs['direct_object']):
-                    self.right_hand_inv.append(room_item)
+                    self.set_dominant_hand_inv(room_item)
                     self.room.items.remove(room_item)
                     terminal_output.print_text("You pick up {}.".format(room_item.name))
                     return
@@ -368,7 +441,7 @@ Attribute:  {}
                     if inv_item.container:
                         for sub_item in inv_item.items:
                             if set(sub_item.handle) & set(kwargs['direct_object']):
-                                self.right_hand_inv.append(sub_item)
+                                self.set_dominant_hand_inv(sub_item)
                                 inv_item.items.remove(sub_item)
                                 terminal_output.print_text("You take {} from {}.".format(sub_item.name, inv_item.name))
                                 return
@@ -385,10 +458,10 @@ Attribute:  {}
         elif not kwargs['direct_object']:
             terminal_output.print_text("What are you trying to give?")
             return
-        elif len(self.right_hand_inv) == 0:
+        elif self.get_dominant_hand_inv() is None:
             terminal_output.print_text("You don't seem to be holding that item in your hand.")
             return
-        elif not set(self.right_hand_inv[0].handle) & set(kwargs['direct_object']):
+        elif not set(self.get_dominant_hand_inv().handle) & set(kwargs['direct_object']):
             terminal_output.print_text("You don't seem to be holding that item in your hand.")
             return
         elif not kwargs['indirect_object']:
@@ -397,8 +470,8 @@ Attribute:  {}
         else:
             for npc in self.room.npcs:
                 if {npc.first_name.lower()} & set(kwargs['indirect_object']):
-                    if npc.give_item(self.right_hand_inv[0]):
-                        del self.right_hand_inv[0]
+                    if npc.give_item(self.get_dominant_hand_inv()):
+                        self.get_dominant_hand_inv()
                         return
                     else:
                         return
@@ -443,42 +516,41 @@ Health:  {} of {} hit points
                        self.health_max))
 
     def view_inventory(self, **kwargs):
-        with lock:
-            if len(self.right_hand_inv) == 1:
-                right_hand = "You have {} in your right hand.".format(self.right_hand_inv[0].name)
-            else:
-                right_hand = "Your right hand is empty."
-            if len(self.left_hand_inv) == 1:
-                left_hand = "You have {} in your left hand.".format(self.left_hand_inv[0].name)
-            else:
-                left_hand = "Your left hand is empty."
-            inventory_clothing = [x.name for x in self.inventory if x.category == 'clothing']
-            if len(inventory_clothing) > 1:
-                inventory_clothing = "You are wearing {} and {}.".format(', '.join(inventory_clothing[:-1]), inventory_clothing[-1])
-            elif len(inventory_clothing) == 1:
-                inventory_clothing = "You are wearing {}.".format(inventory_clothing[0])
-            else:
-                inventory_clothing = "You are wearing nothing."
-            inventory_armor = [x.name for x in self.inventory if x.category == 'armor']
-            if len(inventory_armor) > 1:
-                inventory_armor ="You are also wearing {} and {}.".format(self.object_pronoun, ', '.join(inventory_armor[:-1]), inventory_armor[-1])
-            elif len(inventory_armor) == 1:
-                inventory_armor = "You are also wearing {}.".format(self.object_pronoun, inventory_armor[0])
-            else:
-                inventory_armor = "You are also wearing no armor.".format(self.object_pronoun)
-            wealth = "You have {} gulden.".format(self.money)
-            terminal_output.print_text('''\
+        if self.get_dominant_hand_inv():
+            right_hand = "You have {} in your {} hand.".format(self.get_dominant_hand_inv().name, self.dominance)
+        else:
+            right_hand = "Your right hand is empty."
+        if self.get_non_dominant_hand_inv():
+            left_hand = "You have {} in your {} hand.".format(self.get_non_dominant_hand_inv().name, self.non_dominance)
+        else:
+            left_hand = "Your left hand is empty."
+        inventory_clothing = [x.name for x in self.inventory if x.category == 'clothing']
+        if len(inventory_clothing) > 1:
+            inventory_clothing = "You are wearing {} and {}.".format(', '.join(inventory_clothing[:-1]), inventory_clothing[-1])
+        elif len(inventory_clothing) == 1:
+            inventory_clothing = "You are wearing {}.".format(inventory_clothing[0])
+        else:
+            inventory_clothing = "You are wearing nothing."
+        inventory_armor = [x.name for x in self.inventory if x.category == 'armor']
+        if len(inventory_armor) > 1:
+            inventory_armor ="You are also wearing {} and {}.".format(self.object_pronoun, ', '.join(inventory_armor[:-1]), inventory_armor[-1])
+        elif len(inventory_armor) == 1:
+            inventory_armor = "You are also wearing {}.".format(self.object_pronoun, inventory_armor[0])
+        else:
+            inventory_armor = "You are also wearing no armor.".format(self.object_pronoun)
+        wealth = "You have {} gulden.".format(self.money)
+        terminal_output.print_text('''\
 {}
 {}
 {}
 {}
 {}
-                                        \
-                                        '''.format(right_hand,
-                                                   left_hand,
-                                                   wrapper.fill(inventory_clothing),
-                                                   wrapper.fill(inventory_armor),
-                                                   wrapper.fill(wealth)))
+                                    \
+                                    '''.format(right_hand,
+                                               left_hand,
+                                               wrapper.fill(inventory_clothing),
+                                               wrapper.fill(inventory_armor),
+                                               wrapper.fill(wealth)))
 
     def look(self, **kwargs):
         if self.check_round_time():
@@ -493,7 +565,7 @@ Health:  {} of {} hit points
             if kwargs['indirect_object'] is None:
                 terminal_output.print_text("I am not sure what you are referring to.")
                 return
-            for item in self.room.items + self.room.objects + self.room.npcs + self.inventory + self.right_hand_inv + self.left_hand_inv:
+            for item in self.room.items + self.room.objects + self.room.npcs + self.inventory + [self.get_right_hand_inv()] + [self.get_left_hand_inv()]:
                 if isinstance(item, npcs.NPC):
                     terminal_output.print_text("It wouldn't be advisable to look in " + item.name)
                     return
@@ -508,7 +580,7 @@ Health:  {} of {} hit points
             if kwargs['indirect_object'] is None:
                 terminal_output.print_text("I am not sure what you are referring to.")
                 return
-            for item in self.room.items + self.room.objects + self.room.npcs + self.inventory + self.right_hand_inv + self.left_hand_inv:
+            for item in self.room.items + self.room.objects + self.room.npcs + self.inventory + [self.get_right_hand_inv()] + [self.get_left_hand_inv()]:
                 if set(item.handle) & set(kwargs['indirect_object']):
                     item.view_description()
                     return
@@ -579,34 +651,34 @@ Health:  {} of {} hit points
         if not kwargs['direct_object']:
             terminal_output.print_text("What is it you're trying to put down?")
             return
-        elif len(self.right_hand_inv) == 0:
+        elif self.get_dominant_hand_inv() is None:
             terminal_output.print_text("You do not have that item in your hand.")
             return
-        elif not set(self.right_hand_inv[0].handle) & set(kwargs['direct_object']):
+        elif not set(self.get_dominant_hand_inv().handle) & set(kwargs['direct_object']):
             terminal_output.print_text("You do not have that item in your right hand.")
             return
         elif kwargs['preposition'][0] == "in":
             for inv_item in self.inventory:
                 if set(inv_item.handle) & set(kwargs['indirect_object']):
                     if inv_item.container == False:
-                        terminal_output.print_text("{} won't fit in there.".format(self.right_hand_inv[0].name))
+                        terminal_output.print_text("{} won't fit in there.".format(self.get_dominant_hand_inv().name))
                         return
                     if len(inv_item.items) == inv_item.capacity:
                         terminal_output.print_text("{} can't hold any more items".format(inv_item.name))
                         return
-                    inv_item.items.append(self.right_hand_inv[0])
-                    terminal_output.print_text("You put {} {} {}".format(self.right_hand_inv[0].name, kwargs['preposition'][0], inv_item.name))
-                    del self.right_hand_inv[0]
+                    inv_item.items.append(self.get_dominant_hand_inv())
+                    terminal_output.print_text("You put {} {} {}".format(self.get_dominant_hand_inv().name, kwargs['preposition'][0], inv_item.name))
+                    self.set_dominant_hand_inv(item=None)
                     return
             for room_item in self.room.items:
                 if set(room_item.handle) & set(kwargs['indirect_object']):
                     if room_item.container == False:
                         terminal_output.print_text("{} won't fit {} there.".format(self.right_hand_inv[0].name, kwargs['preposition'][0]))
                         return
-                    room_item.items.append(self.right_hand_inv[0])
-                    del self.right_hand_inv[0]
-                    terminal_output.print_text("You put {} {} {}".format(self.right_hand_inv[0].name, kwargs['preposition'][0], room_item.name))
-                    del self.right_hand_inv[0]
+                    room_item.items.append(self.get_dominant_hand_inv())
+                    self.set_dominant_hand_inv(None)
+                    terminal_output.print_text("You put {} {} {}".format(self.get_dominant_hand_inv().name, kwargs['preposition'][0], room_item.name))
+                    self.set_dominant_hand_inv(None)
                     return
         elif kwargs['preposition'][0] == "on":
             terminal_output.print_text("You cannot stack items yet.")
@@ -666,7 +738,7 @@ Health:  {} of {} hit points
             return
         for npc in self.room.npcs:
             if set(npc.handle) & {kwargs['indirect_object']}:
-                npc.sell_item(item=self.right_hand_inv[0])
+                npc.sell_item(item=self.get_dominant_hand_inv())
                 return
         else:
             terminal_output.print_text("Who are you trying to sell to?")

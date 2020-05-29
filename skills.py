@@ -355,7 +355,19 @@ class Skills:
 
         for skill in self.all_skills:
             player.character.skills[skill] = int(self.all_skills[skill].get())
-
+            
+        for skill in self.all_skills:
+            if skill <= 10:
+                player.character.skills_bonus[skill] = int(skill * 5)
+            elif skill <= 20:
+                player.character.skills_bonus[skill] = 50 + int((skill - 10) * 4)
+            elif skill <= 30:
+                player.character.skills_bonus[skill] = 90 + int((skill - 20) * 3)
+            elif skill <= 40:
+                player.character.skills_bonus[skill] = 120 + int((skill - 30) * 2)
+            elif skill <= 50:
+                player.character.skills_bonus[skill] = 140 + int((skill - 40) * 1)
+                
         print("starting stat " + str(self.weapons_skills.skills['edged_weapons']['skill_var'].get()))
         print("starting base stat " + str(self.weapons_skills.skills['edged_weapons']['skill_var_start'].get()))
 

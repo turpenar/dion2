@@ -1,8 +1,8 @@
 {
 	"Door": {
 		"dochas_west_gate": {
-			"name": "The Dochas West Gate", 
-			"description": "Standing just over head-high, the town gate is a feeble attempt at keeping out intruders.", 
+			"name": "the town gate", 
+			"description": "Standing just over head-high, the Dochas West Gate is a feeble attempt at keeping out intruders.", 
 			"handle": ["gate"],
 			"adjectives": ["town"],
 			"container": false,
@@ -21,8 +21,8 @@
 			}
 		}, 
 		"dochas_south_gate": {
-			"name": "The Dochas South Gate", 
-			"description": "Standing just over head-high, the town gate is a feeble attempt at keeping out intruders.", 
+			"name": "the town gate", 
+			"description": "Standing just over head-high, the Dochas South Gate is a feeble attempt at keeping out intruders.", 
 			"handle": ["gate"],
 			"adjectives": ["town"],
 			"container": false,
@@ -61,7 +61,7 @@
 			}
 		}, 
 		"dochas_smallhouse_gate": {
-			"name": "Small House Gate", 
+			"name": "a gate", 
 			"description": "You see a small gate leading to the doorstep of the house.", 
 			"handle": ["gate"],
 			"adjectives": [],
@@ -81,8 +81,8 @@
 				}
 			}, 
 		"dochas_smallhouse_door": {
-			"name": "Small House Door", 
-			"description": "You see a door, which fits awkwardly in the doorjam.", 
+			"name": "a door", 
+			"description": "You see a front door of the small house, which fits awkwardly in the doorjam.", 
 			"handle": ["door"],
 			"adjectives": [],
 			"container": false,

@@ -28,10 +28,10 @@
 # endregion
 
 # region Object
-import objects as objects
-
-object = objects.create_object(object_category='door', object_name='dochas_south_gate', room='the room')
-print(object)
+# import objects as objects
+# 
+# object = objects.create_object(object_category='door', object_name='dochas_south_gate', room='the room')
+# print(object)
 # endregion
 
 
@@ -43,5 +43,9 @@ print(object)
 # character = player.Player(player_name='new_player')
 # print(character)
 # endregion
+
+
+a= []
+print(a[0])
 
 

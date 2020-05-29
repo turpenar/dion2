@@ -256,7 +256,7 @@
 			"stackable": false,
 			"capacity": 0,
 			"category": "weapon", 
-			"sub_category": "edged",
+			"sub_category": "edged_weapons",
 			"visibility": 100,
 			"enchant": false,
 			"rarity": "common",
