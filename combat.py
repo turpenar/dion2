@@ -29,10 +29,11 @@ def calculate_defense_strength(character):
     weapon_ranks = 0
     if character.get_dominant_hand_inv():
         if character.get_dominant_hand_inv().category == 'weapon':
-            weapon_ranks = chracter.get_skill(chracter.get_dominant_hand_inv().sub_category)
+            weapon_ranks = character.get_skill(character.get_dominant_hand_inv().sub_category)
     defense_strength_evade = int(character.get_defense_strength_evade_base() + character.get_skill('dodging'))
     defense_strength_block = int(character.get_defense_strength_block_base() + character.get_skill('shield'))
     defense_strength_parry = int(character.get_defense_strength_parry_base() + weapon_ranks)
+      
     return defense_strength_evade + defense_strength_block + defense_strength_parry
 
 def success(strength, defense, att_random):
@@ -48,24 +49,27 @@ def melee_attack(self, target):
         att_random = random.randint(0,100)
         att_success = success(attack_strength, target.defense, att_random)
         att_damage = damage(att_success, self.get_stat('constitution'))
+        result = None
+        
+        if att_success < 0:
+            result = """\
+{} evades the attack.\
+                """.format(target.name)
+        else:
+            target.health = target.health - att_damage
+            result = """\
+{} damages {} by {}.\
+                """.format(self.name, target.name, att_damage)
 
         terminal_output.print_text("""\
 {} attacks {}!
-STR {} - DEF {} + RAND {} - 100 = {}\
-        """.format(self.name, target.name, attack_strength, target.defense, att_random, att_success))
+STR {} - DEF {} + RAND {} - 100 = {}
+{}
+        """.format(self.name, target.name, attack_strength, target.defense, att_random, att_success, result))
+        
+        if target.health <= 0:
+            target.is_dead()
 
-        if att_damage < 0:
-            terminal_output.print_text("""\
-{} evades the attack.\
-                """.format(target.name))
-        else:
-            target.health = target.health - att_damage
-            terminal_output.print_text("""\
-{} damages {} by {}.\
-                """.format(self.name, target.name, att_damage))
-            if target.health <= 0:
-                target.is_dead()
-                # self.experience += get_experience(character_level=self.level, target_level=target.level)
         return target
 
 def do_physical_damage_to_character(self, character):

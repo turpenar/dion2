@@ -45,7 +45,17 @@
 # endregion
 
 
-a= []
-print(a[0])
+# region Combat
+import player as player
+import world as world
+import combat as combat
+
+world.load_tiles()
+character = player.Player(player_name='new_player')
+
+defense_strength = combat.calculate_defense_strength(character)
+print(defense_strength)
+
+# endregion
 
 

@@ -21,6 +21,16 @@
 			"logic": 0,
 			"spirit": 0
 			},
+		"stats_base": {
+			"strength": 0,
+			"constitution": 0,
+			"dexterity": 0,
+			"agility": 0,
+			"intellect": 0,
+			"wisdom": 0,
+			"logic": 0,
+			"spirit": 0
+			},
 		"stats_bonus": {
 			"strength": 0,
 			"constitution": 0,
@@ -36,6 +46,18 @@
 			"mental_points": 0
 			},
 		"skills": {
+			"edged_weapons": 0,
+			"blunt_weapons": 0,
+			"polearm_weapons": 0,
+			"thrown_weapons": 0,
+			"ranged_weapons": 0,
+			"armor": 0,
+			"shield": 0,
+			"dodging": 0,
+			"physical_fitness": 0,
+			"perception": 0
+			},
+		"skills_base": {
 			"edged_weapons": 0,
 			"blunt_weapons": 0,
 			"polearm_weapons": 0,

@@ -8,6 +8,7 @@ TODO: A player can continue opening the skills screen and incrementing skill. Sh
 """
 
 import tkinter as tk
+import copy as copy
 
 import player as player
 import config as config
@@ -28,7 +29,7 @@ def level_up_skill_points():
     stat_value = {}
 
     for stat in player.character.stats:
-        stat_value[stat] = int(round(float(player.character.stats[stat]))) * int(profession_skillpoint_bonus_file.loc[player.character.profession, stat])
+        stat_value[stat] = int(round(float(player.character.get_stat(stat)))) * int(profession_skillpoint_bonus_file.loc[player.character.get_profession(), stat])
 
     added_physical_points = base_training_points + ((stat_value['strength']
                                                     + stat_value['constitution']
@@ -39,11 +40,11 @@ def level_up_skill_points():
                                                    + stat_value['logic']
                                                    + stat_value['spirit']) / 20)
 
-    player.character.physical_points += added_physical_points
-    player.character.mental_points += added_mental_points
+    player.character.set_physical_training_points(player.character.get_physical_training_points() + added_physical_points)
+    player.character.set_mental_training_points(player.character.get_mental_training_points() + added_mental_points)
 
     for skill in player.character.skills:
-        player.character.skills_base[skill] = player.character.skills[skill]
+        player.character.set_skill_base(skill=skill, value=player.character.get_skill(skill))
 
 
 class TrainingPoints(tk.Frame):
@@ -53,14 +54,14 @@ class TrainingPoints(tk.Frame):
         self.parent = parent
 
         self.physical_points_var = tk.IntVar()
-        self.physical_points_var.set(player.character.physical_points)
+        self.physical_points_var.set(player.character.get_physical_training_points())
         self.physical_points_label = tk.Label(self, text="Physical Training Points = ")
         self.physical_points_label.grid(row=0, column=0)
         self.physical_points = tk.Label(self, textvariable=self.physical_points_var)
         self.physical_points.grid(row=0, column=1)
 
         self.mental_points_var = tk.IntVar()
-        self.mental_points_var.set(player.character.mental_points)
+        self.mental_points_var.set(player.character.get_mental_training_points())
         self.mental_points_label = tk.Label(self, text="Mental Training Points = ")
         self.mental_points_label.grid(row=0, column=2)
         self.mental_points = tk.Label(self, textvariable=self.mental_points_var)
@@ -87,16 +88,12 @@ class WeaponSkills(tk.Frame):
 
             self.skills[skill_name] = {}
 
-            # print("player " + skill_name + " base " + str(player.character.skills_base[skill_name]))
-
             self.skills[skill_name]['skill_var_start'] = tk.IntVar(self)
-            self.skills[skill_name]['skill_var_start'].set(player.character.skills_base[skill_name])
-            # print(skill_name + " base " + str(self.skills[skill_name]['skill_var_start'].get()))
+            self.skills[skill_name]['skill_var_start'].set(player.character.get_skill_base(skill_name))
 
             self.skills[skill_name]['skill_var'] = tk.IntVar(self)
-            self.skills[skill_name]['skill_var'].set(player.character.skills[skill_name])
+            self.skills[skill_name]['skill_var'].set(player.character.get_skill(skill_name))
             self.all_skills[skill_name] = self.skills[skill_name]['skill_var']
-            # print(skill_name + str(self.skills[skill_name]['skill_var'].get()))
 
             self.skills[skill_name]['skill_label'] = tk.Label(self, text=skill_label)
             self.skills[skill_name]['skill_label'].grid(row=row, column=0)
@@ -115,17 +112,12 @@ class WeaponSkills(tk.Frame):
             row += 1
 
     def increase_skill(self, skill_var, skill_var_start):
-        print("starting stat " + str(skill_var.get()))
-        print("starting base stat" + str(skill_var_start.get()))
         if skill_var.get() >= skill_var_start.get() + 2:
             return
 
         self.training_points.physical_points_var.set(self.training_points.physical_points_var.get() - 2)
         self.training_points.mental_points_var.set(self.training_points.mental_points_var.get() - 1)
         skill_var.set(skill_var.get() + 1)
-
-        print("ending stat " + str(skill_var.get()))
-        print("ending base stat " + str(skill_var_start.get()))
 
     def decrease_skill(self, skill_var):
         if skill_var.get() == 0:
@@ -160,10 +152,10 @@ class ArmorSkills(tk.Frame):
             self.skills[skill_name] = {}
 
             self.skills[skill_name]['skill_var_start'] = tk.IntVar(self)
-            self.skills[skill_name]['skill_var_start'].set(player.character.skills_base[skill_name])
+            self.skills[skill_name]['skill_var_start'].set(player.character.get_skill_base(skill_name))
 
             self.skills[skill_name]['skill_var'] = tk.IntVar(self)
-            self.skills[skill_name]['skill_var'].set(player.character.skills[skill_name])
+            self.skills[skill_name]['skill_var'].set(player.character.get_skill(skill_name))
             self.all_skills[skill_name] = self.skills[skill_name]['skill_var']
 
             self.skills[skill_name]['skill_label'] = tk.Label(self, text=skill_label)
@@ -220,10 +212,10 @@ class CombatSkills(tk.Frame):
             self.skills[skill_name] = {}
 
             self.skills[skill_name]['skill_var_start'] = tk.IntVar(self)
-            self.skills[skill_name]['skill_var_start'].set(player.character.skills_base[skill_name])
+            self.skills[skill_name]['skill_var_start'].set(player.character.get_skill_base(skill_name))
 
             self.skills[skill_name]['skill_var'] = tk.IntVar(self)
-            self.skills[skill_name]['skill_var'].set(player.character.skills[skill_name])
+            self.skills[skill_name]['skill_var'].set(player.character.get_skill(skill_name))
             self.all_skills[skill_name] = self.skills[skill_name]['skill_var']
 
             self.skills[skill_name]['skill_label'] = tk.Label(self, text=skill_label)
@@ -280,10 +272,10 @@ class SurvivalSkills(tk.Frame):
             self.skills[skill_name] = {}
 
             self.skills[skill_name]['skill_var_start'] = tk.IntVar(self)
-            self.skills[skill_name]['skill_var_start'].set(player.character.skills_base[skill_name])
+            self.skills[skill_name]['skill_var_start'].set(player.character.get_skill_base(skill_name))
 
             self.skills[skill_name]['skill_var'] = tk.IntVar(self)
-            self.skills[skill_name]['skill_var'].set(player.character.skills[skill_name])
+            self.skills[skill_name]['skill_var'].set(player.character.get_skill(skill_name))
             self.all_skills[skill_name] = self.skills[skill_name]['skill_var']
 
             self.skills[skill_name]['skill_label'] = tk.Label(self, text=skill_label)
@@ -354,22 +346,20 @@ class Skills:
     def update_skills(self):
 
         for skill in self.all_skills:
-            player.character.skills[skill] = int(self.all_skills[skill].get())
+            player.character.set_skill(skill, int(self.all_skills[skill].get()))
             
         for skill in self.all_skills:
-            if skill <= 10:
-                player.character.skills_bonus[skill] = int(skill * 5)
-            elif skill <= 20:
-                player.character.skills_bonus[skill] = 50 + int((skill - 10) * 4)
-            elif skill <= 30:
-                player.character.skills_bonus[skill] = 90 + int((skill - 20) * 3)
-            elif skill <= 40:
-                player.character.skills_bonus[skill] = 120 + int((skill - 30) * 2)
-            elif skill <= 50:
-                player.character.skills_bonus[skill] = 140 + int((skill - 40) * 1)
-                
-        print("starting stat " + str(self.weapons_skills.skills['edged_weapons']['skill_var'].get()))
-        print("starting base stat " + str(self.weapons_skills.skills['edged_weapons']['skill_var_start'].get()))
+            skill_value = int(self.all_skills[skill].get())
+            if skill_value <= 10:
+                player.character.set_skill_bonus(skill=skill, value=int(skill_value * 5))
+            elif skill_value <= 20:
+                player.character.set_skill_bonus(skill=skill, value=(50 + int((skill_value - 10) * 4)))
+            elif skill_value <= 30:
+                player.character.set_skill_bonus(skill=skill, value=(90 + int((skill_value - 20) * 3)))
+            elif skill_value <= 40:
+                player.character.set_skill_bonus(skill=skill, value=(120 + int((skill_value - 30) * 2)))
+            elif skill_value <= 50:
+                player.character.set_skill_bonus(skill=skill, value=(140 + int((skill_value - 40) * 1)))
 
         self.close_window()
 

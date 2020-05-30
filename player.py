@@ -62,18 +62,17 @@ class Player(mixins.ReprMixin, mixins.DataFileMixin):
         self.level = self.player_data['level']
         self.experience = self.player_data['experience']
 
-        self.stats_base = self.player_data['stats']
         self.stats = self.player_data['stats']
-
+        self.stats_base = self.player_data['stats_base']
         self.stats_bonus = self.player_data['stats_bonus']
 
         self.training_points = self.player_data['training']
 
-        self.physical_points = self.player_data['training']['physical_points']
-        self.mental_points = self.player_data['training']['mental_points']
+        self.physical_training_points = self.player_data['training']['physical_points']
+        self.mental_training_points = self.player_data['training']['mental_points']
 
-        self.skills_base = self.player_data['skills']
         self.skills = self.player_data['skills']
+        self.skills_base = self.player_data['skills_base']
         self.skills_bonus = self.player_data['skills_bonus']
         
         self.health = self.player_data['health']
@@ -119,52 +118,121 @@ class Player(mixins.ReprMixin, mixins.DataFileMixin):
         for quest in self.player_data['quests']:
             self.quests[quest] = quests.Quest(quest_name=quest, character=self)
             self.quests[quest].start()
+            
+    def get_first_name(self):
+        with lock:
+            return self.first_name
+        
+    def get_last_name(self):
+        with lock:
+            return self.last_name
+            
+    def set_gender(self, gender):
+        with lock:
+            if gender == "female":
+                self.gender = gender
+                self.object_pronoun = "She"
+                self.possessive_pronoun = "Her"
+            if gender == "male":
+                self.gender = gender
+                self.object_pronoun = "He"
+                self.possessive_pronoun = "His"
+                
+    def get_profession(self):
+        with lock:
+            return self.profession
+    
+    def get_level(self):
+        with lock:
+            return self.level
 
     def level_up(self):
+        with lock: 
+            self.level += 1
+            
+            for stat in self.stats:
+                self.stats[stat] = self.stats[stat] + 1 / (self.stats[stat] / int(profession_stats_growth_file.loc[self.profession][stat]))
+                if self.stats[stat] > 100:
+                    self.stats[stat] = 100
+            
+                self.stats_bonus[stat] = ((self.stats[stat] - available_stat_points / 8) / 2 + int(race_stats_file.loc[self.race][stat]))
+            
+            self.health = int(math.floor((self.stats['strength'] + self.stats['constitution']) / 10))
+            self.health_max = self.health
+            
+            self.attack_strength_base = int(round(self.stats_bonus['strength'],0))
+            self.defense_strength_evade_base = int(round(self.stats_bonus['agility'] + self.stats_bonus['intellect'] / 4 + self.skills['dodging'],0))
+            self.defense_strength_block_base = int(round(self.stats_bonus['strength'] / 4 + self.stats_bonus['dexterity'] /4,0))
+            self.defense_strength_parry_base = int(round(self.stats_bonus['strength'] / 4 + self.stats_bonus['dexterity'] / 4,0)) 
+
+    def set_stat(self, stat, value):
+        with lock:
+            self.stats[stat] = value
+
+    def get_stat(self, stat):
+        with lock:
+            return self.stats[stat]
         
-        self.level += 1
+    def set_stat_bonus(self, stat, value):
+        with lock:
+            self.stats_bonus[stat] = value
         
-        for stat in self.stats:
-            self.stats[stat] = self.stats[stat] + 1 / (self.stats[stat] / int(profession_stats_growth_file.loc[self.profession][stat]))
-            if self.stats[stat] > 100:
-                self.stats[stat] = 100
+    def get_stat_bonus(self, stat):
+        with lock:
+            return self.stats_bonus[stat]
         
-            self.stats_bonus[stat] = ((self.stats[stat] - available_stat_points / 8) / 2 + int(race_stats_file.loc[self.race][stat]))
+    def set_physical_training_points(self, value):
+        with lock:
+            self.physical_training_points = value
+    
+    def get_physical_training_points(self):
+        with lock:
+            return self.physical_training_points
         
-        self.health = int(math.floor((self.stats['strength'] + self.stats['constitution']) / 10))
-        self.health_max = self.health
+    def set_mental_training_points(self, value):
+        with lock:
+            self.mental_training_points = value
+            
+    def get_mental_training_points(self):
+        with lock:
+            return self.mental_training_points
         
-        self.attack_strength_base = int(round(self.stats_bonus['strength'],0))
-        self.defense_strength_evade_base = int(round(self.stats_bonus['agility'] + self.stats_bonus['intellect'] / 4 + self.skills['dodging'],0))
-        self.defense_strength_block_base = int(round(self.stats_bonus['strength'] / 4 + self.stats_bonus['dexterity'] /4,0))
-        self.defense_strength_parry_base = int(round(self.stats_bonus['strength'] / 4 + self.stats_bonus['dexterity'] / 4,0))      
+    def set_skill(self, skill, value):
+        with lock:
+            self.skills[skill] = value
+    
+    def get_skill(self, skill):
+        with lock:
+            return self.skills[skill]
         
+    def set_skill_bonus(self, skill, value):
+        with lock:
+            self.skills_bonus[skill] = value
+
+    def get_skill_bonus(self, skill):
+        with lock:
+            return self.skills_bonus[skill] 
+        
+    def set_skill_base(self, skill, value):
+        with lock:
+            self.skills_base[skill] = value
+        
+    def get_skill_base(self, skill):
+        with lock:
+            return self.skills_base[skill]
 
     def set_character_attributes(self):
-        for stat in self.stats:
-            self.stats_bonus[stat] = ((self.stats[stat] - available_stat_points / 8) / 2 + int(race_stats_file.loc[self.race][stat]))
-
-        self.health = int(math.floor((self.stats['strength'] + self.stats['constitution']) / 10))
-        self.health_max = self.health
-        
-        self.attack_strength_base = int(round(self.stats_bonus['strength'],0))
-        self.defense_strength_evade_base = int(round(self.stats_bonus['agility'] + self.stats_bonus['intellect'] / 4 + self.skills['dodging'],0))
-        self.defense_strength_block_base = int(round(self.stats_bonus['strength'] / 4 + self.stats_bonus['dexterity'] /4,0))
-        self.defense_strength_parry_base = int(round(self.stats_bonus['strength'] / 4 + self.stats_bonus['dexterity'] / 4,0))
-
-    def set_gender(self, gender):
-        if gender == "female":
-            self.gender = gender
-            self.object_pronoun = "She"
-            self.possessive_pronoun = "Her"
-        if gender == "male":
-            self.gender = gender
-            self.object_pronoun = "He"
-            self.possessive_pronoun = "His"
-
-    def test(self, **kwargs):
-        area_rooms = world.area_rooms(self.area)
-        print(random.choice(list(area_rooms)))
+        with lock:
+            for stat in self.stats:
+                self.stats_bonus[stat] = ((self.stats[stat] - available_stat_points / 8) / 2 + int(race_stats_file.loc[self.race][stat]))
+    
+            self.health = int(math.floor((self.stats['strength'] + self.stats['constitution']) / 10))
+            self.health_max = self.health
+            
+            self.attack_strength_base = int(round(self.stats_bonus['strength'],0))
+            self.defense_strength_evade_base = int(round(self.stats_bonus['agility'] + self.stats_bonus['intellect'] / 4 + self.skills['dodging'],0))
+            self.defense_strength_block_base = int(round(self.stats_bonus['strength'] / 4 + self.stats_bonus['dexterity'] /4,0))
+            self.defense_strength_parry_base = int(round(self.stats_bonus['strength'] / 4 + self.stats_bonus['dexterity'] / 4,0))
 
     def add_money(self, amount):
         with lock:
@@ -194,22 +262,6 @@ class Player(mixins.ReprMixin, mixins.DataFileMixin):
             self.rt_start = time.time()
             self.rt_end = self.rt_start + seconds
         return
-    
-    def get_stat(self, stat):
-        with lock:
-            return self.stats[stat]
-        
-    def get_stat_bonus(self, stat):
-        with lock:
-            return self.stats_bonus[stat]
-    
-    def get_skill(self, skill):
-        with lock:
-            return self.skills[skill]
-
-    def get_skill_bonus(self, skill):
-        with lock:
-            return self.skills_bonus[skill]
 
     def check_inventory_for_item(self, item):
         with lock:
@@ -745,18 +797,25 @@ Health:  {} of {} hit points
 
     def view_skills(self, **kwargs):
         terminal_output.print_text('''
-
 Edged Weapons Base:  {}
         
-Edged Weapons:    {}
-Armor:            {}
-Dodging:          {}
-Perception:       {}
-            '''.format(self.skills_base['edged_weapons'],
-                       self.skills['edged_weapons'],
-                       self.skills['armor'],
-                       self.skills['dodging'],
-                       self.skills['perception'])
+Edged Weapons:    {}  ({})          Armor:              {}  ({})
+Blunt Weapons:    {}  ({})          Shield:             {}  ({})
+Polearm Weapons:  {}  ({})          Dodging:            {}  ({})
+Thrown Weapons:   {}  ({})          Physical Fitness:   {}  ({})
+Ranged Weapons:   {}  ({})          Perception:         {}  ({})
+
+            '''.format(self.skills_base['edged_weapons'], 
+                       self.get_skill('edged_weapons'), self.get_skill_bonus('edged_weapons'),
+                       self.get_skill('armor'), self.get_skill_bonus('armor'),
+                       self.get_skill('blunt_weapons'), self.get_skill_bonus('blunt_weapons'),
+                       self.get_skill('shield'), self.get_skill_bonus('shield'),
+                       self.get_skill('polearm_weapons'), self.get_skill_bonus('polearm_weapons'),
+                       self.get_skill('dodging'), self.get_skill_bonus('dodging'),
+                       self.get_skill('thrown_weapons'), self.get_skill_bonus('thrown_weapons'),
+                       self.get_skill('physical_fitness'), self.get_skill_bonus('physical_fitness'),
+                       self.get_skill('ranged_weapons'), self.get_skill_bonus('ranged_weapons'),
+                       self.get_skill('perception'), self.get_skill_bonus('perception'))
               )
 
     def skin(self, **kwargs):
@@ -785,21 +844,21 @@ Perception:       {}
         terminal_output.print_text('''
 Name:  {} {}
 Level: {}
-Strength:       {}          Intellect:   {}
-Constitution:   {}          Wisdom:         {}
-Dexterity:      {}          Logic:       {}
-Agility:        {}          Spirit:         {}
-        '''.format(self.first_name,
-                   self.last_name,
-                   self.level,
-                   self.stats['strength'],
-                   self.stats['intellect'],
-                   self.stats['constitution'],
-                   self.stats['wisdom'],
-                   self.stats['dexterity'],
-                   self.stats['logic'],
-                   self.stats['agility'],
-                   self.stats['spirit'])
+Strength:       {}  ({})        Intellect:      {}  ({})
+Constitution:   {}  ({})        Wisdom:         {}  ({})
+Dexterity:      {}  ({})        Logic:          {}  ({})
+Agility:        {}  ({})        Spirit:         {}  ({})
+        '''.format(self.get_first_name(),
+                   self.get_last_name(),
+                   self.get_level(),
+                   self.get_stat('strength'), self.get_stat_bonus('strength'),
+                   self.get_stat('intellect'), self.get_stat_bonus('intellect'),
+                   self.get_stat('constitution'), self.get_stat_bonus('constitution'),
+                   self.get_stat('wisdom'), self.get_stat_bonus('wisdom'),
+                   self.get_stat('dexterity'), self.get_stat_bonus('dexterity'),
+                   self.get_stat('logic'), self.get_stat_bonus('logic'),
+                   self.get_stat('agility'), self.get_stat_bonus('agility'),
+                   self.get_stat('spirit'), self.get_stat_bonus('spirit'))
               )
 
     def target_enemy(self, **kwargs):
