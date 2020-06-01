@@ -99,6 +99,8 @@ class Weapon(Item):
         category_data = self.get_item_by_name('Weapons')
         item_data = category_data[item_name]
         super().__init__(item_data=item_data, **kwargs)
+        
+        self.classification = item_data['classification']
 
 
 @Item.register_subclass('money')
@@ -116,7 +118,7 @@ class Armor(Item):
         item_data = category_data[item_name]
         super().__init__(item_data=item_data, **kwargs)
 
-        self.material = item_data['material']
+        self.classification = item_data['classification']
 
 @Item.register_subclass('ring')
 class Ring(Item):

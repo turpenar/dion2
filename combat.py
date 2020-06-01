@@ -14,6 +14,8 @@ import items as items
 
 lock = threading.Lock()
 
+weapon_damage_factors = config.WEAPON_DAMAGE_FACTORS
+
 def link_terminal(terminal):
     global terminal_output
     terminal_output = terminal
@@ -39,38 +41,37 @@ def calculate_defense_strength(character):
 def success(strength, defense, att_random):
     return int((strength - defense + att_random - 100))
 
-def damage(success, constitution):
-    return int(success / constitution)
+def get_damage(success, weapon, armor):
+    damage_factor = weapon_damage_factors.loc[weapon.classification, armor.classification]
+    return success * damage_factor
 
 def melee_attack(self, target):
     attack_strength = calculate_attack_strength(self)
 
-    with lock:
-        att_random = random.randint(0,100)
-        att_success = success(attack_strength, target.defense, att_random)
-        att_damage = damage(att_success, self.get_stat('constitution'))
-        result = None
-        
-        if att_success < 0:
-            result = """\
+    att_random = random.randint(0,100)
+    att_success = success(attack_strength, target.defense, att_random)
+    result = None
+    
+    if att_success < 0:
+        result = """\
 {} evades the attack.\
-                """.format(target.name)
-        else:
-            target.health = target.health - att_damage
-            result = """\
+            """.format(target.get_name())
+    else:
+        target.health = target.get_health() - get_damage(att_success, self.get_dominant_hand_inv(), target.get_armor())
+        result = """\
 {} damages {} by {}.\
-                """.format(self.name, target.name, att_damage)
+            """.format(self.name, target.get_name(), att_damage)
 
-        terminal_output.print_text("""\
+    terminal_output.print_text("""\
 {} attacks {}!
 STR {} - DEF {} + RAND {} - 100 = {}
 {}
-        """.format(self.name, target.name, attack_strength, target.defense, att_random, att_success, result))
-        
-        if target.health <= 0:
-            target.is_dead()
+    """.format(self.name, target.get_name(), attack_strength, target.get_defense(), att_random, att_success, result))
+    
+    if target.health <= 0:
+        target.is_dead()
 
-        return target
+    return target
 
 def do_physical_damage_to_character(self, character):
     if isinstance(self.right_hand_inv, items.Weapon):
@@ -78,28 +79,27 @@ def do_physical_damage_to_character(self, character):
     else:
         attack_modifier = 0
 
-    with lock:
-        att_random = random.randint(0,100)
-        att_success = success(self.strength, calculate_defense_strength(character), att_random)
-        att_damage = damage(att_success, self.constitution)
+    att_random = random.randint(0,100)
+    att_success = success(self.strength, calculate_defense_strength(character), att_random)
+    att_damage = get_damage(att_success, self.constitution)
 
-        terminal_output.print_text("""\
+    terminal_output.print_text("""\
 {} attacks {}!
 STR {} - DEF {} + RAND {} - 100 = {}\
-        """.format(self.name, character.name, self.strength, calculate_defense_strength(character), att_random, att_success))
+    """.format(self.name, character.name, self.strength, calculate_defense_strength(character), att_random, att_success))
 
-        if att_damage < 0:
-            terminal_output.print_text("""\
+    if att_damage < 0:
+        terminal_output.print_text("""\
 {} evades the attack.\
-                """.format(character.name))
-        else:
-            character.health = character.health - att_damage
-            terminal_output.print_text("""\
+            """.format(character.name))
+    else:
+        character.health = character.health - att_damage
+        terminal_output.print_text("""\
 {} damages {} by {}.\
-                """.format(self.name, character.name, att_damage))
-            if character.health <= 0:
-                character.is_dead()
-        return character
+            """.format(self.name, character.name, att_damage))
+        if character.health <= 0:
+            character.is_dead()
+    return character
 
 
 

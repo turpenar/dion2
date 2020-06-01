@@ -297,7 +297,7 @@ class CharacterLoader:
         world.load_tiles()
 
         for char_data in self.saved_characters:
-            if char_data['first_name'] == char_name:
+            if char_data['_first_name'] == char_name:
                 player.create_character("new_player")
                 player.character.load(state=char_data)
 
@@ -327,7 +327,7 @@ command usage.  ***
         saved_character_names = []
 
         for character in self.saved_characters:
-            saved_character_names.append(character['first_name'])
+            saved_character_names.append(character['_first_name'])
 
         return saved_character_names
 

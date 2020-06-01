@@ -14,6 +14,8 @@ import combat as combat
 import objects as objects
 import world as world
 
+lock = threading.Lock()
+
 def link_terminal(terminal):
     global terminal_output
     terminal_output = terminal
@@ -36,6 +38,7 @@ class Enemy(mixins.ReprMixin, mixins.DataFileMixin, threading.Thread):
         self.mana = self.enemy_data['mana']
         self.dexterity = self.enemy_data['dexterity']
         self.defense = self.enemy_data['defense']
+        self.armor = self.enemy_data['armor']
         self.spawn_location = self.enemy_data['spawn_location']
 
         self.location_x = location_x
@@ -74,9 +77,26 @@ class Enemy(mixins.ReprMixin, mixins.DataFileMixin, threading.Thread):
 
     def move_west(self, **kwargs):
         self.move(dx=-1, dy=0)
+        
+    def get_name(self):
+        with lock:
+            return self.name
+        
+    def get_armor(self):
+        with lock:
+            return self.armor
+    
+    def get_health(self):
+        with lock:
+            return self.health
+    
+    def get_defense(self):
+        with lock:
+            return self.defense
 
     def is_alive(self):
-        return self.health > 0
+        with lock:
+            return self.health > 0
 
     def is_dead(self):
         terminal_output.print_text(self.enemy_data['death_text'])

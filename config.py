@@ -23,6 +23,9 @@ PROFESSION_SKILLPOINT_BONUS_FILE.set_index('Profession', inplace=True)
 RACE_STATS_FILE = pd.read_csv(DATA_DIR / "Race_Stats.csv")
 RACE_STATS_FILE.set_index('Race', inplace=True)
 
+WEAPON_DAMAGE_FACTORS = pd.read_csv(DATA_DIR / "Weapon_Damage_Factors.csv")
+WEAPON_DAMAGE_FACTORS.set_index('classification', inplace=True)
+
 verbs_path = DATA_DIR / 'verbs.txt'
 with verbs_path.open(mode='r') as file:
     verbs = file.readlines()
