@@ -82,6 +82,7 @@
 			"perception": 0
 			},
 		"health": 0,
+		"health_max": 0,
 		"mana": 0,
 		"armor": {
 			"torso": ["light_leather"],

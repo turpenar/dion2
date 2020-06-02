@@ -93,7 +93,6 @@ class Player(mixins.ReprMixin, mixins.DataFileMixin):
         for category in self._player_data['armor']:
             for item in self._player_data['armor'][category]:
                 self._armor[category] = items.create_item('armor', item_name=item)
-        print(self._armor)
 
         self._inventory = []
 
@@ -729,7 +728,6 @@ Health:  {} of {} hit points
         inventory_armor = []  
         for category in self.armor:
             inventory_armor.append(self.armor[category])
-        print(inventory_armor)
         if len(inventory_armor) > 1:
             inventory_armor ="You are also wearing {} and {}.".format(self.object_pronoun, ', '.join(inventory_armor[:-1]), inventory_armor[-1])
         elif len(inventory_armor) == 1:

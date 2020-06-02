@@ -38,6 +38,7 @@ class Enemy(mixins.ReprMixin, mixins.DataFileMixin, threading.Thread):
         self.mana = self.enemy_data['mana']
         self.dexterity = self.enemy_data['dexterity']
         self.defense = self.enemy_data['defense']
+        self.weapon = self.enemy_data['weapon']
         self.armor = self.enemy_data['armor']
         self.spawn_location = self.enemy_data['spawn_location']
 

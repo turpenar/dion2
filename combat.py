@@ -21,20 +21,20 @@ def link_terminal(terminal):
     terminal_output = terminal
     
 def calculate_attack_strength(character):
-    attack_strength = character.get_attack_strength_base()
+    attack_strength = character.attack_strength_base
     if character.get_dominant_hand_inv():
         if character.get_dominant_hand_inv().category == 'weapon':
-            attack_strength += character.get_skill_bonus(character.get_dominant_hand_inv().sub_category)  
+            attack_strength += character.skills_bonus[character.get_dominant_hand_inv().sub_category] 
     return attack_strength
 
 def calculate_defense_strength(character):
     weapon_ranks = 0
     if character.get_dominant_hand_inv():
         if character.get_dominant_hand_inv().category == 'weapon':
-            weapon_ranks = character.get_skill(character.get_dominant_hand_inv().sub_category)
-    defense_strength_evade = int(character.get_defense_strength_evade_base() + character.get_skill('dodging'))
-    defense_strength_block = int(character.get_defense_strength_block_base() + character.get_skill('shield'))
-    defense_strength_parry = int(character.get_defense_strength_parry_base() + weapon_ranks)
+            weapon_ranks = character.skills[character.get_dominant_hand_inv().sub_category]
+    defense_strength_evade = int(character.defense_strength_evade_base() + character.skills['dodging'])
+    defense_strength_block = int(character.defense_strength_block_base() + character.skills['shield'])
+    defense_strength_parry = int(character.defense_strength_parry_base() + weapon_ranks)
       
     return defense_strength_evade + defense_strength_block + defense_strength_parry
 
@@ -42,7 +42,10 @@ def success(strength, defense, att_random):
     return int((strength - defense + att_random - 100))
 
 def get_damage(success, weapon, armor):
-    damage_factor = weapon_damage_factors.loc[weapon.classification, armor.classification]
+    if weapon == None:
+        damage_factor = weapon_damage_factors.loc[None, armor.classification]
+    else:
+        damage_factor = weapon_damage_factors.loc[weapon.classification, armor.classification]
     return success * damage_factor
 
 def melee_attack(self, target):
@@ -81,7 +84,7 @@ def do_physical_damage_to_character(self, character):
 
     att_random = random.randint(0,100)
     att_success = success(self.strength, calculate_defense_strength(character), att_random)
-    att_damage = get_damage(att_success, self.constitution)
+    att_damage = get_damage(att_success, self.weapon, target.armor['torso'])
 
     terminal_output.print_text("""\
 {} attacks {}!
