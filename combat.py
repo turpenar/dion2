@@ -20,89 +20,110 @@ def link_terminal(terminal):
     global terminal_output
     terminal_output = terminal
     
-def calculate_attack_strength(character):
+def calculate_attack_strength(character, weapon):
     attack_strength = character.attack_strength_base
-    if character.get_dominant_hand_inv():
-        if character.get_dominant_hand_inv().category == 'weapon':
-            attack_strength += character.skills_bonus[character.get_dominant_hand_inv().sub_category] 
+    if character.category == "player":
+        if weapon:
+            if weapon.category == 'weapon':
+                attack_strength += character.skills_bonus[weapon.sub_category] 
     return attack_strength
-
-def calculate_defense_strength(character):
-    weapon_ranks = 0
-    if character.get_dominant_hand_inv():
-        if character.get_dominant_hand_inv().category == 'weapon':
-            weapon_ranks = character.skills[character.get_dominant_hand_inv().sub_category]
-    defense_strength_evade = int(character.defense_strength_evade_base() + character.skills['dodging'])
-    defense_strength_block = int(character.defense_strength_block_base() + character.skills['shield'])
-    defense_strength_parry = int(character.defense_strength_parry_base() + weapon_ranks)
-      
-    return defense_strength_evade + defense_strength_block + defense_strength_parry
-
-def success(strength, defense, att_random):
-    return int((strength - defense + att_random - 100))
-
-def get_damage(success, weapon, armor):
-    if weapon == None:
-        damage_factor = weapon_damage_factors.loc[None, armor.classification]
-    else:
-        damage_factor = weapon_damage_factors.loc[weapon.classification, armor.classification]
-    return success * damage_factor
-
-def melee_attack(self, target):
-    attack_strength = calculate_attack_strength(self)
-
-    att_random = random.randint(0,100)
-    att_success = success(attack_strength, target.defense, att_random)
-    result = None
     
-    if att_success < 0:
-        result = """\
-{} evades the attack.\
-            """.format(target.get_name())
+def calculate_defense_strength_evade(character):
+    defense_strength_evade = int(character.defense_strength_evade_base + character.skills['dodging'])
+    return defense_strength_evade
+    
+def calculate_defense_strength_block(character):
+    defense_strength_block = int(character.defense_strength_block_base) + character.skills['shield']
+    return defense_strength_block
+        
+def calculate_defense_strength_parry(character, weapon):
+    defense_strength_parry = int(character.defense_strength_parry_base + character.skills['dodging'])      
+    if weapon:
+        if weapon.category == 'weapon':
+            weapon_ranks = character.skills[character.get_dominant_hand_inv().sub_category]
+            defense_strength_parry += int(weapon_ranks)
+            return defense_strength_parry
+        else:
+            return defense_strength_parry
+
+def calculate_defense_strength(character, weapon):
+    defense_strength = 0
+    if character.category == "player":
+        defense_strength_evade = calculate_defense_strength_evade(character=character)
+        defense_strength_block = calculate_defense_strength_block(character=character)
+        defense_strength_parry = calculate_defense_strength_parry(character=character, weapon=weapon)  
+        defense_strength =  defense_strength_evade + defense_strength_block + defense_strength_parry
     else:
-        target.health = target.get_health() - get_damage(att_success, self.get_dominant_hand_inv(), target.get_armor())
+        defense_strength = character.defense_strength_base
+    return defense_strength
+
+def end_roll(attack, defense, random):
+    return int((attack - defense + random + 100))
+
+def get_damage(end_roll, weapon, armor):
+    damage_factor = 0
+    if weapon:
+        if weapon.category == 'weapon':
+            damage_factor = weapon_damage_factors.loc[weapon.classification, armor.classification]
+    else:
+        damage_factor = weapon_damage_factors.loc[None, armor.classification]
+    return (end_roll - 100) * damage_factor
+
+def melee_attack_enemy(self, target):
+    attack_strength = calculate_attack_strength(self, self.get_dominant_hand_inv())
+    defense_strength = calculate_defense_strength(character=target, weapon=target.weapon)
+    att_random = random.randint(0,100)
+    att_end_roll = end_roll(attack=attack_strength, defense=defense_strength, random=att_random)
+    
+    result = None
+    if att_end_roll <= 100:
+        result = """\
+{} evades the attack
+            """.format(target.name)
+    else:
+        target.health = target.health - get_damage(att_end_roll, self.get_dominant_hand_inv(), target.armor)
         result = """\
 {} damages {} by {}.\
-            """.format(self.name, target.get_name(), att_damage)
+            """.format(self.name, target.name, att_damage)
 
     terminal_output.print_text("""\
 {} attacks {}!
-STR {} - DEF {} + RAND {} - 100 = {}
+STR {} - DEF {} + RAND {} + 100 = {}
 {}
-    """.format(self.name, target.get_name(), attack_strength, target.get_defense(), att_random, att_success, result))
+    """.format(self.name, target.name, attack_strength, defense_strength, att_random, att_end_roll, result))
     
     if target.health <= 0:
         target.is_dead()
 
     return target
 
-def do_physical_damage_to_character(self, character):
-    if isinstance(self.right_hand_inv, items.Weapon):
-        attack_modifier = self.right_hand_inv.attack_modifier
-    else:
-        attack_modifier = 0
-
+def melee_attack_character(self, character):
+    attack_strength = calculate_attack_strength(self, self.weapon)
+    defense_strength = calculate_defense_strength(character=character, weapon=character.get_dominant_hand_inv())
     att_random = random.randint(0,100)
-    att_success = success(self.strength, calculate_defense_strength(character), att_random)
-    att_damage = get_damage(att_success, self.weapon, target.armor['torso'])
+    att_end_roll = end_roll(attack=attack_strength,defense=defense_strength, random=att_random)
+
+    result = None
+    if att_end_roll <= 100:
+        result = """\
+{} evades the attack.\
+            """.format(character.name)
+    else:
+        character.health = character.health - get_damage(att_end_roll, self.weapon, character.armor['torso'])
+        result = """\
+{} damages {} by {}.\
+            """.format(self.name, character.name, att_damage)
+        if character.health <= 0:
+            character.is_dead() 
 
     terminal_output.print_text("""\
 {} attacks {}!
-STR {} - DEF {} + RAND {} - 100 = {}\
-    """.format(self.name, character.name, self.strength, calculate_defense_strength(character), att_random, att_success))
+STR {} - DEF {} + RAND {} + 100 = {}
+{}\
+    """.format(self.name, character.name, attack_strength, defense_strength, att_random, att_end_roll, result))
 
-    if att_damage < 0:
-        terminal_output.print_text("""\
-{} evades the attack.\
-            """.format(character.name))
-    else:
-        character.health = character.health - att_damage
-        terminal_output.print_text("""\
-{} damages {} by {}.\
-            """.format(self.name, character.name, att_damage))
-        if character.health <= 0:
-            character.is_dead()
     return character
+
 
 
 

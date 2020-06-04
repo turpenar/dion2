@@ -59,6 +59,9 @@ class Player(mixins.ReprMixin, mixins.DataFileMixin):
         self._possessive_pronoun = None
         self.race = self._player_data['race']
         self._profession = self._player_data['profession']
+        self._category= self._player_data['category']
+        
+        
         self._level = self._player_data['level']
         self._experience = self._player_data['experience']
 
@@ -76,7 +79,7 @@ class Player(mixins.ReprMixin, mixins.DataFileMixin):
         self._skills_bonus = self._player_data['skills_bonus']
         
         self._health = self._player_data['health']
-        self._health_max = self._player_data['health']
+        self._health_max = self._player_data['health_max']
 
         self._attack_strength_base = 0
 
@@ -189,6 +192,11 @@ class Player(mixins.ReprMixin, mixins.DataFileMixin):
     def profession(self, profession):
         with lock:
             self._profession = profession
+            
+    @property
+    def category(self):
+        with lock:
+            return self._category
     
     @property
     def level(self):
@@ -571,7 +579,7 @@ Attribute:  {}
             for enemy in self.room.enemies:
                 if set(enemy.handle) & set(self.target):
                     enemy_found = True
-                    combat.melee_attack(self, enemy)
+                    combat.melee_attack_enemy(self, enemy)
                     self.set_round_time(3)
                     return
             if not enemy_found:
@@ -595,7 +603,7 @@ Attribute:  {}
         else:
             self.room.items.append(self.get_dominant_hand_inv())
             terminal_output.print_text("You drop " + self.get_dominant_hand_inv().name)
-            self.get_dominant_hand_inv()
+            self.set_dominant_hand_inv(item=None)
             return
 
     def flee(self, **kwargs):
@@ -664,7 +672,7 @@ Attribute:  {}
             for npc in self.room.npcs:
                 if {npc.first_name.lower()} & set(kwargs['indirect_object']):
                     if npc.give_item(self.get_dominant_hand_inv()):
-                        self.get_dominant_hand_inv()
+                        self.set_dominant_hand_inv(item=None)
                         return
                     else:
                         return
@@ -872,9 +880,9 @@ Health:  {} of {} hit points
                         terminal_output.print_text("{} won't fit {} there.".format(self.right_hand_inv[0].name, kwargs['preposition'][0]))
                         return
                     room_item.items.append(self.get_dominant_hand_inv())
-                    self.set_dominant_hand_inv(None)
+                    self.set_dominant_hand_inv(item=None)
                     terminal_output.print_text("You put {} {} {}".format(self.get_dominant_hand_inv().name, kwargs['preposition'][0], room_item.name))
-                    self.set_dominant_hand_inv(None)
+                    self.set_dominant_hand_inv(item=None)
                     return
         elif kwargs['preposition'][0] == "on":
             terminal_output.print_text("You cannot stack items yet.")
