@@ -114,7 +114,7 @@ class Corpse(Object):
         if self.skin == None:
             terminal_output.print_text("You cannot skin {}".format(self.name))
         else:
-            terminal_output.print_text("You skin {} to yield {}.".format(self.name, all_items_categories['Skins'][self.skin]['name']))
+            terminal_output.print_text("You skin {} to yield {}.".format(self.name, all_items_categories['Skin'][self.skin]['name']))
             self.room.add_item(items.create_item(item_category='skin', item_name=self.skin))
         return
 

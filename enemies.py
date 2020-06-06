@@ -39,9 +39,14 @@ class Enemy(mixins.ReprMixin, mixins.DataFileMixin, threading.Thread):
         self._attack_strength_base = self._enemy_data['attack_strength_base']
         self._defense_strength_base = self._enemy_data['defense_strength_base']
         self._weapon = self._enemy_data['weapon']
-        self._armor = self._enemy_data['armor']
-        self.spawn_location = self._enemy_data['spawn_location']
+        
+        self._armor = {}
+        
+        for category in self._enemy_data['armor']:
+            for item in self._enemy_data['armor'][category]:
+                self._armor[category] = items.create_item('armor', item_name=item)
 
+        self.spawn_location = self._enemy_data['spawn_location']
         self.location_x = location_x
         self.location_y = location_y
         self.area = area
@@ -50,7 +55,7 @@ class Enemy(mixins.ReprMixin, mixins.DataFileMixin, threading.Thread):
         self.target = target
 
         if self.room == target.room:
-            for line in textwrap.wrap(self.enemy_data['entrance_text'], 80):
+            for line in textwrap.wrap(self._enemy_data['entrance_text'], 80):
                 terminal_output.print_text(line)
 
         self.right_hand_inv = self._enemy_data['right_hand']
@@ -157,13 +162,17 @@ class Enemy(mixins.ReprMixin, mixins.DataFileMixin, threading.Thread):
     def is_alive(self):
         return self.health > 0
 
-    def is_dead(self):
-        terminal_output.print_text(self._enemy_data['death_text'])
-        if self in self.room.enemies:
-            self.room.remove_enemy(self)
-        self.room.add_object(objects.Corpse(object_name=self.enemy_data['corpse'], room=self.room))
-        self.target = None
-        self.room = None
+    def is_killed(self):
+        if self.health > 0:
+            return "" 
+        else:
+            if self in self.room.enemies:
+                self.room.remove_enemy(self)
+            self.room.add_object(objects.Corpse(object_name=self._enemy_data['corpse'], room=self.room))
+            self.target = None
+            self.room = None
+            return self._enemy_data['death_text']
+
 
     def run(self):
         if self.room == self.target.room:

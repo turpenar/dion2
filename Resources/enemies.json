@@ -61,8 +61,16 @@
 		"health": 10,
 		"health_max": 10,
 		"attack_strength_base": 20,
-		"defense_strength_base": 20,
-		"armor": "None",
+		"defense_strength_base": 5,
+		"armor": {
+			"torso": [],
+			"head": [],
+			"neck": [],
+			"right_arm": [],
+			"left_arm": [],
+			"right_leg": [],
+			"left_leg": []
+			},
 		"weapon": "None",
 		"right_hand": "",
 		"left_hand": "",

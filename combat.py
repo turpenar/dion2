@@ -58,43 +58,50 @@ def calculate_defense_strength(character, weapon):
     return defense_strength
 
 def end_roll(attack, defense, random):
-    return int((attack - defense + random + 100))
+    return int((attack - defense + random))
 
 def get_damage(end_roll, weapon, armor):
-    damage_factor = 0
-    if weapon:
+    try:
+        armor_classification = armor['torso'].classification
+    except:
+        armor_classification = "None"
+    try:
         if weapon.category == 'weapon':
-            damage_factor = weapon_damage_factors.loc[weapon.classification, armor.classification]
-    else:
-        damage_factor = weapon_damage_factors.loc[None, armor.classification]
-    return (end_roll - 100) * damage_factor
+            weapon_classification = weapon.classification
+    except:
+        weapon_classification = "None"
+        
+    damage_factor = weapon_damage_factors.loc[weapon_classification, armor_classification]
+    return int(round((end_roll - 100) * damage_factor))
 
 def melee_attack_enemy(self, target):
     attack_strength = calculate_attack_strength(self, self.get_dominant_hand_inv())
     defense_strength = calculate_defense_strength(character=target, weapon=target.weapon)
     att_random = random.randint(0,100)
     att_end_roll = end_roll(attack=attack_strength, defense=defense_strength, random=att_random)
+    round_time = self.set_round_time(3)
     
     result = None
     if att_end_roll <= 100:
         result = """\
-{} evades the attack
-            """.format(target.name)
+{} evades the attack.
+Round time:  {} seconds
+            """.format(target.name, round_time)
     else:
-        target.health = target.health - get_damage(att_end_roll, self.get_dominant_hand_inv(), target.armor)
+        att_damage = get_damage(att_end_roll, self.get_dominant_hand_inv(), target.armor)
+        target.health = target.health - att_damage
+        death_text = target.is_killed()
         result = """\
-{} damages {} by {}.\
-            """.format(self.name, target.name, att_damage)
+{} damages {} by {}.
+Round time:  {} seconds
+{}\
+            """.format(self.name, target.name, att_damage, death_text, round_time)
 
     terminal_output.print_text("""\
 {} attacks {}!
-STR {} - DEF {} + RAND {} + 100 = {}
-{}
+STR {} - DEF {} + D100 ROLL {} = {}
+{}\
     """.format(self.name, target.name, attack_strength, defense_strength, att_random, att_end_roll, result))
-    
-    if target.health <= 0:
-        target.is_dead()
-
     return target
 
 def melee_attack_character(self, character):
@@ -104,21 +111,23 @@ def melee_attack_character(self, character):
     att_end_roll = end_roll(attack=attack_strength,defense=defense_strength, random=att_random)
 
     result = None
+    death_text = None
     if att_end_roll <= 100:
         result = """\
 {} evades the attack.\
             """.format(character.name)
     else:
-        character.health = character.health - get_damage(att_end_roll, self.weapon, character.armor['torso'])
+        att_damage = get_damage(att_end_roll, self.weapon, character.armor)
+        character.health = character.health - att_damage
+        death_text = character.is_killed()
         result = """\
-{} damages {} by {}.\
-            """.format(self.name, character.name, att_damage)
-        if character.health <= 0:
-            character.is_dead() 
+{} damages {} by {}.
+{}\
+            """.format(self.name, character.name, att_damage, death_text)
 
     terminal_output.print_text("""\
 {} attacks {}!
-STR {} - DEF {} + RAND {} + 100 = {}
+STR {} - DEF {} + D100 ROLL {} = {}
 {}\
     """.format(self.name, character.name, attack_strength, defense_strength, att_random, att_end_roll, result))
 

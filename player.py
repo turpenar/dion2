@@ -395,6 +395,13 @@ class Player(mixins.ReprMixin, mixins.DataFileMixin):
         else:
             terminal_output.print_text("You're dead! You will need to restart from your last saved point.")
             return True
+        
+    def is_killed(self):
+        if self.health > 0:
+            return ""
+        else:
+            return "Your body falls to the ground with a *slump*. You are dead."
+        
 
     def check_round_time(self):
         with lock:
@@ -408,7 +415,7 @@ class Player(mixins.ReprMixin, mixins.DataFileMixin):
         with lock:
             self.rt_start = time.time()
             self.rt_end = self.rt_start + seconds
-        return
+        return seconds
     
     @property
     def inventory(self):
@@ -580,7 +587,6 @@ Attribute:  {}
                 if set(enemy.handle) & set(self.target):
                     enemy_found = True
                     combat.melee_attack_enemy(self, enemy)
-                    self.set_round_time(3)
                     return
             if not enemy_found:
                 terminal_output.print_text("{} is not around here.".format(kwargs['direct_object']))
