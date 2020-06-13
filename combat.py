@@ -95,7 +95,7 @@ Round time:  {} seconds
 {} damages {} by {}.
 Round time:  {} seconds
 {}\
-            """.format(self.name, target.name, att_damage, death_text, round_time)
+            """.format(self.name, target.name, att_damage, round_time, death_text)
 
     terminal_output.print_text("""\
 {} attacks {}!

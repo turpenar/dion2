@@ -14,6 +14,7 @@ import config as config
 
 
 verbs = config.verbs
+action_history = []
 
 
 def link_terminal(terminal):
@@ -22,6 +23,7 @@ def link_terminal(terminal):
 
 
 def do_action(action_input, character):
+    action_history.append(action_input)
     if len(action_input) == 0:
         terminal_output.print_text("")
         return

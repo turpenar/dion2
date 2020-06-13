@@ -12,7 +12,6 @@ def link_terminal(terminal):
     global terminal_output
     terminal_output = terminal
 
-
 def loot():
     pass
 
@@ -139,7 +138,7 @@ class Neck(Item):
 @Item.register_subclass('skin')
 class Skin(Item):
     def __init__(self, item_name: str, **kwargs):
-        category_data = self.get_item_by_name('Skins')
+        category_data = self.get_item_by_name('Skin')
         item_data = category_data[item_name]
         super().__init__(item_data=item_data, **kwargs)
 

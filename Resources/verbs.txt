@@ -9,6 +9,7 @@ give
 go
 health
 help
+information
 inventory
 look
 north
