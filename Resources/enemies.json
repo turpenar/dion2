@@ -57,7 +57,7 @@
 		"handle": ["boar"], 
 		"adjectives": [],
 		"category": "enemy",
-		"level": 0,
+		"level": 1,
 		"health": 10,
 		"health_max": 10,
 		"attack_strength_base": 20,

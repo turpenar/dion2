@@ -29,6 +29,8 @@ commands = {}
 global character
 global terminal_output
 available_stat_points = config.available_stat_points
+experience_points_base = config.experience_points_base
+experience_growth = config.experience_growth
 profession_stats_growth_file = config.PROFESSION_STATS_GROWTH_FILE
 race_stats_file = config.RACE_STATS_FILE
 all_items = mixins.all_items
@@ -57,7 +59,7 @@ class Player(mixins.ReprMixin, mixins.DataFileMixin):
         self._gender = self._player_data['gender']
         self._object_pronoun = None
         self._possessive_pronoun = None
-        self.race = self._player_data['race']
+        self._race = self._player_data['race']
         self._profession = self._player_data['profession']
         self._category= self._player_data['category']
         
@@ -183,6 +185,11 @@ class Player(mixins.ReprMixin, mixins.DataFileMixin):
             if gender == "male":
                 self._object_pronoun = "He"
                 self._possessive_pronoun = "His"
+                
+    @property
+    def race(self):
+        with lock:
+            return self._race
                 
     @property            
     def profession(self):
@@ -350,6 +357,14 @@ class Player(mixins.ReprMixin, mixins.DataFileMixin):
     def defense_strength_parry_base(self, defense_strength_parry_base):
         with lock:
             self._defense_strength_parry_base = defense_strength_parry_base
+            
+    def check_level_up(self):
+        experience_next_level = int(math.floor(experience_points_base * math.pow(self.level + 1, experience_growth)))
+        if self.experience >= experience_next_level:
+            self.level_up()
+            return
+        else:
+            return
         
     def level_up(self):
         self.level += 1
@@ -361,20 +376,24 @@ class Player(mixins.ReprMixin, mixins.DataFileMixin):
         
             self.stats_bonus[stat] = ((self.stats[stat] - available_stat_points / 8) / 2 + int(race_stats_file.loc[self.race][stat]))
         
+        skills.level_up_skill_points()
+        
         self.health = int(math.floor((self.stats['strength'] + self.stats['constitution']) / 10))
-        self.health_max = self.health
+        self.health_max = int(math.floor((self.stats['strength'] + self.stats['constitution']) / 10))
         
         self.attack_strength_base = int(round(self.stats_bonus['strength'],0))
         self.defense_strength_evade_base = int(round(self.stats_bonus['agility'] + self.stats_bonus['intellect'] / 4 + self.skills['dodging'],0))
         self.defense_strength_block_base = int(round(self.stats_bonus['strength'] / 4 + self.stats_bonus['dexterity'] /4,0))
-        self.defense_strength_parry_base = int(round(self.stats_bonus['strength'] / 4 + self.stats_bonus['dexterity'] / 4,0)) 
+        self.defense_strength_parry_base = int(round(self.stats_bonus['strength'] / 4 + self.stats_bonus['dexterity'] / 4,0))
+        
+        terminal_output.print_text("Ding! You are now level {}!".format(self.level)) 
 
     def set_character_attributes(self):
         for stat in self.stats:
             self.stats_bonus[stat] = ((self.stats[stat] - available_stat_points / 8) / 2 + int(race_stats_file.loc[self.race][stat]))
 
         self.health = int(math.floor((self.stats['strength'] + self.stats['constitution']) / 10))
-        self.health_max = self.health
+        self.health_max = int(math.floor((self.stats['strength'] + self.stats['constitution']) / 10))
         
         self.attack_strength_base = int(round(self.stats_bonus['strength'],0))
         self.defense_strength_evade_base = int(round(self.stats_bonus['agility'] + self.stats_bonus['intellect'] / 4 + self.skills['dodging'],0))
@@ -611,6 +630,11 @@ Attribute:  {}
             terminal_output.print_text("You drop " + self.get_dominant_hand_inv().name)
             self.set_dominant_hand_inv(item=None)
             return
+        
+    def view_experience(self, **kwargs):
+        terminal_output.print_text('''\
+Experience:  {}
+        '''.format(self.experience))
 
     def flee(self, **kwargs):
         """Moves the player randomly to an adjacent tile"""
@@ -721,6 +745,19 @@ Attribute:  {}
 Health:  {} of {} hit points
             '''.format(self.health,
                        self.health_max))
+        
+    def information(self, **kwargs):
+        terminal_output.print_text('''
+Name:  {} {}
+Gender:  {}
+Race:  {}
+Profession:  {}
+Level:  {}
+            '''.format(self.first_name, self.last_name,
+                       self.gender,
+                       self.race,
+                       self.profession,
+                       self.level))
 
     def view_inventory(self, **kwargs):
         if self.get_dominant_hand_inv():
@@ -775,7 +812,7 @@ Health:  {} of {} hit points
             if kwargs['indirect_object'] is None:
                 terminal_output.print_text("I am not sure what you are referring to.")
                 return
-            for item in self.room.items + self.room.objects + self.room.npcs + self.inventory + [self.get_right_hand_inv()] + [self.get_left_hand_inv()]:
+            for item in self.room.items + self.room.objects + self.room.npcs + self.inventory + [self.get_dominant_hand_inv()] + [self.get_non_dominant_hand_inv()]:
                 if isinstance(item, npcs.NPC):
                     terminal_output.print_text("It wouldn't be advisable to look in " + item.name)
                     return
@@ -790,7 +827,7 @@ Health:  {} of {} hit points
             if kwargs['indirect_object'] is None:
                 terminal_output.print_text("I am not sure what you are referring to.")
                 return
-            for item in self.room.items + self.room.objects + self.room.npcs + self.inventory + [self.get_right_hand_inv()] + [self.get_left_hand_inv()]:
+            for item in self.room.items + self.room.objects + self.room.npcs + self.inventory + [self.get_dominant_hand_inv()] + [self.get_non_dominant_hand_inv()]:
                 if set(item.handle) & set(kwargs['indirect_object']):
                     item.view_description()
                     return

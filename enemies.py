@@ -10,12 +10,18 @@ import threading as threading
 import time as time
 import textwrap as textwrap
 import random as random
+import math as math
 
 import mixins as mixins
 import combat as combat
 import objects as objects
 import world as world
+import config as config
 
+enemy_level_base = config.enemy_level_base
+enemy_growth = config.enemy_growth
+experience_points_base = config.experience_points_base
+experience_growth = config.experience_growth
 lock = threading.Lock()
 
 def link_terminal(terminal):
@@ -39,6 +45,7 @@ class Enemy(mixins.ReprMixin, mixins.DataFileMixin, threading.Thread):
         self._attack_strength_base = self._enemy_data['attack_strength_base']
         self._defense_strength_base = self._enemy_data['defense_strength_base']
         self._weapon = self._enemy_data['weapon']
+        self._death_text = self._enemy_data['death_text']
         
         self._armor = {}
         
@@ -60,6 +67,16 @@ class Enemy(mixins.ReprMixin, mixins.DataFileMixin, threading.Thread):
 
         self.right_hand_inv = self._enemy_data['right_hand']
         self.left_hand_inv = self._enemy_data['left_hand']
+        
+        experience_level = math.floor(experience_points_base * math.pow(self.level, experience_growth))
+        print("experience level:  " + str(experience_level))
+        experience_next_level = math.floor(experience_points_base * math.pow(self.level + 1, experience_growth))
+        print("experience next level:  " + str(experience_next_level))
+        enemies_at_level = math.floor(enemy_level_base * math.pow(self.level,enemy_growth))
+        print("enemies at level:  " + str(enemies_at_level))
+        
+        self.experience = int((experience_next_level - experience_level) / enemies_at_level * random.uniform(0.9,1.1))
+        print("experience:  " + str(self.experience))
 
     def move(self, dx, dy):
         self.room.remove_enemy(self)
@@ -158,21 +175,29 @@ class Enemy(mixins.ReprMixin, mixins.DataFileMixin, threading.Thread):
     def armor(self, armor):
         with lock:
             self._armor = armor
+            
+    @property
+    def death_text(self):
+        with lock:
+            return self._death_text
 
     def is_alive(self):
         return self.health > 0
 
     def is_killed(self):
         if self.health > 0:
-            return "" 
+            return False
         else:
+            return True
+        
+    def replace_with_corpse(self):
             if self in self.room.enemies:
                 self.room.remove_enemy(self)
-            self.room.add_object(objects.Corpse(object_name=self._enemy_data['corpse'], room=self.room))
-            self.target = None
-            self.room = None
-            return self._enemy_data['death_text']
-
+                self.room.add_object(objects.Corpse(object_name=self._enemy_data['corpse'], room=self.room))
+                self.target = None
+                self.room = None
+            else:
+                print("Game Error:  when replacing a dead enemy with a corpse, the enemy was not in mapped to the proper room")
 
     def run(self):
         if self.room == self.target.room:

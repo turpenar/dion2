@@ -23,7 +23,8 @@ def link_terminal(terminal):
 
 
 def do_action(action_input, character):
-    action_history.append(action_input)
+    action_history.insert(0,action_input)
+    print(action_history)
     if len(action_input) == 0:
         terminal_output.print_text("")
         return
@@ -90,7 +91,7 @@ class Attack(DoActions):
 @DoActions.register_subclass('attribute')
 class Attributes(DoActions):
     """\
-    ATTRIBUTES allows you to view variuos attributes\
+    ATTRIBUTES allows you to view various attributes\
     """
 
     def __init__(self, character, **kwargs):
@@ -132,6 +133,18 @@ class East(DoActions):
             self.character.move_east()
         else:
             terminal_output.print_text("You cannot find a way to move in that direction.")
+            
+@DoActions.register_subclass('experience')
+@DoActions.register_subclass('exp')
+class Experience(DoActions):
+    """\
+    Displays your experience information.\
+    """
+    
+    def __init__(self, character, **kwargs):
+        DoActions.__init__(self, character, **kwargs)
+        
+        self.character.view_experience()
 
 
 @DoActions.register_subclass('flee')
@@ -198,7 +211,7 @@ class Go(DoActions):
 @DoActions.register_subclass('health')
 class Health(DoActions):
     """\
-    HEALTH shows your current health attributes.
+    HEALTH shows your current health attributes.\
     """
     
     def __init__(self, character, **kwargs):
@@ -214,21 +227,41 @@ class Help(DoActions):
 
     Usage:
 
-    HELP <subject> : Output help on a specific subject.
+    HELP <subject> : Output help on a specific subject.\
     """
 
     def __init__(self, character, **kwargs):
         DoActions.__init__(self, character, **kwargs)
+        
+        verb_list = ""
+        
+        for a, b, c in zip(verbs[::3], verbs[1::3], verbs[2::3]):
+            verb_list = verb_list + '{:<30}{:<30}{:<}\n'.format(a,b,c)
 
         if kwargs['subject_verb'] == None:
-            terminal_output.print_text('''
-Below are the list of actions with which you can ask for help:
-{}
-            '''.format(verbs))
+            terminal_output.print_text("""
+Below are the list of actions with which you can ask for help.
+Type HELP <verb> for more information about that specific verb.
+{}\
+            """.format(verb_list))
+
+            
         elif kwargs['subject_verb'] in DoActions.do_actions:
             terminal_output.print_text(DoActions.do_actions[kwargs['subject_verb']].__doc__)
         else:
             terminal_output.print_text("I'm sorry, what did you need help with?")
+            
+@DoActions.register_subclass('info')
+@DoActions.register_subclass('information')
+class Information(DoActions):
+    """\
+    Provides general information on your character including level, experience, and other attributes.\
+    """
+    
+    def __init__(self, character, **kwargs):
+        DoActions.__init__(self, character, **kwargs)
+        
+        self.character.information(**kwargs)
 
 
 @DoActions.register_subclass('inventory')

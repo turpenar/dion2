@@ -39,7 +39,9 @@ class CommandBox(tk.Frame):
 
         self.user_entry = tk.Entry(self, width=100)
         self.user_entry.pack()
-
+        
+    def print_action(self, text):
+        self.user_entry.insert("end", text)
 
 class SkillBox(tk.Frame):
     def __init__(self, parent, **kwargs):
@@ -90,8 +92,30 @@ class MainApplication(tk.Frame):
         skills.link_terminal(self.terminal_window)
 
         self.splash_screen()
+        self.command_index = 0
 
         self.commandbox.user_entry.bind("<Return>", func=self.game_menu)
+        self.commandbox.user_entry.bind("<Up>", func=self.cycle_previous_command)
+        self.commandbox.user_entry.bind("<Down>", func=self.cycle_next_command)
+        
+    def cycle_previous_command(self, event):
+        self.command_index += 1
+        if self.command_index > len(actions.action_history):
+            self.command_index = len(actions.action_history)
+        previous_command = actions.action_history[self.command_index - 1]
+        self.commandbox.user_entry.delete(0, "end")
+        self.commandbox.print_action(previous_command)
+        
+    def cycle_next_command(self, event):
+        self.command_index -= 1
+        if self.command_index < 1:
+            self.command_index = 0
+            self.commandbox.user_entry.delete(0, "end")
+            return
+        next_command = actions.action_history[self.command_index - 1]
+        self.commandbox.user_entry.delete(0, "end")
+        self.commandbox.print_action(next_command)
+        
 
     def game_menu(self, event):
 
@@ -120,6 +144,8 @@ class MainApplication(tk.Frame):
             entry = self.submit_command()
 
             actions.do_action(action_input=entry, character=player.character)
+        
+        self.command_index = 0
 
     def submit_command(self):
         entry = self.commandbox.user_entry.get()

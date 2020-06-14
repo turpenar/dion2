@@ -15,6 +15,8 @@ import items as items
 lock = threading.Lock()
 
 weapon_damage_factors = config.WEAPON_DAMAGE_FACTORS
+weapon_attack_factors = config.WEAPON_ATTACK_FACTORS
+experience_adjustment_factors = config.EXPERIENCE_ADJUSTMENT_FACTORS
 
 def link_terminal(terminal):
     global terminal_output
@@ -42,9 +44,7 @@ def calculate_defense_strength_parry(character, weapon):
         if weapon.category == 'weapon':
             weapon_ranks = character.skills[character.get_dominant_hand_inv().sub_category]
             defense_strength_parry += int(weapon_ranks)
-            return defense_strength_parry
-        else:
-            return defense_strength_parry
+    return defense_strength_parry
 
 def calculate_defense_strength(character, weapon):
     defense_strength = 0
@@ -57,8 +57,23 @@ def calculate_defense_strength(character, weapon):
         defense_strength = character.defense_strength_base
     return defense_strength
 
-def end_roll(attack, defense, random):
-    return int((attack - defense + random))
+def calculate_attack_factor(weapon, armor):
+    try:
+        armor_classification = armor['torso'].classification
+    except:
+        armor_classification = "None"
+    try:
+        if weapon.category == 'weapon':
+            weapon_classification = weapon.classification
+        else:
+            weapon_classification = "None"
+    except:
+        weapon_classification = "None"
+    attack_factor = weapon_attack_factors.loc[weapon_classification, armor_classification]
+    return int(attack_factor)
+
+def end_roll(attack, defense, attack_factor, random):
+    return int((attack - defense + attack_factor + random))
 
 def get_damage(end_roll, weapon, armor):
     try:
@@ -68,17 +83,24 @@ def get_damage(end_roll, weapon, armor):
     try:
         if weapon.category == 'weapon':
             weapon_classification = weapon.classification
+        else:
+            weapon_classification = "None"
     except:
         weapon_classification = "None"
         
     damage_factor = weapon_damage_factors.loc[weapon_classification, armor_classification]
     return int(round((end_roll - 100) * damage_factor))
 
+def get_exerience_modifier(self_level, target_level):
+    level_variance = int(target_level - self_level)
+    return experience_adjustment_factors.loc[level_variance, 'Adjustment_Factor']
+
 def melee_attack_enemy(self, target):
     attack_strength = calculate_attack_strength(self, self.get_dominant_hand_inv())
     defense_strength = calculate_defense_strength(character=target, weapon=target.weapon)
+    attack_factor = calculate_attack_factor(self.get_dominant_hand_inv(), target.armor)
     att_random = random.randint(0,100)
-    att_end_roll = end_roll(attack=attack_strength, defense=defense_strength, random=att_random)
+    att_end_roll = end_roll(attack=attack_strength, defense=defense_strength, attack_factor=attack_factor, random=att_random)
     round_time = self.set_round_time(3)
     
     result = None
@@ -90,7 +112,12 @@ Round time:  {} seconds
     else:
         att_damage = get_damage(att_end_roll, self.get_dominant_hand_inv(), target.armor)
         target.health = target.health - att_damage
-        death_text = target.is_killed()
+        if target.is_killed():
+            death_text = target.death_text
+            target.replace_with_corpse()
+            self.experience += int(target.experience * get_exerience_modifier(self.level, target.level))
+        else:
+            death_text = ""
         result = """\
 {} damages {} by {}.
 Round time:  {} seconds
@@ -99,16 +126,18 @@ Round time:  {} seconds
 
     terminal_output.print_text("""\
 {} attacks {}!
-STR {} - DEF {} + D100 ROLL {} = {}
+STR {} - DEF {} + AF {} + D100 ROLL {} = {}
 {}\
-    """.format(self.name, target.name, attack_strength, defense_strength, att_random, att_end_roll, result))
+    """.format(self.name, target.name, attack_strength, defense_strength, attack_factor, att_random, att_end_roll, result))
+    self.check_level_up()
     return target
 
 def melee_attack_character(self, character):
     attack_strength = calculate_attack_strength(self, self.weapon)
     defense_strength = calculate_defense_strength(character=character, weapon=character.get_dominant_hand_inv())
+    attack_factor = calculate_attack_factor(self.weapon, character.armor)
     att_random = random.randint(0,100)
-    att_end_roll = end_roll(attack=attack_strength,defense=defense_strength, random=att_random)
+    att_end_roll = end_roll(attack=attack_strength,defense=defense_strength, attack_factor=attack_factor, random=att_random)
 
     result = None
     death_text = None
@@ -127,9 +156,9 @@ def melee_attack_character(self, character):
 
     terminal_output.print_text("""\
 {} attacks {}!
-STR {} - DEF {} + D100 ROLL {} = {}
+STR {} - DEF {} + AF {} + D100 ROLL {} = {}
 {}\
-    """.format(self.name, character.name, attack_strength, defense_strength, att_random, att_end_roll, result))
+    """.format(self.name, character.name, attack_strength, defense_strength, attack_factor, att_random, att_end_roll, result))
 
     return character
 

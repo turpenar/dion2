@@ -26,6 +26,12 @@ RACE_STATS_FILE.set_index('Race', inplace=True)
 WEAPON_DAMAGE_FACTORS = pd.read_csv(DATA_DIR / "Weapon_Damage_Factors.csv")
 WEAPON_DAMAGE_FACTORS.set_index('classification', inplace=True)
 
+WEAPON_ATTACK_FACTORS = pd.read_csv(DATA_DIR / "Weapon_Attack_Factors.csv")
+WEAPON_ATTACK_FACTORS.set_index('classification', inplace=True)
+
+EXPERIENCE_ADJUSTMENT_FACTORS = pd.read_csv(DATA_DIR / "Experience_Adjustment_Factors.csv")
+EXPERIENCE_ADJUSTMENT_FACTORS.set_index('Level_Variance', inplace=True)
+
 verbs_path = DATA_DIR / 'verbs.txt'
 with verbs_path.open(mode='r') as file:
     verbs = file.readlines()
@@ -56,6 +62,10 @@ nouns = [x.strip() for x in nouns]
 
 available_stat_points = 528
 base_training_points = 25
+experience_points_base = 1000
+experience_growth = 2
+enemy_level_base = 10
+enemy_growth = 1
 profession_choices = ['None', 'Clairvoyant', 'Enchanter', 'Illusionist', 'Paladin', 'Ranger', 'Rogue', 'Inyanga', 'Warrior']
 gender_choices = ['None', 'Female', 'Male']
 
