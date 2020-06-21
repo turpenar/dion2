@@ -19,11 +19,13 @@
 		"left_hand": "",
 		"round_time": 10,
 		"spawn_location": "Wilds",
-		"entrance_text": "A nearby bush rustles for a brief moment before a small creature jumps out. A kobold seems to have wandered into the area.",
-		"move_out_text": "A kobold slowly wanders out of the area.",
-		"move_in_text": "A kobold slowly wanders into the area.",
-		"death_text": "A kobold staggers and eventually slumps to the ground, motionless.",
-		"corpse": "kobold_corpse"
+		"text": {
+			"entrance_text": "A nearby bush rustles for a brief moment before a small creature jumps out. A kobold seems to have wandered into the area.",
+			"move_out_text": "A kobold slowly wanders out of the area.",
+			"move_in_text": "A kobold slowly wanders into the area.",
+			"death_text": "A kobold staggers and eventually slumps to the ground, motionless.",
+			"corpse": "kobold_corpse"
+			}
 	},
 	"goblin": {
 		"name": "a goblin", 
@@ -53,7 +55,7 @@
 	},
 	"wild_boar": {
 		"name": "a wild boar", 
-		"description": "Greedy little eyes.", 
+		"description": "You see a small, stout boar looking for something to eat. Mottled fur covers the boar's backside and one of its tusks is badly chipped. It greedily looks at you.", 
 		"handle": ["boar"], 
 		"adjectives": [],
 		"category": "enemy",
@@ -74,12 +76,19 @@
 		"weapon": "None",
 		"right_hand": "",
 		"left_hand": "",
-		"round_time": 10,
+		"round_time": {
+			"engage": 5,
+			"attack": 10,
+			"move": 5
+			},
 		"spawn_location": "Wilds",
-		"entrance_text": "A wild boar has arrived!",
-		"move_out_text": "A wild boar rushes out of the area.",
-		"move_in_text": "A wild boar rushes into the area.",
-		"death_text": "A wild boar staggers and eventually slumps to the ground, motionless.",
+		"text": {
+			"entrance_text": "A wild boar has arrived!",
+			"move_out_text": "A wild boar rushes out of the area.",
+			"move_in_text": "A wild boar rushes into the area.",
+			"engage_text": "A wild boar stamps its feet.",
+			"death_text": "A wild boar staggers and eventually slumps to the ground, motionless."
+			},
 		"corpse": "wild_boar_corpse"
 	}
 }

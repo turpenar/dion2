@@ -113,7 +113,7 @@ Round time:  {} seconds
         att_damage = get_damage(att_end_roll, self.get_dominant_hand_inv(), target.armor)
         target.health = target.health - att_damage
         if target.is_killed():
-            death_text = target.death_text
+            death_text = target.text_death
             target.replace_with_corpse()
             self.experience += int(target.experience * get_exerience_modifier(self.level, target.level))
         else:

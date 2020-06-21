@@ -24,7 +24,6 @@ def link_terminal(terminal):
 
 def do_action(action_input, character):
     action_history.insert(0,action_input)
-    print(action_history)
     if len(action_input) == 0:
         terminal_output.print_text("")
         return

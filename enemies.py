@@ -45,8 +45,19 @@ class Enemy(mixins.ReprMixin, mixins.DataFileMixin, threading.Thread):
         self._attack_strength_base = self._enemy_data['attack_strength_base']
         self._defense_strength_base = self._enemy_data['defense_strength_base']
         self._weapon = self._enemy_data['weapon']
-        self._death_text = self._enemy_data['death_text']
         
+        self._text_entrance = self._enemy_data['text']['entrance_text']
+        self._text_move_in = self._enemy_data['text']['move_in_text']
+        self._text_move_out = self._enemy_data['text']['move_out_text']
+        self._text_engage = self._enemy_data['text']['engage_text']
+        self._text_death = self._enemy_data['text']['death_text']
+        
+        self._round_time_engage = self._enemy_data['round_time']['engage']
+        self._round_time_attack = self._enemy_data['round_time']['attack']
+        self._round_time_move = self._enemy_data['round_time']['move']
+        
+        self._corpse = self._enemy_data['corpse']
+    
         self._armor = {}
         
         for category in self._enemy_data['armor']:
@@ -65,29 +76,25 @@ class Enemy(mixins.ReprMixin, mixins.DataFileMixin, threading.Thread):
             for line in textwrap.wrap(self._enemy_data['entrance_text'], 80):
                 terminal_output.print_text(line)
 
-        self.right_hand_inv = self._enemy_data['right_hand']
-        self.left_hand_inv = self._enemy_data['left_hand']
+        self._right_hand_inv = self._enemy_data['right_hand']
+        self._left_hand_inv = self._enemy_data['left_hand']
         
         experience_level = math.floor(experience_points_base * math.pow(self.level, experience_growth))
-        print("experience level:  " + str(experience_level))
         experience_next_level = math.floor(experience_points_base * math.pow(self.level + 1, experience_growth))
-        print("experience next level:  " + str(experience_next_level))
         enemies_at_level = math.floor(enemy_level_base * math.pow(self.level,enemy_growth))
-        print("enemies at level:  " + str(enemies_at_level))
         
         self.experience = int((experience_next_level - experience_level) / enemies_at_level * random.uniform(0.9,1.1))
-        print("experience:  " + str(self.experience))
 
     def move(self, dx, dy):
         self.room.remove_enemy(self)
         if self.room == self.target.room:
-            terminal_output.print_text(self._enemy_data['move_out_text'])
+            terminal_output.print_text(self.text_move_out)
         self.location_x += dx
         self.location_y += dy
         self.room = world.tile_exists(x=self.location_x, y=self.location_y, area=self.area)
         self.room.add_enemy(self)
         if self.room == self.target.room:
-            terminal_output.print_text(self._enemy_data['move_in_text'])
+            terminal_output.print_text(self.text_move_in)
 
     def move_north(self, **kwargs):
         self.move(dx=0, dy=-1)
@@ -107,7 +114,7 @@ class Enemy(mixins.ReprMixin, mixins.DataFileMixin, threading.Thread):
             return self._name
         
     @property
-    def descriptionn(self):
+    def description(self):
         with lock:
             return self._description
         
@@ -177,9 +184,64 @@ class Enemy(mixins.ReprMixin, mixins.DataFileMixin, threading.Thread):
             self._armor = armor
             
     @property
-    def death_text(self):
+    def text_move_in(self):
         with lock:
-            return self._death_text
+            return self._text_move_in
+        
+    @property
+    def text_move_out(self):
+        with lock:
+            return self._text_move_out
+        
+    @property
+    def text_engage(self):
+        with lock:
+            return self._text_engage
+            
+    @property
+    def text_death(self):
+        with lock:
+            return self._text_death
+        
+    @property
+    def round_time_engage(self):
+        with lock:
+            return self._round_time_engage
+        
+    @property
+    def round_time_attack(self):
+        with lock:
+            return self._round_time_attack
+        
+    @property
+    def round_time_move(self):
+        with lock:
+            return self._round_time_move
+        
+    @property
+    def corpse(self):
+        with lock:
+            return self._corpse
+        
+    @property
+    def right_hand_inv(self):
+        with lock:
+            return self.right_hand_inv
+        
+    @right_hand_inv.setter
+    def right_hand_inv(self, item):
+        with lock:
+            self._right_hand_inv = item
+            
+    @property
+    def left_hand_inv(self):
+        with lock:
+            return self._left_hand_inv
+            
+    @left_hand_inv.setter
+    def left_hand_inv(self, item):
+        with lock:
+            self._left_hand_inv = item
 
     def is_alive(self):
         return self.health > 0
@@ -193,7 +255,7 @@ class Enemy(mixins.ReprMixin, mixins.DataFileMixin, threading.Thread):
     def replace_with_corpse(self):
             if self in self.room.enemies:
                 self.room.remove_enemy(self)
-                self.room.add_object(objects.Corpse(object_name=self._enemy_data['corpse'], room=self.room))
+                self.room.add_object(objects.Corpse(object_name=self.corpse, room=self.room))
                 self.target = None
                 self.room = None
             else:
@@ -201,22 +263,26 @@ class Enemy(mixins.ReprMixin, mixins.DataFileMixin, threading.Thread):
 
     def run(self):
         if self.room == self.target.room:
-            terminal_output.print_text(self._enemy_data['move_in_text'])
+            terminal_output.print_text(self.text_move_in)
         while self.health > 0:
-            time.sleep(self._enemy_data['round_time'])
             if self.health <= 0:
                 break
             elif (self.room == self.target.room) and (self.target.health > 0):
-                combat.melee_attack_character(self, self.target)
+                terminal_output.print_text(self.text_engage)
+                time.sleep(self.round_time_engage)
+                if (self.room == self.target.room) and (self.target.health > 0):
+                    combat.melee_attack_character(self, self.target)
+                    time.sleep(self.round_time_attack)
             else:
                 available_actions = self.room.adjacent_moves_enemy(area=self.area)
                 action = random.choice(available_actions)
                 action_method = getattr(self, action.method.__name__)
                 action_method()
+                time.sleep(self.round_time_move)
         return
 
     def view_description(self):
-        return self.description
+        terminal_output.print_text(self.description)
 
 
 

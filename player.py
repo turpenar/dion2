@@ -827,8 +827,10 @@ Level:  {}
             if kwargs['indirect_object'] is None:
                 terminal_output.print_text("I am not sure what you are referring to.")
                 return
-            for item in self.room.items + self.room.objects + self.room.npcs + self.inventory + [self.get_dominant_hand_inv()] + [self.get_non_dominant_hand_inv()]:
-                if set(item.handle) & set(kwargs['indirect_object']):
+            for item in self.room.items + self.room.objects + self.room.npcs + self.room.enemies + self.inventory + [self.get_dominant_hand_inv()] + [self.get_non_dominant_hand_inv()]:
+                if not item:
+                    pass
+                elif set(item.handle) & set(kwargs['indirect_object']):
                     item.view_description()
                     return
             for item in self.inventory:
@@ -842,6 +844,10 @@ Level:  {}
             for npc in self.room.npcs:
                 if set(npc.handle) & set(kwargs['indirect_object']):
                     npc.view_description()
+                    return
+            for enemy in self.room.enemies:
+                if set(npc.handle) & set(kwargs['indirect_object']):
+                    enemy.view_description()
                     return
             if item_found is False:
                 terminal_output.print_text("At what did you want to look?")

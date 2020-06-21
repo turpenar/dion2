@@ -114,8 +114,7 @@ class MainApplication(tk.Frame):
             return
         next_command = actions.action_history[self.command_index - 1]
         self.commandbox.user_entry.delete(0, "end")
-        self.commandbox.print_action(next_command)
-        
+        self.commandbox.print_action(next_command) 
 
     def game_menu(self, event):
 
