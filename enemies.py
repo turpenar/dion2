@@ -270,7 +270,7 @@ class Enemy(mixins.ReprMixin, mixins.DataFileMixin, threading.Thread):
             elif (self.room == self.target.room) and (self.target.health > 0):
                 terminal_output.print_text(self.text_engage)
                 time.sleep(self.round_time_engage)
-                if (self.room == self.target.room) and (self.target.health > 0):
+                if (self.room == self.target.room) and (self.target.health > 0) and (self.is_killed == False):
                     combat.melee_attack_character(self, self.target)
                     time.sleep(self.round_time_attack)
             else:

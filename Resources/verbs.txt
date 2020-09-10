@@ -11,6 +11,7 @@ health
 help
 information
 inventory
+lie
 look
 north
 put
@@ -21,6 +22,7 @@ sell
 skills
 skin
 south
+stand
 stats
 take
 target

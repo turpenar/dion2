@@ -239,7 +239,7 @@ class Help(DoActions):
 
         if kwargs['subject_verb'] == None:
             terminal_output.print_text("""
-Below are the list of actions with which you can ask for help.
+Below are the list of actions for which you can ask for help.
 Type HELP <verb> for more information about that specific verb.
 {}\
             """.format(verb_list))
@@ -274,6 +274,34 @@ class Inventory(DoActions):
         DoActions.__init__(self, character, **kwargs)
 
         self.character.view_inventory(**kwargs)
+        
+        
+@DoActions.register_subclass('lie')
+class Lie(DoActions):
+    """\
+    Moves you to a lying position on the ground. While many actions can be performed on the ground, 
+    movement is not possible.
+    """
+
+    def __init__(self, character, **kwargs):
+        DoActions.__init__(self, character, **kwargs)
+        
+        self.character = character
+        
+        self.lie()
+        
+    def lie(self):
+        if self.character.check_round_time():
+            return 
+        if self.character.is_dead():
+            return 
+        if self.character.position == 'lying':
+            terminal_output.print_text('You seem to already be lying down.')
+            return 
+        else:
+            self.character.position = 'lying'
+            terminal_output.print_text('You lower yourself to the ground and lie down.')
+            return
 
 
 @DoActions.register_subclass('look')
@@ -432,6 +460,33 @@ class South(DoActions):
             self.character.move_south()
         else:
             terminal_output.print_text("You cannot find a way to move in that direction.")
+            
+
+@DoActions.register_subclass('stand')
+class Stand(DoActions):
+    """\
+    Raises you to the standing position if you are not already in the standing position.
+    """
+    
+    def __init__(self, character, **kwargs):
+        DoActions.__init__(self, character, **kwargs)
+        
+        self.character = character
+        
+        self.stand()
+        
+    def stand(self):
+        if self.character.check_round_time():
+            return 
+        if self.character.is_dead():
+            return 
+        if self.character.position == 'standing':
+            terminal_output.print_text('You seem to already be standing.')
+            return 
+        else:
+            self.character.position = 'standing'
+            terminal_output.print_text('You raise yourself to a standing position.')
+            return
 
 
 @DoActions.register_subclass('stats')

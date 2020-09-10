@@ -4,6 +4,7 @@
 TODO:  add container limitation
 TODO:  Define dominant hand. Current default dominant hand is right hand
 TODO:  Define health leveling function after 0.
+TODO:  Add lie and stand action.
 """
 
 import random as random
@@ -61,8 +62,8 @@ class Player(mixins.ReprMixin, mixins.DataFileMixin):
         self._possessive_pronoun = None
         self._race = self._player_data['race']
         self._profession = self._player_data['profession']
-        self._category= self._player_data['category']
-        
+        self._category = self._player_data['category']
+        self._position = self._player_data['position']
         
         self._level = self._player_data['level']
         self._experience = self._player_data['experience']
@@ -161,7 +162,6 @@ class Player(mixins.ReprMixin, mixins.DataFileMixin):
     def gender(self):
         with lock:
             return self._gender
-        
     @gender.setter
     def gender(self, gender):
         with lock:
@@ -204,6 +204,22 @@ class Player(mixins.ReprMixin, mixins.DataFileMixin):
     def category(self):
         with lock:
             return self._category
+        
+    @property
+    def position(self):
+        with lock:
+            return self._position
+    @position.setter
+    def position(self, position):
+        with lock:
+            self._position = position
+            
+    def check_position_to_move(self):
+        if self.position == 'lying':
+            terminal_output.print_text('You cannot move, you are lying down.')
+            return False
+        else:
+            return True
     
     @property
     def level(self):
@@ -642,6 +658,8 @@ Experience:  {}
             return
         if self.is_dead():
             return
+        if not self.check_position_to_move():
+            return
         available_moves = self.room.adjacent_moves()
         r = random.randint(0, len(available_moves) - 1)
         actions.do_action(action_input=available_moves[r], character=self)
@@ -713,6 +731,8 @@ Experience:  {}
         if self.check_round_time():
             return
         if self.is_dead():
+            return
+        if not self.check_position_to_move():
             return
         if not kwargs['direct_object']:
             terminal_output.print_text("Go where?")
@@ -869,6 +889,8 @@ Level:  {}
             return
         if self.is_dead():
             return
+        if not self.check_position_to_move():
+            return
         self.move(dx=0, dy=-1)
         return
 
@@ -876,6 +898,8 @@ Level:  {}
         if self.check_round_time():
             return
         if self.is_dead():
+            return
+        if not self.check_position_to_move():
             return
         self.move(dx=0, dy=1)
         return
@@ -885,6 +909,8 @@ Level:  {}
             return
         if self.is_dead():
             return
+        if not self.check_position_to_move():
+            return
         self.move(dx=1, dy=0)
         return
 
@@ -892,6 +918,8 @@ Level:  {}
         if self.check_round_time():
             return
         if self.is_dead():
+            return
+        if not self.check_position_to_move():
             return
         self.move(dx=-1, dy=0)
         return
