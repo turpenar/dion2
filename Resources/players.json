@@ -8,6 +8,7 @@
 		"profession": "None",
 		"category": "player",
 		"position": "lying",
+		"stance": "neutral",
 		"description": "You seem to be one piece.", 
 		"handle": ["self"], 
 		"adjectives": [],

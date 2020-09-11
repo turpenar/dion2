@@ -11,13 +11,12 @@ prepositions = config.prepositions
 articles = config.articles
 determiners = config.determiners
 nouns = config.nouns
+adjectives = config.adjectives
 
 objects = mixins.objects
 items = mixins.items
 npcs = mixins.npcs
 enemies = mixins.enemies
-
-adjectives = []
 
 for category in objects:
     for object in objects[category]:
@@ -37,11 +36,8 @@ for enemy in enemies:
     nouns.extend(enemies[enemy]['handle'])
     adjectives.extend(enemies[enemy]['adjectives'])
 
-
-
 def find_index(input_list, list_of_matches):
     return [i for i, item in enumerate(input_list) if item in list_of_matches]
-
 
 def parser(input):
     input = input.lower()
@@ -88,5 +84,12 @@ def parser(input):
         kwargs['preposition'] = None
     elif len(preposition_index) == 1:
         kwargs['preposition'] = [tokens[preposition_index[0]]] or None
+    if len(adjective_index) < 1:
+        kwargs['adjective_1'] = None
+    elif len(adjective_index) == 1:
+        kwargs['adjective_1'] = [tokens[adjective_index[0]]] or None
+    elif len(adjective_index) == 2:
+        kwargs['adjective_1'] = [tokens[adjective_index[0]]] or None
+        kwargs['adjective_2'] = [tokens[adjective_index[1]]] or None
     return kwargs
 

@@ -1,8 +1,12 @@
 
 
+list = ['one', 'two', 'three']
+print(list)
 
+list2 = [x for x in list if x is not 'one']
+print(list2)
 
-
+print(set(list2))
 
 
 

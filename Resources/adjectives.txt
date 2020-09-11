@@ -1,0 +1,5 @@
+offensive
+forward
+neutral
+guarded
+defensive

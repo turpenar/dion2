@@ -34,6 +34,8 @@ experience_points_base = config.experience_points_base
 experience_growth = config.experience_growth
 profession_stats_growth_file = config.PROFESSION_STATS_GROWTH_FILE
 race_stats_file = config.RACE_STATS_FILE
+positions = config.positions
+stances = config.stances
 all_items = mixins.all_items
 all_items_categories = mixins.items
 lock = threading.Lock()
@@ -64,6 +66,7 @@ class Player(mixins.ReprMixin, mixins.DataFileMixin):
         self._profession = self._player_data['profession']
         self._category = self._player_data['category']
         self._position = self._player_data['position']
+        self._stance = self._player_data['stance']
         
         self._level = self._player_data['level']
         self._experience = self._player_data['experience']
@@ -215,11 +218,21 @@ class Player(mixins.ReprMixin, mixins.DataFileMixin):
             self._position = position
             
     def check_position_to_move(self):
-        if self.position == 'lying':
-            terminal_output.print_text('You cannot move, you are lying down.')
+        non_moving_positions = [x for x in positions if x is not 'standing']
+        if set([self.position]) & set(non_moving_positions):
+            terminal_output.print_text('''You cannot move, you are {} down.'''.format(self.position))
             return False
         else:
             return True
+        
+    @property
+    def stance(self):
+        with lock:
+            return self._stance
+    @stance.setter
+    def stance(self, stance):
+        with lock:
+            self._stance = stance
     
     @property
     def level(self):

@@ -14,6 +14,7 @@ import config as config
 
 
 verbs = config.verbs
+stances = config.stances
 action_history = []
 
 
@@ -276,6 +277,34 @@ class Inventory(DoActions):
         self.character.view_inventory(**kwargs)
         
         
+@DoActions.register_subclass('kneel')
+class Kneel(DoActions):
+    """\
+    Moves you to a kneeling position. While you may perform many actions from this position,
+    movement is not possible.
+    """
+    
+    def __init__(self, character, **kwargs):
+        DoActions.__init__(self, character, **kwargs)
+        
+        self.character = character
+        
+        self.kneel()
+        
+    def kneel(self):
+        if self.character.check_round_time():
+            return 
+        if self.character.is_dead():
+            return 
+        if self.character.position == 'kneeling':
+            terminal_output.print_text('You seem to already be kneeling.')
+            return 
+        else:
+            self.character.position = 'kneeling'
+            terminal_output.print_text('You move yourself to a kneeling position.')
+            return
+        
+        
 @DoActions.register_subclass('lie')
 class Lie(DoActions):
     """\
@@ -336,6 +365,24 @@ class North(DoActions):
             self.character.move_north()
         else:
             terminal_output.print_text('You cannot find a way to move in that direction.')
+            
+
+@DoActions.register_subclass('position')
+@DoActions.register_subclass('pos')
+class Position(DoActions):
+    """\
+    Displays the position you are currently in.\
+    """
+    
+    def __init__(self, character, **kwargs):
+        DoActions.__init__(self, character, **kwargs)
+        
+        self.character = character
+        
+        self.position()
+        
+    def position(self):
+        terminal_output.print_text('''You are currently in the {} position.'''.format(self.character.position))
 
 
 @DoActions.register_subclass('put')
@@ -412,6 +459,34 @@ class Sell(DoActions):
         DoActions.__init__(self, character, **kwargs)
 
         self.character.search(**kwargs)
+        
+        
+@DoActions.register_subclass('sit')
+class Sit(DoActions):
+    """\
+    Moves you to a sitting position. While you can perform many actions while in a sitting position,
+    movement is no possible.
+    """        
+    
+    def __init__(self, character, **kwargs):
+        DoActions.__init__(self, character, **kwargs)
+        
+        self.character = character
+        
+        self.sit()
+        
+    def sit(self):
+        if self.character.check_round_time():
+            return 
+        if self.character.is_dead():
+            return 
+        if self.character.position == 'sitting':
+            terminal_output.print_text('You seem to already be sitting.')
+            return 
+        else:
+            self.character.position = 'sitting'
+            terminal_output.print_text('You move yourself to a sitting position.')
+            return
 
 
 @DoActions.register_subclass('skills')
@@ -461,6 +536,44 @@ class South(DoActions):
         else:
             terminal_output.print_text("You cannot find a way to move in that direction.")
             
+            
+@DoActions.register_subclass('stance')
+class Stance(DoActions):
+    """\
+    STANCE controls the position in which you carry yourself in combat. Your stance will affect the amount of 
+    attack and defensive strength you have during combat.
+    
+    Usage:
+    STANCE:  Shows your current stance.
+    STANCE <type>: Changes your stance to the desired stance.
+    
+    Types of Stances:
+    offensive
+    forward
+    neutral
+    guarded
+    defensive\
+    """
+    
+    def __init__(self, character, **kwargs):
+        DoActions.__init__(self, character, **kwargs)
+        
+        self.character = character
+        
+        self.stance(kwargs['adjective_1'])
+        
+    def stance(self, desired_stance):
+        if not desired_stance:
+            terminal_output.print_text('''You are currently in the {} stance.'''.format(self.character.stance))
+            return
+        if set(desired_stance) & set(stances):
+            self.character.stance = desired_stance[0]
+            terminal_output.print_text('''You are now in {} stance.'''.format(desired_stance[0]))
+            return
+        else:
+            terminal_output.print_text("You cannot form that stance.")
+            return
+
 
 @DoActions.register_subclass('stand')
 class Stand(DoActions):
