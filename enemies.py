@@ -301,19 +301,7 @@ class Enemy(mixins.ReprMixin, mixins.DataFileMixin, threading.Thread):
             elif (self.room == self.target.room) and (self.target.health > 0):
                 terminal_output.print_text(self.text_engage)
                 time.sleep(self.round_time_engage)
-                print('enemy position = ' + self.position)
-                print('enemy stance = ' + self.stance)
-                print(self.room)
-                print(self.target.room)
-                print(bool(self.room == self.target.room))
-                print('target health = ' + str(self.target.health))
-                print(bool(self.target.health > 0))
-                print('is the enemy alive = ' + str(self.is_alive))
-                print(bool(self.is_alive() == True))
-                print('all true? ')
-                print(bool((self.room == self.target.room) and (self.target.health > 0) and (self.is_alive)))
                 if (self.room == self.target.room) and (self.target.health > 0) and (self.is_alive):
-                    print('the enemy is about to attack')
                     combat.melee_attack_character(self, self.target)
                     time.sleep(self.round_time_attack)
             else:

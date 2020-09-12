@@ -11,6 +11,7 @@ NPC_FILE = str(DATA_DIR / f"npcs.{DATA_FORMAT}")
 QUEST_FILE = str(DATA_DIR / f"quests.{DATA_FORMAT}")
 OBJECT_FILE = str(DATA_DIR / f"objects.{DATA_FORMAT}")
 PLAYER_FILE = str(DATA_DIR / f"players.{DATA_FORMAT}")
+SKILLS_FILE = str(DATA_DIR / f"skills.{DATA_FORMAT}")
 
 TEXT_WRAPPER_WIDTH = 100
 

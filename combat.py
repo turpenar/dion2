@@ -2,7 +2,6 @@
 """
 
 
-TODO: Insert player name in combat text
 """
 
 

@@ -2,9 +2,6 @@
 
 """
 
-TODO: A player can continue opening the skills screen and incrementing skill. Should stop at 2 per level.
-
-
 """
 
 import tkinter as tk
@@ -12,10 +9,12 @@ import copy as copy
 
 import player as player
 import config as config
+import mixins as mixins
 
 
 global terminal_output
 profession_skillpoint_bonus_file = config.PROFESSION_SKILLPOINT_BONUS_FILE
+skills_file = config.SKILLS_FILE
 base_training_points = config.base_training_points
 
 
@@ -68,247 +67,83 @@ class TrainingPoints(tk.Frame):
         self.mental_points.grid(row=0, column=3)
 
 
-class WeaponSkills(tk.Frame):
-    def __init__(self, parent, training_points, *args, **kwargs):
+class SkillDetails(tk.Frame, mixins.ReprMixin, mixins.DataFileMixin):
+    def __init__(self, parent, skill_category, training_points, *args, **kwargs):
         tk.Frame.__init__(self, parent, *args, **kwargs)
 
         self.parent = parent
         self.training_points = training_points
+        self.skill_category_file = self.get_skill_category_by_name(name=skill_category)
         self.all_skills = {}
-
-        self.weapon_skills_label = tk.Label(self, text="Weapons Skills")
+        
+        self.weapon_skills_label = tk.Label(self, text=skill_category + " Skills")
         self.weapon_skills_label.grid(row=0, column=0)
+        
+        self.physical_points_label = tk.Label(self, text="PT")
+        self.physical_points_label.grid(row=0, column=4)
+        
+        self.mental_points_label = tk.Label(self, text="MT")
+        self.mental_points_label.grid(row=0, column=5)
 
-        self.skill_names = ['edged_weapons', 'blunt_weapons', 'polearm_weapons']
-        self.skill_labels = ['Edged Weapons', 'Blunt Weapons', 'Polearm Weapons']
         self.skills = {}
+         
         row = 1
-
-        for skill_name, skill_label in zip(self.skill_names, self.skill_labels):
-
+ 
+        for skill_name in self.skill_category_file:
+ 
             self.skills[skill_name] = {}
-
+ 
             self.skills[skill_name]['skill_var_start'] = tk.IntVar(self)
             self.skills[skill_name]['skill_var_start'].set(player.character.skills_base[skill_name])
-
+ 
             self.skills[skill_name]['skill_var'] = tk.IntVar(self)
             self.skills[skill_name]['skill_var'].set(player.character.skills[skill_name])
             self.all_skills[skill_name] = self.skills[skill_name]['skill_var']
-
-            self.skills[skill_name]['skill_label'] = tk.Label(self, text=skill_label)
+ 
+            self.skills[skill_name]['skill_label'] = tk.Label(self, text=skill_name.replace("_", " ").title())
             self.skills[skill_name]['skill_label'].grid(row=row, column=0)
-
-            self.skills[skill_name]['skill_decrease'] = tk.Button(self, text="-", command=lambda x=self.skills[skill_name]['skill_var']: self.decrease_skill(x))
+ 
+            self.skills[skill_name]['skill_decrease'] = tk.Button(self, text="-", command=lambda x=self.skills[skill_name]['skill_var'],
+                                                                                                 y=self.skill_category_file[skill_name]['physical_points'],
+                                                                                                 z=self.skill_category_file[skill_name]['mental_points']: self.decrease_skill(x,y,z))
             self.skills[skill_name]['skill_decrease'].grid(row=row, column=1)
-
+ 
             self.skills[skill_name]['skill_value'] = tk.Label(self, textvariable=self.skills[skill_name]['skill_var'])
             self.skills[skill_name]['skill_value'].grid(row=row, column=2)
-
+ 
             self.skills[skill_name]['skill_increase'] = tk.Button(self, text="+",
                                                    command=lambda x=self.skills[skill_name]['skill_var'],
-                                                                  y=self.skills[skill_name]['skill_var_start']: self.increase_skill(x,y))
+                                                                  y=self.skills[skill_name]['skill_var_start'],
+                                                                  z=self.skill_category_file[skill_name]['physical_points'],
+                                                                  l=self.skill_category_file[skill_name]['mental_points']: self.increase_skill(x,y,z,l))
             self.skills[skill_name]['skill_increase'].grid(row=row, column=3)
-
+            
+            self.skills[skill_name]['physical_points'] = tk.Label(self, text=self.skill_category_file[skill_name]['physical_points'])
+            self.skills[skill_name]['physical_points'].grid(row=row, column=4)
+            
+            self.skills[skill_name]['mental_points'] = tk.Label(self, text=self.skill_category_file[skill_name]['mental_points'])
+            self.skills[skill_name]['mental_points'].grid(row=row, column=5)   
+ 
             row += 1
 
-    def increase_skill(self, skill_var, skill_var_start):
+    def increase_skill(self, skill_var, skill_var_start, physical_points, mental_points):
         if skill_var.get() >= skill_var_start.get() + 2:
             return
 
-        self.training_points.physical_points_var.set(self.training_points.physical_points_var.get() - 2)
-        self.training_points.mental_points_var.set(self.training_points.mental_points_var.get() - 1)
+        self.training_points.physical_points_var.set(self.training_points.physical_points_var.get() - physical_points)
+        self.training_points.mental_points_var.set(self.training_points.mental_points_var.get() - mental_points)
         skill_var.set(skill_var.get() + 1)
 
-    def decrease_skill(self, skill_var):
+    def decrease_skill(self, skill_var, physical_points, mental_points):
         if skill_var.get() == 0:
             return
 
-        self.training_points.physical_points_var.set(self.training_points.physical_points_var.get() + 2)
-        self.training_points.mental_points_var.set(self.training_points.mental_points_var.get() + 1)
+        self.training_points.physical_points_var.set(self.training_points.physical_points_var.get() + physical_points)
+        self.training_points.mental_points_var.set(self.training_points.mental_points_var.get() + mental_points)
         skill_var.set(skill_var.get() - 1)
 
     def calculate_increment(self):
         pass
-
-
-class ArmorSkills(tk.Frame):
-    def __init__(self, parent, training_points, *args, **kwargs):
-        tk.Frame.__init__(self, parent, *args, **kwargs)
-
-        self.parent = parent
-        self.training_points = training_points
-        self.all_skills = {}
-
-        self.armor_skills_label = tk.Label(self, text="Armor Skills")
-        self.armor_skills_label.grid(row=0, column=0)
-
-        self.skill_names = ['armor', 'shield']
-        self.skill_labels = ['Armor', 'Shield']
-        self.skills = {}
-        row = 1
-
-        for skill_name, skill_label in zip(self.skill_names, self.skill_labels):
-
-            self.skills[skill_name] = {}
-
-            self.skills[skill_name]['skill_var_start'] = tk.IntVar(self)
-            self.skills[skill_name]['skill_var_start'].set(player.character.skills_base[skill_name])
-
-            self.skills[skill_name]['skill_var'] = tk.IntVar(self)
-            self.skills[skill_name]['skill_var'].set(player.character.skills[skill_name])
-            self.all_skills[skill_name] = self.skills[skill_name]['skill_var']
-
-            self.skills[skill_name]['skill_label'] = tk.Label(self, text=skill_label)
-            self.skills[skill_name]['skill_label'].grid(row=row, column=0)
-
-            self.skills[skill_name]['skill_decrease'] = tk.Button(self, text="-", command=lambda x=self.skills[skill_name]['skill_var']: self.decrease_skill(x))
-            self.skills[skill_name]['skill_decrease'].grid(row=row, column=1)
-
-            self.skills[skill_name]['skill_value'] = tk.Label(self, textvariable=self.skills[skill_name]['skill_var'])
-            self.skills[skill_name]['skill_value'].grid(row=row, column=2)
-
-            self.skills[skill_name]['skill_increase'] = tk.Button(self, text="+",
-                                                   command=lambda x=self.skills[skill_name]['skill_var'],
-                                                                  y=self.skills[skill_name]['skill_var_start']: self.increase_skill(x,y))
-            self.skills[skill_name]['skill_increase'].grid(row=row, column=3)
-
-            row += 1
-
-    def increase_skill(self, skill_var, skill_var_start):
-        if skill_var.get() >= skill_var_start.get() + 2:
-            return
-
-        self.training_points.physical_points_var.set(self.training_points.physical_points_var.get() - 2)
-        self.training_points.mental_points_var.set(self.training_points.mental_points_var.get() - 1)
-        skill_var.set(skill_var.get() + 1)
-
-    def decrease_skill(self, skill_var):
-        if skill_var.get() == 0:
-            return
-
-        self.training_points.physical_points_var.set(self.training_points.physical_points_var.get() + 2)
-        self.training_points.mental_points_var.set(self.training_points.mental_points_var.get() + 1)
-        skill_var.set(skill_var.get() - 1)
-
-
-class CombatSkills(tk.Frame):
-    def __init__(self, parent, training_points, *args, **kwargs):
-        tk.Frame.__init__(self, parent, *args, **kwargs)
-
-        self.parent = parent
-        self.training_points = training_points
-        self.all_skills = {}
-
-        self.combat_skills_label = tk.Label(self, text="Combat Skills")
-        self.combat_skills_label.grid(row=0, column=0)
-
-        self.skill_names = ['dodging']
-        self.skill_labels = ['Dodging']
-        self.skills = {}
-        row = 1
-
-        for skill_name, skill_label in zip(self.skill_names, self.skill_labels):
-
-            self.skills[skill_name] = {}
-
-            self.skills[skill_name]['skill_var_start'] = tk.IntVar(self)
-            self.skills[skill_name]['skill_var_start'].set(player.character.skills_base[skill_name])
-
-            self.skills[skill_name]['skill_var'] = tk.IntVar(self)
-            self.skills[skill_name]['skill_var'].set(player.character.skills[skill_name])
-            self.all_skills[skill_name] = self.skills[skill_name]['skill_var']
-
-            self.skills[skill_name]['skill_label'] = tk.Label(self, text=skill_label)
-            self.skills[skill_name]['skill_label'].grid(row=row, column=0)
-
-            self.skills[skill_name]['skill_decrease'] = tk.Button(self, text="-", command=lambda x=self.skills[skill_name]['skill_var']: self.decrease_skill(x))
-            self.skills[skill_name]['skill_decrease'].grid(row=row, column=1)
-
-            self.skills[skill_name]['skill_value'] = tk.Label(self, textvariable=self.skills[skill_name]['skill_var'])
-            self.skills[skill_name]['skill_value'].grid(row=row, column=2)
-
-            self.skills[skill_name]['skill_increase'] = tk.Button(self, text="+",
-                                                   command=lambda x=self.skills[skill_name]['skill_var'],
-                                                                  y=self.skills[skill_name]['skill_var_start']: self.increase_skill(x,y))
-            self.skills[skill_name]['skill_increase'].grid(row=row, column=3)
-
-            row += 1
-
-    def increase_skill(self, skill_var, skill_var_start):
-        if skill_var.get() >= skill_var_start.get() + 2:
-            return
-
-        self.training_points.physical_points_var.set(self.training_points.physical_points_var.get() - 2)
-        self.training_points.mental_points_var.set(self.training_points.mental_points_var.get() - 1)
-        skill_var.set(skill_var.get() + 1)
-
-    def decrease_skill(self, skill_var):
-        if skill_var.get() == 0:
-            return
-
-        self.training_points.physical_points_var.set(self.training_points.physical_points_var.get() + 2)
-        self.training_points.mental_points_var.set(self.training_points.mental_points_var.get() + 1)
-        skill_var.set(skill_var.get() - 1)
-
-
-class SurvivalSkills(tk.Frame):
-    def __init__(self, parent, training_points, *args, **kwargs):
-        tk.Frame.__init__(self, parent, *args, **kwargs)
-
-        self.parent = parent
-        self.training_points = training_points
-        self.all_skills = {}
-
-        self.survival_skills_label = tk.Label(self, text="Survival Skills")
-        self.survival_skills_label.grid(row=0, column=0)
-
-        self.skill_names = ['physical_fitness', 'perception']
-        self.skill_labels = ['Physical Fitness', 'Perception']
-        self.skills = {}
-        row = 1
-
-        for skill_name, skill_label in zip(self.skill_names, self.skill_labels):
-
-            self.skills[skill_name] = {}
-
-            self.skills[skill_name]['skill_var_start'] = tk.IntVar(self)
-            self.skills[skill_name]['skill_var_start'].set(player.character.skills_base[skill_name])
-
-            self.skills[skill_name]['skill_var'] = tk.IntVar(self)
-            self.skills[skill_name]['skill_var'].set(player.character.skills[skill_name])
-            self.all_skills[skill_name] = self.skills[skill_name]['skill_var']
-
-            self.skills[skill_name]['skill_label'] = tk.Label(self, text=skill_label)
-            self.skills[skill_name]['skill_label'].grid(row=row, column=0)
-
-            self.skills[skill_name]['skill_decrease'] = tk.Button(self, text="-", command=lambda x=self.skills[skill_name]['skill_var']: self.decrease_skill(x))
-            self.skills[skill_name]['skill_decrease'].grid(row=row, column=1)
-
-            self.skills[skill_name]['skill_value'] = tk.Label(self, textvariable=self.skills[skill_name]['skill_var'])
-            self.skills[skill_name]['skill_value'].grid(row=row, column=2)
-
-            self.skills[skill_name]['skill_increase'] = tk.Button(self, text="+",
-                                                   command=lambda x=self.skills[skill_name]['skill_var'],
-                                                                  y=self.skills[skill_name]['skill_var_start']: self.increase_skill(x,y))
-            self.skills[skill_name]['skill_increase'].grid(row=row, column=3)
-
-            row += 1
-
-    def increase_skill(self, skill_var, skill_var_start):
-        if skill_var.get() >= skill_var_start.get() + 2:
-            return
-
-        self.training_points.physical_points_var.set(self.training_points.physical_points_var.get() - 2)
-        self.training_points.mental_points_var.set(self.training_points.mental_points_var.get() - 1)
-        skill_var.set(skill_var.get() + 1)
-
-    def decrease_skill(self, skill_var):
-        if skill_var.get() == 0:
-            return
-
-        self.training_points.physical_points_var.set(self.training_points.physical_points_var.get() + 2)
-        self.training_points.mental_points_var.set(self.training_points.mental_points_var.get() + 1)
-        skill_var.set(skill_var.get() - 1)
 
 
 class Skills:
@@ -320,16 +155,16 @@ class Skills:
         self.training_points = TrainingPoints(self.parent)
         self.training_points.grid(row=0, column=0)
 
-        self.weapons_skills = WeaponSkills(self.parent, self.training_points)
+        self.weapons_skills = SkillDetails(self.parent, 'Weapons', self.training_points)
         self.weapons_skills.grid(row=1, column=0)
 
-        self.armor_skills = ArmorSkills(self.parent, self.training_points)
+        self.armor_skills = SkillDetails(self.parent, 'Armor', self.training_points)
         self.armor_skills.grid(row=2, column=0)
 
-        self.combat_skills = CombatSkills(self.parent, self.training_points)
+        self.combat_skills = SkillDetails(self.parent, 'Combat', self.training_points)
         self.combat_skills.grid(row=3, column=0)
 
-        self.survival_skills = SurvivalSkills(self.parent, self.training_points)
+        self.survival_skills = SkillDetails(self.parent, 'Survival', self.training_points)
         self.survival_skills.grid(row=4, column=0)
 
         self.label = tk.Label(self.frame)

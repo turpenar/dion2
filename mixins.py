@@ -66,6 +66,9 @@ class DataFileMixin(metaclass=abc.ABCMeta):
 
     def get_quest_by_name(self, name: str, file=config.QUEST_FILE) -> dict:
         return self._get_by_name(name, 'quests', file)
+    
+    def get_skill_category_by_name(self, name: str, file=config.SKILLS_FILE) -> dict:
+        return self._get_by_name(name, 'skills', file)
 
 
 class ReprMixin(metaclass=abc.ABCMeta):
