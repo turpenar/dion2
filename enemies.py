@@ -22,6 +22,8 @@ enemy_level_base = config.enemy_level_base
 enemy_growth = config.enemy_growth
 experience_points_base = config.experience_points_base
 experience_growth = config.experience_growth
+positions = config.positions
+stances = config.stances
 lock = threading.Lock()
 
 def link_terminal(terminal):
@@ -44,7 +46,8 @@ class Enemy(mixins.ReprMixin, mixins.DataFileMixin, threading.Thread):
         self._health_max = self._enemy_data['health_max']
         self._attack_strength_base = self._enemy_data['attack_strength_base']
         self._defense_strength_base = self._enemy_data['defense_strength_base']
-        self._weapon = self._enemy_data['weapon']
+        self._position = self._enemy_data['position']
+        self._stance = self._enemy_data['stance']
         
         self._text_entrance = self._enemy_data['text']['entrance_text']
         self._text_move_in = self._enemy_data['text']['move_in_text']
@@ -63,6 +66,8 @@ class Enemy(mixins.ReprMixin, mixins.DataFileMixin, threading.Thread):
         for category in self._enemy_data['armor']:
             for item in self._enemy_data['armor'][category]:
                 self._armor[category] = items.create_item('armor', item_name=item)
+                
+        self._weapon = self._enemy_data['weapon']
 
         self.spawn_location = self._enemy_data['spawn_location']
         self.location_x = location_x
@@ -164,14 +169,30 @@ class Enemy(mixins.ReprMixin, mixins.DataFileMixin, threading.Thread):
             return self._defense_strength_base
         
     @property
-    def weapon(self):
+    def position(self):
         with lock:
-            return self._weapon
+            return self._position[0]
+    @position.setter
+    def position(self, position):
+        with lock:
+            self._position = [position]
+            
+    def check_position_to_move(self):
+        non_moving_positions = [x for x in positions if x is not 'standing']
+        if set(self.position) & set(non_moving_positions):
+            terminal_output.print_text('''{} struggles to move.'''.format(self.name[0]))
+            return False
+        else:
+            return True
         
-    @weapon.setter
-    def weapon(self, weapon):
+    @property
+    def stance(self):
         with lock:
-            self._weapon = weapon
+            return self._stance[0]
+    @stance.setter
+    def stance(self, stance):
+        with lock:
+            self._stance = [stance]
     
     @property
     def armor(self):
@@ -182,6 +203,16 @@ class Enemy(mixins.ReprMixin, mixins.DataFileMixin, threading.Thread):
     def armor(self, armor):
         with lock:
             self._armor = armor
+            
+    @property
+    def weapon(self):
+        with lock:
+            return self._weapon
+        
+    @weapon.setter
+    def weapon(self, weapon):
+        with lock:
+            self._weapon = weapon
             
     @property
     def text_move_in(self):
@@ -270,7 +301,19 @@ class Enemy(mixins.ReprMixin, mixins.DataFileMixin, threading.Thread):
             elif (self.room == self.target.room) and (self.target.health > 0):
                 terminal_output.print_text(self.text_engage)
                 time.sleep(self.round_time_engage)
-                if (self.room == self.target.room) and (self.target.health > 0) and (self.is_killed == False):
+                print('enemy position = ' + self.position)
+                print('enemy stance = ' + self.stance)
+                print(self.room)
+                print(self.target.room)
+                print(bool(self.room == self.target.room))
+                print('target health = ' + str(self.target.health))
+                print(bool(self.target.health > 0))
+                print('is the enemy alive = ' + str(self.is_alive))
+                print(bool(self.is_alive() == True))
+                print('all true? ')
+                print(bool((self.room == self.target.room) and (self.target.health > 0) and (self.is_alive)))
+                if (self.room == self.target.room) and (self.target.health > 0) and (self.is_alive):
+                    print('the enemy is about to attack')
                     combat.melee_attack_character(self, self.target)
                     time.sleep(self.round_time_attack)
             else:

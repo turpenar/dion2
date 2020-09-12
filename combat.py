@@ -17,10 +17,32 @@ lock = threading.Lock()
 weapon_damage_factors = config.WEAPON_DAMAGE_FACTORS
 weapon_attack_factors = config.WEAPON_ATTACK_FACTORS
 experience_adjustment_factors = config.EXPERIENCE_ADJUSTMENT_FACTORS
+position_factors = config.POSITION_FACTORS
+stance_factors = config.STANCE_FACTORS
 
 def link_terminal(terminal):
     global terminal_output
     terminal_output = terminal
+    
+def calculate_position_factor_for_attack(character):
+    position = character.position
+    position_factor_for_attack = float(position_factors.loc[position, 'attack_factor'])
+    return position_factor_for_attack
+
+def calculate_position_factor_for_defense(character):
+    position = character.position
+    position_factor_for_defense = float(position_factors.loc[position, 'defense_factor'])
+    return position_factor_for_defense
+
+def calculate_stance_factor_for_attack(character):
+    stance = character.stance
+    stance_factor_for_attack = float(stance_factors.loc[stance, 'attack_factor'])
+    return stance_factor_for_attack
+
+def calculate_stance_factor_for_defense(character):
+    stance = character.stance
+    stance_factor_for_defense = float(stance_factors.loc[stance, 'defense_factor'])
+    return stance_factor_for_defense
     
 def calculate_attack_strength(character, weapon):
     attack_strength = character.attack_strength_base
@@ -28,6 +50,7 @@ def calculate_attack_strength(character, weapon):
         if weapon:
             if weapon.category == 'weapon':
                 attack_strength += character.skills_bonus[weapon.sub_category] 
+    attack_strength = int(attack_strength * calculate_position_factor_for_attack(character) * calculate_stance_factor_for_attack(character))
     return attack_strength
     
 def calculate_defense_strength_evade(character):
@@ -55,6 +78,7 @@ def calculate_defense_strength(character, weapon):
         defense_strength =  defense_strength_evade + defense_strength_block + defense_strength_parry
     else:
         defense_strength = character.defense_strength_base
+    defense_strength = int(defense_strength * calculate_position_factor_for_defense(character) * calculate_stance_factor_for_defense(character))
     return defense_strength
 
 def calculate_attack_factor(weapon, armor):

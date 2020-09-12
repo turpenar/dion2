@@ -211,16 +211,16 @@ class Player(mixins.ReprMixin, mixins.DataFileMixin):
     @property
     def position(self):
         with lock:
-            return self._position
+            return self._position[0]
     @position.setter
     def position(self, position):
         with lock:
-            self._position = position
+            self._position = [position]
             
     def check_position_to_move(self):
         non_moving_positions = [x for x in positions if x is not 'standing']
-        if set([self.position]) & set(non_moving_positions):
-            terminal_output.print_text('''You cannot move, you are {} down.'''.format(self.position))
+        if set(self.position) & set(non_moving_positions):
+            terminal_output.print_text('''You cannot move, you are {} down.'''.format(self.position[0]))
             return False
         else:
             return True
@@ -228,11 +228,11 @@ class Player(mixins.ReprMixin, mixins.DataFileMixin):
     @property
     def stance(self):
         with lock:
-            return self._stance
+            return self._stance[0]
     @stance.setter
     def stance(self, stance):
         with lock:
-            self._stance = stance
+            self._stance = [stance]
     
     @property
     def level(self):
