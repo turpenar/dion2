@@ -7,17 +7,28 @@
 {% block body %}
 <h1>Dion</h1>
 
+<br>
+
+<div class="game-window" style="overflow: auto; width: 1000px; height: 500px">
+
 {% for task in tasks %}
 
 {{ task.content }}
-{{ task.date_createddate() }}
-
+{{ task.date_created.date() }}
+<br>
 
 {% endfor %}
+
+</div>
 
 <form action="/" method="POST">
 	<input type="text" name="content" id="content">
 	<input type="submit" value="Add Task">
 </form>
+
+
+<p class='synopsis'>CSS selectors let you <em>select</em> individual HTML
+   elements in an HTML document. This is <strong>super</strong> useful.</p>
+
 
 {% endblock %}

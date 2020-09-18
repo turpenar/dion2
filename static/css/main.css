@@ -1,4 +1,13 @@
 body {
-	margin:  0;
-	font-family:  sans-serif;
+	margin: 1;
+	font-family: sans-sarif;
+}
+
+.synopsis {
+  color: #7E8184;        /* Light gray */
+  font-style: italic;
+}
+
+.game-window {
+	border: solid;
 }
