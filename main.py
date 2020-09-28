@@ -22,6 +22,7 @@ app = Flask(__name__)
 game_window_text = list()
 profession_choices = config.profession_choices
 stats = config.stats
+available_stat_points = config.available_stat_points
 
 def print_text(text):
     game_window_text.append(text)
@@ -35,9 +36,6 @@ def index():
         
         try:
             print_text(event_content)
-            
-            
-            
             return redirect('/')
         except:
             return "There was an issue adding your item"
@@ -49,11 +47,27 @@ def index():
 @app.route('/new_character', methods=['POST', 'GET'])
 def new_character():
     
+    message = ""
+    
     if request.method == "POST":
         first_name = request.form['first_name']
         last_name = request.form['last_name']
+        gender = request.form['gender']
+        profession = request.form['profession']
         
-    return render_template('new_character.html', ProfessionChoices=profession_choices, Stats=stats)
+        stats_initial = {}
+        stats_total = 0
+        
+        for stat in stats:
+            stats_initial[stat] = int(request.form[stat])
+            stats_total += stats_initial[stat]
+            
+        if stats_total > available_stat_points:
+            message = "You have exceeded the allowed stat points."
+        if stats_total <= available_stat_points:
+            return redirect('/')
+        
+    return render_template('new_character.html', ProfessionChoices=profession_choices, Stats=stats, outputMessage=message)
 
 
 if __name__ == '__main__':

@@ -22,7 +22,7 @@
 	<br>
 	
 	<label for="profession">Profession</label>
-	<select name="profession">
+	<select name="profession" id="profession">
 	{% for profession in ProfessionChoices %}
 	<option value="{{profession}}">{{profession}}</option>
 	<br>
@@ -32,13 +32,15 @@
 	
 	{% for stat in Stats %}
 	<label for="{{stat}}">{{stat}}</label>
-	<input type="number" name="{{stat}}" id="{{stat}}">
+	<input type="number" name="{{stat}}" id="{{stat}}" min="20" max="100" value="20">
 	<br>
 	{% endfor %}
 	
 	<input type="submit" value="Enter">
 	
 </form>
+
+<p class="error-message">{{ outputMessage }}</p>
 
 
 {% endblock %}

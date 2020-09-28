@@ -14,3 +14,9 @@ body {
     display: flex;
     flex-direction: column-reverse;
 }
+
+.error-message {
+	color: red;
+	font-style: italics;
+	font-size: 15px;
+}
