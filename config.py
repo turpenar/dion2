@@ -80,6 +80,7 @@ experience_growth = 2
 enemy_level_base = 10
 enemy_growth = 1
 profession_choices = ['None', 'Clairvoyant', 'Enchanter', 'Illusionist', 'Paladin', 'Ranger', 'Rogue', 'Inyanga', 'Warrior']
+stats = ['Strength', 'Constitution', 'Dexterity', 'Agility', 'Intellect', 'Wisdom', 'Logic', 'Spirit']
 gender_choices = ['None', 'Female', 'Male']
 positions = ['standing', 'kneeling', 'sitting', 'lying']
 stances = ['offensive', 'forward', 'neutral', 'guarded', 'defensive']

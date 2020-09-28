@@ -8,13 +8,14 @@
 <h1>Dion</h1>
 
 <br>
+<a href="new_character" target="blank"><button>New Character</button></a>
+<br>
 
-<div class="game-window" style="overflow: auto; width: 1000px; height: 500px">
+<div class="game-window" style="overflow: auto; width: 1200px; height: 500px">
 
-{% for task in tasks %}
+{% for event in events %}
 
-{{ task.content }}
-{{ task.date_created.date() }}
+{{ event }}
 <br>
 
 {% endfor %}
@@ -22,8 +23,8 @@
 </div>
 
 <form action="/" method="POST">
-	<input type="text" name="content" id="content">
-	<input type="submit" value="Add Task">
+	<input type="text" name="content" id="content" autofocus="autofocus" size="170">
+	<input type="submit" value="Enter">
 </form>
 
 

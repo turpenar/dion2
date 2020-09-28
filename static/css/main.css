@@ -10,4 +10,7 @@ body {
 
 .game-window {
 	border: solid;
+	overflow: auto;
+    display: flex;
+    flex-direction: column-reverse;
 }
