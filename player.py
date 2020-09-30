@@ -15,6 +15,7 @@ import pathlib as pathlib
 import pickle as pickle
 import math as math
 
+import main as main
 import config as config
 import world as world
 import quests as quests
@@ -986,7 +987,9 @@ Level:  {}
         character_name = "{}_{}.p".format(self.first_name, self.last_name)
         path_save = pathlib.Path.cwd() / 'Profiles' / character_name
         pickle.dump(save_data, open(file=path_save.absolute().as_posix(), mode='wb'))
-        terminal_output.print_text("Progress saved.")
+        print("code goes here")
+        main.print_text(text="Progress saved.")
+        return
 
     def search(self, **kwargs):
         if self.check_round_time():

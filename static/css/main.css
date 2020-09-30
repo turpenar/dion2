@@ -9,6 +9,7 @@ body {
 }
 
 .game-window {
+	font-style: Courier, monospace;
 	border: solid;
 	overflow: auto;
     display: flex;

@@ -9,32 +9,42 @@
 
 <form action="/new_character" method="POST">
 	<label for="first_name">First Name</label>
-	<input type="text" name="first_name" id="first_name">
+	<input type="text" name="first_name" id="first_name" required>
 	<label for="last_name">Last Name</label>
-	<input type="text" name="last_name" id="last_name">
+	<input type="text" name="last_name" id="last_name" required>
 	<br>
 	
 	<label for="gender">Gender</label>
-	<select name="gender" id="gender">
+	<select name="gender" id="gender" required>
+	<option value="" selected="selected" disabled>Select One</option>
 	<option value="male">Male</option>
 	<option value="female">Female</option>
 	</select>
 	<br>
 	
 	<label for="profession">Profession</label>
-	<select name="profession" id="profession">
+	<select name="profession" id="profession" required>
+	<option value="" selected="selected" disabled>Select One</option>
 	{% for profession in ProfessionChoices %}
 	<option value="{{profession}}">{{profession}}</option>
 	<br>
 	{% endfor %}
 	</select>
 	<br>
-	
+	<p>
+	<strong>Stats</strong>
+	<br>
+	Each stat minimum is 20 and maximum is 100.
+	<br>
+	Total Stat Points Available:  {{ AvailableStatPoints }}
+	</p>
 	{% for stat in Stats %}
 	<label for="{{stat}}">{{stat}}</label>
 	<input type="number" name="{{stat}}" id="{{stat}}" min="20" max="100" value="20">
 	<br>
 	{% endfor %}
+	
+	<br>
 	
 	<input type="submit" value="Enter">
 	
