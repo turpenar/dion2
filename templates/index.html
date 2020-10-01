@@ -14,8 +14,11 @@
 
 <div class="game-window" style="overflow: auto; width: 1200px; height: 500px">
 
-{{ events }}
-<br>
+{% for event in gameEvents %}
+
+{{ event }}<br>
+
+{% endfor %}
 
 </div>
 

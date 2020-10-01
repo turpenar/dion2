@@ -9,7 +9,8 @@ body {
 }
 
 .game-window {
-	font-style: Courier, monospace;
+	font-family: Courier New, monospace;
+	font-size:  17px;
 	border: solid;
 	overflow: auto;
     display: flex;

@@ -30,32 +30,42 @@ lock = threading.Lock()
 class GameWindow():
     
     def __init__(self):
-        self.game_window_text = ""
+        self.game_window_text = []
         
     def __str__(self):
         return game_window_text
 
     def add_text(self, text):
+        text = text.split('\n')
         with lock:
-            self.game_window_text = self.game_window_text + "\n" + text
+            self.game_window_text.extend(text)
+            self.game_window_text.extend(['>'])
         return
+    
+    def add_command(self, command):
+        with lock:
+            self.game_window_text[-1] = '>' + command
+            self.game_window_text.extend(['>'])
+        return
+        
 
 global game_window    
 game_window = GameWindow()
+game_window.add_text("")
+
+scratch.link_game_window(game_window)
 
 @app.route('/', methods=['POST', 'GET'])
 def index():
     
-    print(game_window.game_window_text)
-    
     if request.method == "POST":
         event_content = request.form['content']
-        game_window.add_text(event_content)
+        game_window.add_command(event_content)
         return redirect('/')
         
     else:
-        events = game_window.game_window_text
-        return render_template('index.html', events=events)
+        game_events = game_window.game_window_text
+        return render_template('index.html', gameEvents=game_events)
 
 @app.route('/new_character', methods=['POST', 'GET'])
 def new_character():
@@ -95,11 +105,9 @@ def new_character():
             skills.level_up_skill_points()
             player.character.set_character_attributes()
             
-            scratch.print()
+            #  player.character.save()
             
-            player.character.save()
-            
-            print_text('''
+            character_print  = '''
 *** You have created a new character! ***
 First Name:  {}
 Last Name:  {}
@@ -108,10 +116,12 @@ Profession:  {}
             '''.format(first_name,
                        last_name,
                        gender,
-                       profession))
+                       profession)
+            stat_print = ""
             for stat in stats:
-                stat_print = stat + ":  " + str(stats_initial[stat.lower()])
-                print_text(stat_print)
+                stat_print = stat_print + "\n" + stat + ":  " + str(stats_initial[stat.lower()])
+            character_print = character_print + "\n" + stat_print
+            game_window.add_text(character_print)
             return redirect('/')
         
     return render_template('new_character.html', ProfessionChoices=profession_choices, Stats=stats, AvailableStatPoints=available_stat_points, outputMessage=message)
