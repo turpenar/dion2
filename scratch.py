@@ -1,6 +1,5 @@
 
 
-import main as main
 
 def link_game_window(window):
     global game_window

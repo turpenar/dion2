@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Dion - Load Character</title>
+{% endblock %}
+
+{% block body %}
+<h1>Character Loader</h1>
+
+<p>Select a Character to load</p>
+
+<form action="/load_character" method="POST">
+	<select name="character" id="character" required>
+	<option value="" selected="selected" disabled>Select One</option>
+	{% for character in Characters %}
+	<option value="{{character}}">{{character}}</option>
+	<br>
+	{% endfor %}
+	</select>
+	
+	<input type="submit" value="Enter">
+</form>
+
+
+
+{% endblock %}

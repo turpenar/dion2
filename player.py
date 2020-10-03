@@ -15,7 +15,6 @@ import pathlib as pathlib
 import pickle as pickle
 import math as math
 
-import main as main
 import config as config
 import world as world
 import quests as quests
@@ -45,7 +44,10 @@ lock = threading.Lock()
 def link_terminal(terminal):
     global terminal_output
     terminal_output = terminal
-
+    
+def link_game_window(window):
+    global game_window
+    game_window = window
 
 def create_character(character_name=None):
     global character
@@ -588,6 +590,8 @@ class Player(mixins.ReprMixin, mixins.DataFileMixin):
 
     def load(self, state):
         self.__setstate__(state)
+        game_window.print_text(text="You have loaded {} {}".format(self.first_name, self.last_name))
+        return
         
 
 ############### VERBS ####################
@@ -987,8 +991,7 @@ Level:  {}
         character_name = "{}_{}.p".format(self.first_name, self.last_name)
         path_save = pathlib.Path.cwd() / 'Profiles' / character_name
         pickle.dump(save_data, open(file=path_save.absolute().as_posix(), mode='wb'))
-        print("code goes here")
-        main.print_text(text="Progress saved.")
+        game_window.print_text(text="Progress saved.")
         return
 
     def search(self, **kwargs):

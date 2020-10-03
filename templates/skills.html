@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Dion - Skills</title>
+{% endblock %}
+
+{% block body %}
+<h1>Skills</h1>
+
+
+<label for="phyiscal_training_points">Physical Training Points</label>
+
+<label for="mental_training_points">Mental Training Points</label>
+
+<form action="/skills" method="POST">
+	<label for="skill">Skill Name</label>
+	<input type="number" name="skill" id="skill" required>
+	<br>
+	
+	<input type="submit" value="Enter">
+</form>
+
+
+
+{% endblock %}

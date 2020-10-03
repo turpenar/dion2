@@ -15,7 +15,15 @@ body {
 	overflow: auto;
     display: flex;
     flex-direction: column-reverse;
+    border-style: inset;
+    border-width: thick;
+    border-color: #babade;
 }
+
+.command-line {
+	margin: auto;
+}
+
 
 .error-message {
 	color: red;
