@@ -6,8 +6,11 @@ from datetime import datetime
 import threading as threading
 import pathlib as pathlib
 import pickle as pickle
+import abc as abc
+import json as json
 
 import config as config
+import mixins as mixins
 import world as world
 import player as player
 import actions as actions
@@ -166,14 +169,39 @@ def get_characters():
     
     return saved_characters, character_names
 
+def _get_by_name(obj_type: str, file: str, file_format=config.DATA_FORMAT) -> dict:
+    with open(file) as fl:
+        if file_format == "json":
+            data = json.load(fl, parse_int=int, parse_float=float)
+        else:
+            raise NotImplementedError(fl, "Missing support for opening files of type: {file_format}")
+    return data
+
+def get_skill_data_file(file=config.SKILLS_FILE, file_format=config.DATA_FORMAT) -> dict:
+    with open(file) as fl:
+        if file_format == "json":
+            data = json.load(fl, parse_int=int, parse_float=float)
+        else:
+            raise NotImplementedError(fl, "Missing support for opening files of type: {file_format}")
+    
+    return data
 
 @app.route('/skills', methods=['POST', 'GET'])
 def skills():
     
+    skill_data_file = get_skill_data_file()
+    skill_categories = list(skill_data_file.keys())
+    all_skills = {}
+    for category in skill_categories:
+        all_skills[category] = [x.replace("_", " ").title() for x in list(skill_data_file[category].keys())]
+        
+    print(all_skills)
+
+    
     if request.method == "POST":
         return redirect('/')
     
-    return render_template('skills.html')
+    return render_template('skills.html', skillCategories=skill_categories, skills=all_skills, skillDataFile=skill_data_file)
 
 
 
