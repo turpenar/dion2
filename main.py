@@ -2,6 +2,7 @@
 
 from flask import Flask, render_template, url_for, request, redirect
 from flask_sqlalchemy import SQLAlchemy
+from wtforms import IntegerField
 from datetime import datetime
 import threading as threading
 import pathlib as pathlib
@@ -11,6 +12,7 @@ import json as json
 
 import config as config
 import mixins as mixins
+import forms as forms
 import world as world
 import player as player
 import actions as actions
@@ -22,10 +24,9 @@ import char_gen as character_generator
 import tiles as tiles
 import skills as skills
 
-import scratch as scratch
-
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = 'Dion'
 profession_choices = config.profession_choices
 stats = config.stats
 available_stat_points = config.available_stat_points
@@ -58,7 +59,6 @@ global game_window
 game_window = GameWindow()
 game_window.print_text("")
 
-scratch.link_game_window(game_window)
 player.link_game_window(game_window)
 
 @app.route('/', methods=['POST', 'GET'])
@@ -77,6 +77,9 @@ def index():
 def new_character():
     
     message = ""
+        
+    form = forms.NewCharacterForm()
+    print(vars(form))
     
     if request.method == "POST":
         first_name = request.form['first_name']
@@ -130,7 +133,7 @@ Profession:  {}
             game_window.print_text(character_print)
             return redirect('/')
         
-    return render_template('new_character.html', ProfessionChoices=profession_choices, Stats=stats, AvailableStatPoints=available_stat_points, outputMessage=message)
+    return render_template('new_character.html', ProfessionChoices=profession_choices, Stats=stats, AvailableStatPoints=available_stat_points, outputMessage=message, form=form)
 
 @app.route('/load_character', methods=['POST', 'GET'])
 def load_character():
@@ -194,8 +197,6 @@ def skills():
     all_skills = {}
     for category in skill_categories:
         all_skills[category] = [x.replace("_", " ").title() for x in list(skill_data_file[category].keys())]
-        
-    print(all_skills)
 
     
     if request.method == "POST":
