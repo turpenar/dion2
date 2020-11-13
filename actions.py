@@ -21,10 +21,16 @@ action_history = []
 def link_terminal(terminal):
     global terminal_output
     terminal_output = terminal
+    
+def link_game_window(window):
+    global game_window
+    game_window = window
 
-
-def do_action(action_input, character):
+def do_action(action_input, character=None):
     action_history.insert(0,action_input)
+    if not character:
+        game_window.print_text(text="No character loaded. You will need to create a new character or load an existing character.")
+        return
     if len(action_input) == 0:
         terminal_output.print_text("")
         return
@@ -50,7 +56,7 @@ class DoActions:
     def do_action(cls, action, character, **kwargs):
         """Method used to initiate an action"""
         if action not in cls.do_actions:
-            terminal_output.print_text("I am sorry, I did not understand.")
+            game_window.print_text("I am sorry, I did not understand.")
             return
         return cls.do_actions[action](character, **kwargs)
 
@@ -67,8 +73,24 @@ class Ask(DoActions):
 
     def __init__(self, character, **kwargs):
         DoActions.__init__(self, character, **kwargs)
-
-        self.character.ask(**kwargs)
+        
+        if character.check_round_time():
+            return
+        if character.is_dead():
+            return
+        elif not kwargs['direct_object']:
+            game_window.print_text("Who are you trying to ask?")
+            return
+        elif not kwargs['indirect_object']:
+            game_window.print_text("What are you trying to ask about?")
+            return
+        else:
+            for npc in character.room.npcs:
+                if set(npc.handle) & set(kwargs['direct_object']):
+                    npc.ask_about(object=kwargs['indirect_object'])
+                    return
+            else:
+                character.print_text("That doesn't seem to do any good.")
 
 
 @DoActions.register_subclass('attack')

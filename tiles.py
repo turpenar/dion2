@@ -35,7 +35,11 @@ logging.basicConfig(level=logging.DEBUG,
 def link_terminal(terminal):
     global terminal_output
     terminal_output = terminal
-
+    
+def link_game_window(window):
+    global game_window
+    game_window = window
+    
 
 class MapTile(mixins.DataFileMixin):
     def __init__(self, x, y, area_name: str, room_name: str):
@@ -217,7 +221,7 @@ class MapTile(mixins.DataFileMixin):
 
 
     def intro_text(self):
-        terminal_output.print_text("""\
+        game_window.print_text("""\
 [{}, {}] 
 {}
 {}

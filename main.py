@@ -60,13 +60,16 @@ game_window = GameWindow()
 game_window.print_text("")
 
 player.link_game_window(game_window)
+actions.link_game_window(game_window)
+tiles.link_game_window(game_window)
 
 @app.route('/', methods=['POST', 'GET'])
 def index():
     
     if request.method == "POST":
-        event_content = request.form['content']
-        game_window.print_command(event_content)
+        action_content = request.form['content']
+        game_window.print_command(action_content)
+        actions.do_action(action_input=action_content, character=player.character)
         return redirect('/')
         
     else:
@@ -79,44 +82,22 @@ def new_character():
     message = ""
         
     form = forms.NewCharacterForm()
-    print(vars(form))
     
-    if request.method == "POST":
-        first_name = request.form['first_name']
-        last_name = request.form['last_name']
-        gender = request.form['gender']
-        profession = request.form['profession']
-        
-        stats_initial = {}
-        stats_total = 0
+    stats_initial = {}
+    stats_total = 0
+
+    if form.is_submitted():
+        result = request.form
+        first_name = result['first_name']
+        last_name = result['last_name']
+        gender = result['gender']
+        profession = result['profession']  
         
         for stat in stats:
-            stats_initial[stat.lower()] = int(request.form[stat])
+            stats_initial[stat.lower()] = int(result[stat])
             stats_total += stats_initial[stat.lower()]
-            
-        if stats_total > available_stat_points:
-            message = "You have exceeded the allowed stat points."
-        if stats_total <= available_stat_points:
-            
-            world.load_tiles()
-            player.create_character('new_player')
-            
-            player.character.name = first_name
-            player.character.first_name = first_name
-            player.character.last_name = last_name
-            player.character.gender = gender
-            player.character.profession = profession
-            
-            for stat in player.character.stats:
-                player.character.stats[stat] = stats_initial[stat]
-                
-            player.character.set_gender(player.character.gender)
-            skills.level_up_skill_points()
-            player.character.set_character_attributes()
-            
-            player.character.save()
-            
-            character_print  = '''
+        
+        character_print  = '''
 *** You have created a new character! ***
 First Name:  {}
 Last Name:  {}
@@ -126,14 +107,50 @@ Profession:  {}
                        last_name,
                        gender,
                        profession)
-            stat_print = ""
-            for stat in stats:
-                stat_print = stat_print + "\n" + stat + ":  " + str(stats_initial[stat.lower()])
-            character_print = character_print + "\n" + stat_print
-            game_window.print_text(character_print)
-            return redirect('/')
+        stat_print = ""
+        for stat in stats:
+            stat_print = stat_print + "\n" + stat + ":  " + str(stats_initial[stat.lower()])
+        character_print = character_print + "\n" + stat_print
+            
+        game_window.print_text(character_print)
         
-    return render_template('new_character.html', ProfessionChoices=profession_choices, Stats=stats, AvailableStatPoints=available_stat_points, outputMessage=message, form=form)
+        world.load_tiles()
+        player.create_character('new_player')
+        
+        player.character.name = first_name
+        player.character.first_name = first_name
+        player.character.last_name = last_name
+        player.character.gender = gender
+        player.character.profession = profession
+        
+        for stat in player.character.stats:
+            player.character.stats[stat] = stats_initial[stat]
+            
+        player.character.set_gender(player.character.gender)
+        skills.level_up_skill_points()
+        player.character.save()
+        
+        game_intro = '''
+    The beast becomes restless...  hungry and tired...
+
+                        ...it trembles with anger, and the earth shakes...
+
+    Far away, you lay in a field surrounded by trees.    
+    You close your eyes and an unsettling feeling comes over you. You dread having to go back into town and resume a 
+    day you already know is going to be a waste. But you know that people rely on you and your resolve. They trust you,
+    at least that's what they say. "{} really knows how to get things done," they would say.
+
+    You open your eyes...
+            '''.format(player.character.object_pronoun)
+            
+        game_window.print_text(game_intro)
+        
+        player.character.room = world.tile_exists(x=player.character.location_x, y=player.character.location_y, area=player.character.area)
+        player.character.room.fill_room(character=player.character)
+        player.character.room.intro_text()
+              
+        return redirect('/')
+    return render_template('/new_character.html', form=form, Stats=stats)
 
 @app.route('/load_character', methods=['POST', 'GET'])
 def load_character():
@@ -190,7 +207,7 @@ def get_skill_data_file(file=config.SKILLS_FILE, file_format=config.DATA_FORMAT)
     return data
 
 @app.route('/skills', methods=['POST', 'GET'])
-def skills():
+def skills_modify():
     
     skill_data_file = get_skill_data_file()
     skill_categories = list(skill_data_file.keys())

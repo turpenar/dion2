@@ -10,11 +10,11 @@
 <br>
 <a href="new_character"><button>New Character</button></a>
 <a href="load_character"><button>Load Character</button></a>
-<a href="skills"><button>Skills</button></a>
+<a href="skills_modify"><button>Skills</button></a>
 <br>
 <br>
 
-<div class="game-window" style="overflow: auto; width: 1200px; height: 500px">
+<div class="game-window" style="overflow: auto; width: 1000px; height: 500px">
 
 {% for event in gameEvents %}
 
@@ -25,7 +25,7 @@
 </div>
 
 <form class="command-line" action="/" method="POST">
-	<input type="text" name="content" id="content" autofocus="autofocus" size="170">
+	<input type="text" name="content" id="content" autofocus="autofocus" size="190">
 	<input type="submit" value="Enter">
 </form>
 

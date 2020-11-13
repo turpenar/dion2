@@ -28,6 +28,7 @@ import items as items
 wrapper = textwrap.TextWrapper(width=config.TEXT_WRAPPER_WIDTH)
 commands = {}
 global character
+character = None
 global terminal_output
 available_stat_points = config.available_stat_points
 experience_points_base = config.experience_points_base
@@ -176,6 +177,7 @@ class Player(mixins.ReprMixin, mixins.DataFileMixin):
     @property
     def object_pronoun(self):
         with lock:
+            print(self._object_pronoun)
             return self._object_pronoun
     
     @property
