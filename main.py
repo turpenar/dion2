@@ -23,6 +23,7 @@ import objects as objects
 import char_gen as character_generator
 import tiles as tiles
 import skills as skills
+import items as items
 
 
 app = Flask(__name__)
@@ -62,6 +63,10 @@ game_window.print_text("")
 player.link_game_window(game_window)
 actions.link_game_window(game_window)
 tiles.link_game_window(game_window)
+items.link_game_window(game_window)
+enemies.link_game_window(game_window)
+combat.link_game_window(game_window)
+npcs.link_game_window(game_window)
 
 @app.route('/', methods=['POST', 'GET'])
 def index():
@@ -126,6 +131,7 @@ Profession:  {}
         for stat in player.character.stats:
             player.character.stats[stat] = stats_initial[stat]
             
+        player.character.set_character_attributes()    
         player.character.set_gender(player.character.gender)
         skills.level_up_skill_points()
         player.character.save()
@@ -166,6 +172,8 @@ def load_character():
             if char_data['_first_name'] == character_name[0] and char_data['_last_name'] == character_name[1]:
                 player.create_character("new_player")
                 player.character.load(state=char_data)
+                
+        player.character.room.intro_text()
         
         return redirect('/')
     

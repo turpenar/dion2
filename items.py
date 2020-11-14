@@ -11,6 +11,10 @@ import mixins as mixins
 def link_terminal(terminal):
     global terminal_output
     terminal_output = terminal
+    
+def link_game_window(window):
+    global game_window
+    game_window = window
 
 def loot():
     pass
@@ -60,7 +64,7 @@ class Item(mixins.ReprMixin, mixins.DataFileMixin):
         return "Inside {} you see {}".format(self.name, all_items_output)
 
     def view_description(self):
-        terminal_output.print_text("You see " + self.description)
+        game_window.print_text("You see " + self.description)
 
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
@@ -79,7 +83,7 @@ class Item(mixins.ReprMixin, mixins.DataFileMixin):
     def new_item(cls, item_category, item_name, **kwargs):
         """Method used to initiate an action"""
         if item_category not in cls.item_categories:
-            terminal_output.print_text("I am sorry, I did not understand.")
+            game_window.print_text("I am sorry, I did not understand.")
             return
         return cls.item_categories[item_category](item_name, **kwargs)
 

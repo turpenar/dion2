@@ -23,6 +23,10 @@ def link_terminal(terminal):
     global terminal_output
     terminal_output = terminal
     
+def link_game_window(window):
+    global game_window
+    game_window = window
+    
 def calculate_position_factor_for_attack(character):
     position = character.position
     position_factor_for_attack = float(position_factors.loc[position, 'attack_factor'])
@@ -147,7 +151,7 @@ Round time:  {} seconds
 {}\
             """.format(self.name, target.name, att_damage, round_time, death_text)
 
-    terminal_output.print_text("""\
+    game_window.print_text("""\
 {} attacks {}!
 STR {} - DEF {} + AF {} + D100 ROLL {} = {}
 {}\
@@ -177,7 +181,7 @@ def melee_attack_character(self, character):
 {}\
             """.format(self.name, character.name, att_damage, death_text)
 
-    terminal_output.print_text("""\
+    game_window.print_text("""\
 {} attacks {}!
 STR {} - DEF {} + AF {} + D100 ROLL {} = {}
 {}\

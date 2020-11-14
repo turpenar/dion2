@@ -225,7 +225,7 @@ class Player(mixins.ReprMixin, mixins.DataFileMixin):
     def check_position_to_move(self):
         non_moving_positions = [x for x in positions if x is not 'standing']
         if set(self.position) & set(non_moving_positions):
-            terminal_output.print_text('''You cannot move, you are {} down.'''.format(self.position[0]))
+            game_window.print_text('''You cannot move, you are {} down.'''.format(self.position[0]))
             return False
         else:
             return True
@@ -446,7 +446,7 @@ class Player(mixins.ReprMixin, mixins.DataFileMixin):
         if self.health > 0:
             return False
         else:
-            terminal_output.print_text("You're dead! You will need to restart from your last saved point.")
+            game_window.print_text("You're dead! You will need to restart from your last saved point.")
             return True
         
     def is_killed(self):
@@ -460,7 +460,7 @@ class Player(mixins.ReprMixin, mixins.DataFileMixin):
         with lock:
             round_time = False
             if time.time() < self.rt_end:
-                terminal_output.print_text("Remaining round time: " + str(round(self.rt_end - time.time())) + " sec...")
+                game_window.print_text("Remaining round time: " + str(round(self.rt_end - time.time())) + " sec...")
                 round_time = True
         return round_time
 
@@ -595,307 +595,6 @@ class Player(mixins.ReprMixin, mixins.DataFileMixin):
         game_window.print_text(text="You have loaded {} {}".format(self.first_name, self.last_name))
         return
         
-
-############### VERBS ####################
-
-    def ask(self, **kwargs):
-        if self.check_round_time():
-            return
-        if self.is_dead():
-            return
-        elif not kwargs['direct_object']:
-            terminal_output.print_text("Who are you trying to ask?")
-            return
-        elif not kwargs['indirect_object']:
-            terminal_output.print_text("What are you trying to ask about?")
-            return
-        else:
-            for npc in self.room.npcs:
-                if set(npc.handle) & set(kwargs['direct_object']):
-                    npc.ask_about(object=kwargs['indirect_object'])
-                    return
-            else:
-                terminal_output.print_text("That doesn't seem to do any good.")
-                
-    def view_attributes(self, **kwargs):
-                terminal_output.print_text('''
-Attribute:  {}
-            '''.format(self.attack_strength_base))
-
-    def attack(self, **kwargs):
-        if self.check_round_time():
-            return
-        if self.is_dead():
-            return
-        if kwargs['direct_object']:
-            self.target = kwargs['direct_object']
-        if not self.target:
-            terminal_output.print_text("Who are you going to attack? You do not have a target.")
-            return
-        else:
-            for npc in self.room.npcs:
-                if set(npc.handle) & set(self.target):
-                    terminal_output.print_text("{} will probably not appreciate that.".format(npc.name))
-                    return
-            enemy_found = False
-            for enemy in self.room.enemies:
-                if set(enemy.handle) & set(self.target):
-                    enemy_found = True
-                    combat.melee_attack_enemy(self, enemy)
-                    return
-            if not enemy_found:
-                terminal_output.print_text("{} is not around here.".format(kwargs['direct_object']))
-                return
-
-    def drop_item(self, **kwargs):
-        if self.check_round_time():
-            return
-        if self.is_dead():
-            return
-        elif not kwargs['direct_object']:
-            terminal_output.print_text("I'm sorry, I could not understand what you wanted.")
-            return
-        elif self.get_dominant_hand_inv() is None:
-            terminal_output.print_text("You do not have that item in your hand")
-            return
-        elif not set(self.get_dominant_hand_inv().handle) & set(kwargs['direct_object']):
-            terminal_output.print_text("You do not have that item in your right hand.")
-            return
-        else:
-            self.room.items.append(self.get_dominant_hand_inv())
-            terminal_output.print_text("You drop " + self.get_dominant_hand_inv().name)
-            self.set_dominant_hand_inv(item=None)
-            return
-        
-    def view_experience(self, **kwargs):
-        terminal_output.print_text('''\
-Experience:  {}
-        '''.format(self.experience))
-
-    def flee(self, **kwargs):
-        """Moves the player randomly to an adjacent tile"""
-        if self.check_round_time():
-            return
-        if self.is_dead():
-            return
-        if not self.check_position_to_move():
-            return
-        available_moves = self.room.adjacent_moves()
-        r = random.randint(0, len(available_moves) - 1)
-        actions.do_action(action_input=available_moves[r], character=self)
-        return
-
-    def get(self, **kwargs):
-        if self.check_round_time():
-            return
-        if self.is_dead():
-            return
-        if not kwargs['direct_object']:
-            terminal_output.print_text("I'm sorry, I could not understand what you wanted.")
-            return
-        for room_object in self.room.objects:
-            if set(room_object.handle) & set(kwargs['direct_object']):
-                terminal_output.print_text("Perhaps picking up {} is not a good idea.".format(room_object.name))
-                return
-        if self.get_dominant_hand_inv() is None:
-            item_found = False
-            for room_item in self.room.items:
-                if set(room_item.handle) & set(kwargs['direct_object']):
-                    self.set_dominant_hand_inv(room_item)
-                    self.room.items.remove(room_item)
-                    terminal_output.print_text("You pick up {}.".format(room_item.name))
-                    return
-            if not item_found:
-                for inv_item in self.inventory:
-                    if inv_item.container:
-                        for sub_item in inv_item.items:
-                            if set(sub_item.handle) & set(kwargs['direct_object']):
-                                self.set_dominant_hand_inv(sub_item)
-                                inv_item.items.remove(sub_item)
-                                terminal_output.print_text("You take {} from {}.".format(sub_item.name, inv_item.name))
-                                return
-            if not item_found:
-                terminal_output.print_text("A " + kwargs['direct_object'][0] + " is nowhere to be found")
-        else:
-            terminal_output.print_text('You already have something in your right hand')
-
-    def give(self, **kwargs):
-        if self.check_round_time():
-            return
-        if self.is_dead():
-            return
-        elif not kwargs['direct_object']:
-            terminal_output.print_text("What are you trying to give?")
-            return
-        elif self.get_dominant_hand_inv() is None:
-            terminal_output.print_text("You don't seem to be holding that item in your hand.")
-            return
-        elif not set(self.get_dominant_hand_inv().handle) & set(kwargs['direct_object']):
-            terminal_output.print_text("You don't seem to be holding that item in your hand.")
-            return
-        elif not kwargs['indirect_object']:
-            terminal_output.print_text("To whom do you want to give?")
-            return
-        else:
-            for npc in self.room.npcs:
-                if {npc.first_name.lower()} & set(kwargs['indirect_object']):
-                    if npc.give_item(self.get_dominant_hand_inv()):
-                        self.set_dominant_hand_inv(item=None)
-                        return
-                    else:
-                        return
-            terminal_output.print_text("That didn't seem to work.")
-            return
-
-    def go(self, **kwargs):
-        if self.check_round_time():
-            return
-        if self.is_dead():
-            return
-        if not self.check_position_to_move():
-            return
-        if not kwargs['direct_object']:
-            terminal_output.print_text("Go where?")
-            return
-        else:
-            object_found = False
-            for room_object in self.room.objects:
-                if set(room_object.handle) & set(kwargs['direct_object']):
-                    new_location = room_object.go_object(character=self)
-                    self.room = world.tile_exists(x=new_location['x'], y=new_location['y'], area=new_location['area'].replace(" ",""))
-                    self.location_x = new_location['x']
-                    self.location_y = new_location['y']
-                    self.area = new_location['area']
-                    self.room.fill_room(character=self)
-                    self.room.intro_text()
-                    self.room.run(character=self)
-                    object_found = True
-            if object_found == False:
-                for room_item in self.room.items:
-                    if set(room_item.handle) & set(kwargs['direct_object']):
-                        terminal_output.print_text("You move toward {}.".format(room_item.name))
-                        object_found = True
-            if object_found == False:
-                for room_npc in self.room.npcs:
-                    if set(room_npc.handle) & set(kwargs['direct_object']):
-                        terminal_output.print_text("You move toward {}.".format(room_npc.name))
-                        
-    def view_health(self, **kwargs):
-        terminal_output.print_text('''
-Health:  {} of {} hit points
-            '''.format(self.health,
-                       self.health_max))
-        
-    def information(self, **kwargs):
-        terminal_output.print_text('''
-Name:  {} {}
-Gender:  {}
-Race:  {}
-Profession:  {}
-Level:  {}
-            '''.format(self.first_name, self.last_name,
-                       self.gender,
-                       self.race,
-                       self.profession,
-                       self.level))
-
-    def view_inventory(self, **kwargs):
-        if self.get_dominant_hand_inv():
-            right_hand = "You have {} in your {} hand.".format(self.get_dominant_hand_inv().name, self.dominance)
-        else:
-            right_hand = "Your right hand is empty."
-        if self.get_non_dominant_hand_inv():
-            left_hand = "You have {} in your {} hand.".format(self.get_non_dominant_hand_inv().name, self.non_dominance)
-        else:
-            left_hand = "Your left hand is empty."
-        inventory_clothing = [x.name for x in self.inventory if x.category == 'clothing']
-        if len(inventory_clothing) > 1:
-            inventory_clothing = "You are wearing {} and {}.".format(', '.join(inventory_clothing[:-1]), inventory_clothing[-1])
-        elif len(inventory_clothing) == 1:
-            inventory_clothing = "You are wearing {}.".format(inventory_clothing[0])
-        else:
-            inventory_clothing = "You are wearing nothing."
-        
-        inventory_armor = []  
-        for category in self.armor:
-            inventory_armor.append(self.armor[category])
-        if len(inventory_armor) > 1:
-            inventory_armor ="You are also wearing {} and {}.".format(self.object_pronoun, ', '.join(inventory_armor[:-1]), inventory_armor[-1])
-        elif len(inventory_armor) == 1:
-            inventory_armor = "You are also wearing {}.".format(inventory_armor[0].name)
-        else:
-            inventory_armor = "You are also wearing no armor.".format(self.object_pronoun)
-        wealth = "You have {} gulden.".format(self.money)
-        terminal_output.print_text('''\
-{}
-{}
-{}
-{}
-{}
-                                    \
-                                    '''.format(right_hand,
-                                               left_hand,
-                                               wrapper.fill(inventory_clothing),
-                                               wrapper.fill(inventory_armor),
-                                               wrapper.fill(wealth)))
-
-    def look(self, **kwargs):
-        if self.check_round_time():
-            return
-        if self.is_dead():
-            return
-        if kwargs['preposition'] == None:
-            self.room.intro_text()
-            return
-        if kwargs['preposition'][0] == 'in':
-            item_found = False
-            if kwargs['indirect_object'] is None:
-                terminal_output.print_text("I am not sure what you are referring to.")
-                return
-            for item in self.room.items + self.room.objects + self.room.npcs + self.inventory + [self.get_dominant_hand_inv()] + [self.get_non_dominant_hand_inv()]:
-                if isinstance(item, npcs.NPC):
-                    terminal_output.print_text("It wouldn't be advisable to look in " + item.name)
-                    return
-                if set(item.handle) & set(kwargs['indirect_object']):
-                    terminal_output.print_text(item.contents())
-                    return
-            if item_found is False:
-                terminal_output.print_text("A {} is nowhere to be found.".format(kwargs['indirect_object'][0]))
-                return
-        if kwargs['preposition'][0] == 'at':
-            item_found = False
-            if kwargs['indirect_object'] is None:
-                terminal_output.print_text("I am not sure what you are referring to.")
-                return
-            for item in self.room.items + self.room.objects + self.room.npcs + self.room.enemies + self.inventory + [self.get_dominant_hand_inv()] + [self.get_non_dominant_hand_inv()]:
-                if not item:
-                    pass
-                elif set(item.handle) & set(kwargs['indirect_object']):
-                    item.view_description()
-                    return
-            for item in self.inventory:
-                if set(item.handle) & set(kwargs['indirect_object']):
-                    item.view_description()
-                    return
-            for object in self.room.objects:
-                if set(object.handle) & set(kwargs['indirect_object']):
-                    object.view_description()
-                    return
-            for npc in self.room.npcs:
-                if set(npc.handle) & set(kwargs['indirect_object']):
-                    npc.view_description()
-                    return
-            for enemy in self.room.enemies:
-                if set(npc.handle) & set(kwargs['indirect_object']):
-                    enemy.view_description()
-                    return
-            if item_found is False:
-                terminal_output.print_text("At what did you want to look?")
-                return
-        else:
-            terminal_output.print_text("I'm sorry, I didn't understand you.")
-            return
-
     def move(self, dx, dy):
         self.location_x += dx
         self.location_y += dy
@@ -905,89 +604,21 @@ Level:  {}
         return
 
     def move_north(self, **kwargs):
-        if self.check_round_time():
-            return
-        if self.is_dead():
-            return
-        if not self.check_position_to_move():
-            return
         self.move(dx=0, dy=-1)
         return
 
     def move_south(self, **kwargs):
-        if self.check_round_time():
-            return
-        if self.is_dead():
-            return
-        if not self.check_position_to_move():
-            return
         self.move(dx=0, dy=1)
         return
 
     def move_east(self,**kwargs):
-        if self.check_round_time():
-            return
-        if self.is_dead():
-            return
-        if not self.check_position_to_move():
-            return
         self.move(dx=1, dy=0)
         return
 
     def move_west(self, **kwargs):
-        if self.check_round_time():
-            return
-        if self.is_dead():
-            return
-        if not self.check_position_to_move():
-            return
         self.move(dx=-1, dy=0)
         return
-
-    def put(self, **kwargs):
-        if self.check_round_time():
-            return
-        if self.is_dead():
-            return
-        if not kwargs['direct_object']:
-            terminal_output.print_text("What is it you're trying to put down?")
-            return
-        elif self.get_dominant_hand_inv() is None:
-            terminal_output.print_text("You do not have that item in your hand.")
-            return
-        elif not set(self.get_dominant_hand_inv().handle) & set(kwargs['direct_object']):
-            terminal_output.print_text("You do not have that item in your right hand.")
-            return
-        elif kwargs['preposition'][0] == "in":
-            for inv_item in self.inventory:
-                if set(inv_item.handle) & set(kwargs['indirect_object']):
-                    if inv_item.container == False:
-                        terminal_output.print_text("{} won't fit in there.".format(self.get_dominant_hand_inv().name))
-                        return
-                    if len(inv_item.items) == inv_item.capacity:
-                        terminal_output.print_text("{} can't hold any more items".format(inv_item.name))
-                        return
-                    inv_item.items.append(self.get_dominant_hand_inv())
-                    terminal_output.print_text("You put {} {} {}".format(self.get_dominant_hand_inv().name, kwargs['preposition'][0], inv_item.name))
-                    self.set_dominant_hand_inv(item=None)
-                    return
-            for room_item in self.room.items:
-                if set(room_item.handle) & set(kwargs['indirect_object']):
-                    if room_item.container == False:
-                        terminal_output.print_text("{} won't fit {} there.".format(self.right_hand_inv[0].name, kwargs['preposition'][0]))
-                        return
-                    room_item.items.append(self.get_dominant_hand_inv())
-                    self.set_dominant_hand_inv(item=None)
-                    terminal_output.print_text("You put {} {} {}".format(self.get_dominant_hand_inv().name, kwargs['preposition'][0], room_item.name))
-                    self.set_dominant_hand_inv(item=None)
-                    return
-        elif kwargs['preposition'][0] == "on":
-            terminal_output.print_text("You cannot stack items yet.")
-            return
-        else:
-            terminal_output.print_text("That item is not around here, unfortunately.")
-            return
-
+    
     def save(self,):
         save_data = self.__getstate__()
         character_name = "{}_{}.p".format(self.first_name, self.last_name)
@@ -996,129 +627,6 @@ Level:  {}
         game_window.print_text(text="Progress saved.")
         return
 
-    def search(self, **kwargs):
-        if self.check_round_time():
-            return
-        if self.is_dead():
-            return
-        if not kwargs['direct_object']:
-            items_found = 0
-            for hidden_item in self.room.hidden:
-                if 100 - self.level >= hidden_item.visibility:
-                    self.room.add_item(hidden_item)
-                    self.room.remove_hidden_item(hidden_item)
-                    terminal_output.print_text('You found {}!'.format(hidden_item.name))
-                    items_found += 1
-            if items_found == 0:
-                terminal_output.print_text("There doesn't seem to be anything around here.")
-            return
-        else:
-            for object in self.room.objects:
-                if set(object.handle) & set(kwargs['direct_object']):
-                    object.search(character=self)
-                    return
-            for item in self.room.items:
-                if set(item.handle) & set(kwargs['direct_object']):
-                    terminal_output.print_text("Searching {} will not do you much good.".format(item.name))
-                    return
-            for char in self.room.enemies + self.room.npcs:
-                if set(char.handle) & set(kwargs['direct_object']):
-                    terminal_output.print_text("{} probably will not appreciate that.".format(char.first_name))
-                    return
-            else:
-                terminal_output.print_text("That doesn't seem to be around here.")
-                return
-
-    def sell(self, **kwargs):
-        """Determines if an item can be sold as well as calls the npc's sell function"""
-        if self.check_round_time():
-            return
-        if self.is_dead():
-            return
-        elif not kwargs['direct_object']:
-            terminal_output.print_text("What is it you are trying to sell?")
-            return
-        for npc in self.room.npcs:
-            if set(npc.handle) & {kwargs['indirect_object']}:
-                npc.sell_item(item=self.get_dominant_hand_inv())
-                return
-        else:
-            terminal_output.print_text("Who are you trying to sell to?")
-
-    def view_skills(self, **kwargs):
-        terminal_output.print_text('''
-Edged Weapons Base:  {}
-        
-Edged Weapons:    {}  ({})          Armor:              {}  ({})
-Blunt Weapons:    {}  ({})          Shield:             {}  ({})
-Polearm Weapons:  {}  ({})          Dodging:            {}  ({})
-Thrown Weapons:   {}  ({})          Physical Fitness:   {}  ({})
-Ranged Weapons:   {}  ({})          Perception:         {}  ({})
-
-            '''.format(self.skills_base['edged_weapons'], 
-                       self.skills['edged_weapons'], self.skills_bonus['edged_weapons'],
-                       self.skills['armor'], self.skills_bonus['armor'],
-                       self.skills['blunt_weapons'], self.skills_bonus['blunt_weapons'],
-                       self.skills['shield'], self.skills_bonus['shield'],
-                       self.skills['polearm_weapons'], self.skills_bonus['polearm_weapons'],
-                       self.skills['dodging'], self.skills_bonus['dodging'],
-                       self.skills['thrown_weapons'], self.skills_bonus['thrown_weapons'],
-                       self.skills['physical_fitness'], self.skills_bonus['physical_fitness'],
-                       self.skills['ranged_weapons'], self.skills_bonus['ranged_weapons'],
-                       self.skills['perception'], self.skills_bonus['perception'])
-              )
-
-    def skin(self, **kwargs):
-        if self.check_round_time():
-            return
-        if self.is_dead():
-            return
-        elif not kwargs['direct_object']:
-            terminal_output.print_text("What are you trying to skin?")
-            return
-        else:
-            for object in self.room.objects:
-                if set(object.handle) & set(kwargs['direct_object']):
-                    object.skin_corpse()
-                    return
-            for item in self.room.items:
-                if set(item.handle) & set(kwargs['direct_object']):
-                    terminal_output.print_text("You can seem to find any way to skin {}.".format(item.name))
-                    return
-            for npc in self.room.npcs:
-                if set(npc.handle) & set(kwargs['direct_object']):
-                    terminal_output.print_text("You approach {}, but think better of it.".format(npc.name))
-                    return
-
-    def view_stats(self, **kwargs):
-        terminal_output.print_text('''
-Name:  {} {}
-Level: {}
-Strength:       {}  ({})        Intellect:      {}  ({})
-Constitution:   {}  ({})        Wisdom:         {}  ({})
-Dexterity:      {}  ({})        Logic:          {}  ({})
-Agility:        {}  ({})        Spirit:         {}  ({})
-        '''.format(self.first_name,
-                   self.last_name,
-                   self.level,
-                   self.stats['strength'], self.stats_bonus['strength'],
-                   self.stats['intellect'], self.stats_bonus['intellect'],
-                   self.stats['constitution'], self.stats_bonus['constitution'],
-                   self.stats['wisdom'], self.stats_bonus['wisdom'],
-                   self.stats['dexterity'], self.stats_bonus['dexterity'],
-                   self.stats['logic'], self.stats_bonus['logic'],
-                   self.stats['agility'], self.stats_bonus['agility'],
-                   self.stats['spirit'], self.stats_bonus['spirit'])
-              )
-
-    def target_enemy(self, **kwargs):
-        if not kwargs['direct_object']:
-            terminal_output.print_text("What do you want to target?")
-            return
-        else:
-            self.target = kwargs['direct_object']
-            terminal_output.print_text("You are now targeting {}".format(self.target[0]))
-            return
 
 
 

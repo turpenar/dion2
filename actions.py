@@ -6,16 +6,20 @@ TODO: Exit out of all demon programs when quit
 """
 
 import pathlib as pathlib
+import textwrap as textwrap
 
 import world as world
 import enemies as enemies
 import command_parser as command_parser
 import config as config
+import npcs as npcs
+import combat as combat
 
 
 verbs = config.verbs
 stances = config.stances
 action_history = []
+wrapper = textwrap.TextWrapper(width=config.TEXT_WRAPPER_WIDTH)
 
 
 def link_terminal(terminal):
@@ -32,7 +36,7 @@ def do_action(action_input, character=None):
         game_window.print_text(text="No character loaded. You will need to create a new character or load an existing character.")
         return
     if len(action_input) == 0:
-        terminal_output.print_text("")
+        game_window.print_text("")
         return
     kwargs = command_parser.parser(action_input)
     DoActions.do_action(kwargs['action_verb'], character, **kwargs)
@@ -107,8 +111,30 @@ class Attack(DoActions):
     def __init__(self, character, **kwargs):
         DoActions.__init__(self, character, **kwargs)
 
-        self.character.attack(**kwargs)
-        
+        if character.check_round_time():
+            return
+        if character.is_dead():
+            return
+        if kwargs['direct_object']:
+            character.target = kwargs['direct_object']
+        if not character.target:
+            game_window.print_text("Who are you going to attack? You do not have a target.")
+            return
+        else:
+            for npc in character.room.npcs:
+                if set(npc.handle) & set(character.target):
+                    game_window.print_text("{} will probably not appreciate that.".format(npc.name))
+                    return
+            enemy_found = False
+            for enemy in character.room.enemies:
+                if set(enemy.handle) & set(character.target):
+                    enemy_found = True
+                    combat.melee_attack_enemy(character, enemy)
+                    return
+            if not enemy_found:
+                game_window.print_text("{} is not around here.".format(kwargs['direct_object']))
+                return
+            
         
 @DoActions.register_subclass('attribute')
 class Attributes(DoActions):
@@ -119,7 +145,9 @@ class Attributes(DoActions):
     def __init__(self, character, **kwargs):
         DoActions.__init__(self, character, **kwargs)
 
-        self.character.view_attributes(**kwargs)
+        game_window.print_text('''
+Attribute:  {}
+            '''.format(character.attack_strength_base))
 
 
 @DoActions.register_subclass('drop')
@@ -138,7 +166,24 @@ class Drop(DoActions):
     def __init__(self, character, **kwargs):
         DoActions.__init__(self, character, **kwargs)
 
-        self.character.put(**kwargs)
+        if character.check_round_time():
+            return
+        if character.is_dead():
+            return
+        elif not kwargs['direct_object']:
+            game_window.print_text("I'm sorry, I could not understand what you wanted.")
+            return
+        elif character.get_dominant_hand_inv() is None:
+            game_window.print_text("You do not have that item in your hand")
+            return
+        elif not set(character.get_dominant_hand_inv().handle) & set(kwargs['direct_object']):
+            game_window.print_text("You do not have that item in your right hand.")
+            return
+        else:
+            character.room.items.append(character.get_dominant_hand_inv())
+            game_window.print_text("You drop " + character.get_dominant_hand_inv().name)
+            character.set_dominant_hand_inv(item=None)
+            return
 
 
 @DoActions.register_subclass('east')
@@ -150,11 +195,18 @@ class East(DoActions):
 
     def __init__(self, character, **kwargs):
         DoActions.__init__(self, character, **kwargs)
-
+        
+        if character.check_round_time():
+            return
+        if character.is_dead():
+            return
+        if not character.check_position_to_move():
+            return
+        
         if world.tile_exists(x=self.character.location_x + 1, y=self.character.location_y, area=self.character.area):
             self.character.move_east()
         else:
-            terminal_output.print_text("You cannot find a way to move in that direction.")
+            game_window.print_text("You cannot find a way to move in that direction.")
             
 @DoActions.register_subclass('experience')
 @DoActions.register_subclass('exp')
@@ -165,8 +217,10 @@ class Experience(DoActions):
     
     def __init__(self, character, **kwargs):
         DoActions.__init__(self, character, **kwargs)
-        
-        self.character.view_experience()
+
+        game_window.print_text('''\
+Experience:  {}
+        '''.format(character.experience))
 
 
 @DoActions.register_subclass('flee')
@@ -178,7 +232,16 @@ class Flee(DoActions):
     def __init__(self, character, **kwargs):
         DoActions.__init__(self, character, **kwargs)
 
-        self.character.flee(**kwargs)
+        if character.check_round_time():
+            return
+        if character.is_dead():
+            return
+        if not character.check_position_to_move():
+            return
+        available_moves = character.room.adjacent_moves()
+        r = random.randint(0, len(available_moves) - 1)
+        actions.do_action(action_input=available_moves[r], character=character)
+        return
 
 
 @DoActions.register_subclass('get')
@@ -196,7 +259,38 @@ class Get(DoActions):
     def __init__(self, character, **kwargs):
         DoActions.__init__(self, character, **kwargs)
 
-        self.character.get(**kwargs)
+        if character.check_round_time():
+            return
+        if character.is_dead():
+            return
+        if not kwargs['direct_object']:
+            game_window.print_text("I'm sorry, I could not understand what you wanted.")
+            return
+        for room_object in character.room.objects:
+            if set(room_object.handle) & set(kwargs['direct_object']):
+                game_window.print_text("Perhaps picking up {} is not a good idea.".format(room_object.name))
+                return
+        if character.get_dominant_hand_inv() is None:
+            item_found = False
+            for room_item in character.room.items:
+                if set(room_item.handle) & set(kwargs['direct_object']):
+                    character.set_dominant_hand_inv(room_item)
+                    character.room.items.remove(room_item)
+                    game_window.print_text("You pick up {}.".format(room_item.name))
+                    return
+            if not item_found:
+                for inv_item in character.inventory:
+                    if inv_item.container:
+                        for sub_item in inv_item.items:
+                            if set(sub_item.handle) & set(kwargs['direct_object']):
+                                character.set_dominant_hand_inv(sub_item)
+                                inv_item.items.remove(sub_item)
+                                game_window.print_text("You take {} from {}.".format(sub_item.name, inv_item.name))
+                                return
+            if not item_found:
+                game_window.print_text("A " + kwargs['direct_object'][0] + " is nowhere to be found")
+        else:
+            game_window.print_text('You already have something in your right hand')
 
 
 @DoActions.register_subclass('give')
@@ -211,8 +305,33 @@ class Give(DoActions):
 
     def __init__(self, character, **kwargs):
         DoActions.__init__(self, character, **kwargs)
-
-        self.character.give(**kwargs)
+        
+        if character.check_round_time():
+            return
+        if character.is_dead():
+            return
+        elif not kwargs['direct_object']:
+            game_window.print_text("What are you trying to give?")
+            return
+        elif character.get_dominant_hand_inv() is None:
+            game_window.print_text("You don't seem to be holding that item in your hand.")
+            return
+        elif not set(character.get_dominant_hand_inv().handle) & set(kwargs['direct_object']):
+            game_window.print_text("You don't seem to be holding that item in your hand.")
+            return
+        elif not kwargs['indirect_object']:
+            game_window.print_text("To whom do you want to give?")
+            return
+        else:
+            for npc in character.room.npcs:
+                if {npc.first_name.lower()} & set(kwargs['indirect_object']):
+                    if npc.give_item(character.get_dominant_hand_inv()):
+                        character.set_dominant_hand_inv(item=None)
+                        return
+                    else:
+                        return
+            game_window.print_text("That didn't seem to work.")
+            return
 
 
 @DoActions.register_subclass('go')
@@ -228,7 +347,37 @@ class Go(DoActions):
     def __init__(self, character, **kwargs):
         DoActions.__init__(self, character, **kwargs)
 
-        self.character.go(**kwargs)
+        if character.check_round_time():
+            return
+        if character.is_dead():
+            return
+        if not character.check_position_to_move():
+            return
+        if not kwargs['direct_object']:
+            game_window.print_text("Go where?")
+            return
+        else:
+            object_found = False
+            for room_object in character.room.objects:
+                if set(room_object.handle) & set(kwargs['direct_object']):
+                    new_location = room_object.go_object(character=character)
+                    character.room = world.tile_exists(x=new_location['x'], y=new_location['y'], area=new_location['area'].replace(" ",""))
+                    character.location_x = new_location['x']
+                    character.location_y = new_location['y']
+                    character.area = new_location['area']
+                    character.room.fill_room(character=character)
+                    character.room.intro_text()
+                    character.room.run(character=character)
+                    object_found = True
+            if object_found == False:
+                for room_item in character.room.items:
+                    if set(room_item.handle) & set(kwargs['direct_object']):
+                        game_window.print_text("You move toward {}.".format(room_item.name))
+                        object_found = True
+            if object_found == False:
+                for room_npc in character.room.npcs:
+                    if set(room_npc.handle) & set(kwargs['direct_object']):
+                        game_window.print_text("You move toward {}.".format(room_npc.name))
         
 @DoActions.register_subclass('health')
 class Health(DoActions):
@@ -239,7 +388,10 @@ class Health(DoActions):
     def __init__(self, character, **kwargs):
         DoActions.__init__(self, character, **kwargs)
         
-        self.character.view_health(**kwargs)
+        game_window.print_text('''
+Health:  {} of {} hit points
+            '''.format(character.health,
+                       character.health_max))
 
 
 @DoActions.register_subclass('help')
@@ -261,7 +413,7 @@ class Help(DoActions):
             verb_list = verb_list + '{:<30}{:<30}{:<}\n'.format(a,b,c)
 
         if kwargs['subject_verb'] == None:
-            terminal_output.print_text("""
+            game_window.print_text("""
 Below are the list of actions for which you can ask for help.
 Type HELP <verb> for more information about that specific verb.
 {}\
@@ -269,9 +421,9 @@ Type HELP <verb> for more information about that specific verb.
 
             
         elif kwargs['subject_verb'] in DoActions.do_actions:
-            terminal_output.print_text(DoActions.do_actions[kwargs['subject_verb']].__doc__)
+            game_window.print_text(DoActions.do_actions[kwargs['subject_verb']].__doc__)
         else:
-            terminal_output.print_text("I'm sorry, what did you need help with?")
+            game_window.print_text("I'm sorry, what did you need help with?")
             
 @DoActions.register_subclass('info')
 @DoActions.register_subclass('information')
@@ -283,7 +435,17 @@ class Information(DoActions):
     def __init__(self, character, **kwargs):
         DoActions.__init__(self, character, **kwargs)
         
-        self.character.information(**kwargs)
+        game_window.print_text('''
+Name:  {} {}
+Gender:  {}
+Race:  {}
+Profession:  {}
+Level:  {}
+            '''.format(character.first_name, character.last_name,
+                       character.gender,
+                       character.race,
+                       character.profession,
+                       character.level))
 
 
 @DoActions.register_subclass('inventory')
@@ -296,7 +458,44 @@ class Inventory(DoActions):
     def __init__(self, character, **kwargs):
         DoActions.__init__(self, character, **kwargs)
 
-        self.character.view_inventory(**kwargs)
+        if character.get_dominant_hand_inv():
+            right_hand = "You have {} in your {} hand.".format(character.get_dominant_hand_inv().name, character.dominance)
+        else:
+            right_hand = "Your right hand is empty."
+        if character.get_non_dominant_hand_inv():
+            left_hand = "You have {} in your {} hand.".format(character.get_non_dominant_hand_inv().name, character.non_dominance)
+        else:
+            left_hand = "Your left hand is empty."
+        inventory_clothing = [x.name for x in character.inventory if x.category == 'clothing']
+        if len(inventory_clothing) > 1:
+            inventory_clothing = "You are wearing {} and {}.".format(', '.join(inventory_clothing[:-1]), inventory_clothing[-1])
+        elif len(inventory_clothing) == 1:
+            inventory_clothing = "You are wearing {}.".format(inventory_clothing[0])
+        else:
+            inventory_clothing = "You are wearing nothing."
+        
+        inventory_armor = []  
+        for category in character.armor:
+            inventory_armor.append(character.armor[category])
+        if len(inventory_armor) > 1:
+            inventory_armor ="You are also wearing {} and {}.".format(character.object_pronoun, ', '.join(inventory_armor[:-1]), inventory_armor[-1])
+        elif len(inventory_armor) == 1:
+            inventory_armor = "You are also wearing {}.".format(inventory_armor[0].name)
+        else:
+            inventory_armor = "You are also wearing no armor.".format(character.object_pronoun)
+        wealth = "You have {} gulden.".format(character.money)
+        game_window.print_text('''\
+{}
+{}
+{}
+{}
+{}
+                                    \
+                                    '''.format(right_hand,
+                                               left_hand,
+                                               wrapper.fill(inventory_clothing),
+                                               wrapper.fill(inventory_armor),
+                                               wrapper.fill(wealth)))
         
         
 @DoActions.register_subclass('kneel')
@@ -308,22 +507,17 @@ class Kneel(DoActions):
     
     def __init__(self, character, **kwargs):
         DoActions.__init__(self, character, **kwargs)
-        
-        self.character = character
-        
-        self.kneel()
-        
-    def kneel(self):
-        if self.character.check_round_time():
+    
+        if character.check_round_time():
             return 
-        if self.character.is_dead():
+        if character.is_dead():
             return 
-        if self.character.position == 'kneeling':
-            terminal_output.print_text('You seem to already be kneeling.')
+        if character.position == 'kneeling':
+            game_window.print_text('You seem to already be kneeling.')
             return 
         else:
-            self.character.position = 'kneeling'
-            terminal_output.print_text('You move yourself to a kneeling position.')
+            character.position = 'kneeling'
+            game_window.print_text('You move yourself to a kneeling position.')
             return
         
         
@@ -337,21 +531,17 @@ class Lie(DoActions):
     def __init__(self, character, **kwargs):
         DoActions.__init__(self, character, **kwargs)
         
-        self.character = character
-        
-        self.lie()
-        
     def lie(self):
-        if self.character.check_round_time():
+        if character.check_round_time():
             return 
-        if self.character.is_dead():
+        if character.is_dead():
             return 
-        if self.character.position == 'lying':
-            terminal_output.print_text('You seem to already be lying down.')
+        if character.position == 'lying':
+            game_window.print_text('You seem to already be lying down.')
             return 
         else:
-            self.character.position = 'lying'
-            terminal_output.print_text('You lower yourself to the ground and lie down.')
+            character.position = 'lying'
+            game_window.print_text('You lower yourself to the ground and lie down.')
             return
 
 
@@ -370,7 +560,61 @@ class Look(DoActions):
     def __init__(self, character, **kwargs):
         DoActions.__init__(self, character, **kwargs)
 
-        self.character.look(**kwargs)
+        if character.check_round_time():
+            return
+        if character.is_dead():
+            return
+        if kwargs['preposition'] == None:
+            character.room.intro_text()
+            return
+        if kwargs['preposition'][0] == 'in':
+            item_found = False
+            if kwargs['indirect_object'] is None:
+                game_window.print_text("I am not sure what you are referring to.")
+                return
+            for item in character.room.items + character.room.objects + character.room.npcs + character.inventory + [character.get_dominant_hand_inv()] + [character.get_non_dominant_hand_inv()]:
+                if isinstance(item, npcs.NPC):
+                    game_window.print_text("It wouldn't be advisable to look in " + item.name)
+                    return
+                if set(item.handle) & set(kwargs['indirect_object']):
+                    game_window.print_text(item.contents())
+                    return
+            if item_found is False:
+                game_window.print_text("A {} is nowhere to be found.".format(kwargs['indirect_object'][0]))
+                return
+        if kwargs['preposition'][0] == 'at':
+            item_found = False
+            if kwargs['indirect_object'] is None:
+                game_window.print_text("I am not sure what you are referring to.")
+                return
+            for item in character.room.items + character.room.objects + character.room.npcs + character.room.enemies + character.inventory + [character.get_dominant_hand_inv()] + [character.get_non_dominant_hand_inv()]:
+                if not item:
+                    pass
+                elif set(item.handle) & set(kwargs['indirect_object']):
+                    item.view_description()
+                    return
+            for item in character.inventory:
+                if set(item.handle) & set(kwargs['indirect_object']):
+                    item.view_description()
+                    return
+            for object in character.room.objects:
+                if set(object.handle) & set(kwargs['indirect_object']):
+                    object.view_description()
+                    return
+            for npc in character.room.npcs:
+                if set(npc.handle) & set(kwargs['indirect_object']):
+                    npc.view_description()
+                    return
+            for enemy in character.room.enemies:
+                if set(npc.handle) & set(kwargs['indirect_object']):
+                    enemy.view_description()
+                    return
+            if item_found is False:
+                game_window.print_text("At what did you want to look?")
+                return
+        else:
+            game_window.print_text("I'm sorry, I didn't understand you.")
+            return
 
 
 @DoActions.register_subclass('north')
@@ -382,11 +626,18 @@ class North(DoActions):
 
     def __init__(self, character, **kwargs):
         DoActions.__init__(self, character, **kwargs)
+        
+        if character.check_round_time():
+            return
+        if character.is_dead():
+            return
+        if not character.check_position_to_move():
+            return
 
         if world.tile_exists(x=self.character.location_x, y=self.character.location_y - 1, area=self.character.area):
             self.character.move_north()
         else:
-            terminal_output.print_text('You cannot find a way to move in that direction.')
+            game_window.print_text('You cannot find a way to move in that direction.')
             
 
 @DoActions.register_subclass('position')
@@ -404,7 +655,7 @@ class Position(DoActions):
         self.position()
         
     def position(self):
-        terminal_output.print_text('''You are currently in the {} position.'''.format(self.character.position))
+        game_window.print_text('''You are currently in the {} position.'''.format(self.character.position))
 
 
 @DoActions.register_subclass('put')
@@ -423,7 +674,48 @@ class Put(DoActions):
     def __init__(self, character, **kwargs):
         DoActions.__init__(self, character, **kwargs)
 
-        self.character.put(**kwargs)
+        if character.check_round_time():
+            return
+        if character.is_dead():
+            return
+        if not kwargs['direct_object']:
+            game_window.print_text("What is it you're trying to put down?")
+            return
+        elif character.get_dominant_hand_inv() is None:
+            game_window.print_text("You do not have that item in your hand.")
+            return
+        elif not set(character.get_dominant_hand_inv().handle) & set(kwargs['direct_object']):
+            game_window.print_text("You do not have that item in your right hand.")
+            return
+        elif kwargs['preposition'][0] == "in":
+            for inv_item in character.inventory:
+                if set(inv_item.handle) & set(kwargs['indirect_object']):
+                    if inv_item.container == False:
+                        game_window.print_text("{} won't fit in there.".format(character.get_dominant_hand_inv().name))
+                        return
+                    if len(inv_item.items) == inv_item.capacity:
+                        game_window.print_text("{} can't hold any more items".format(inv_item.name))
+                        return
+                    inv_item.items.append(character.get_dominant_hand_inv())
+                    game_window.print_text("You put {} {} {}".format(character.get_dominant_hand_inv().name, kwargs['preposition'][0], inv_item.name))
+                    character.set_dominant_hand_inv(item=None)
+                    return
+            for room_item in character.room.items:
+                if set(room_item.handle) & set(kwargs['indirect_object']):
+                    if room_item.container == False:
+                        game_window.print_text("{} won't fit {} there.".format(character.right_hand_inv[0].name, kwargs['preposition'][0]))
+                        return
+                    room_item.items.append(character.get_dominant_hand_inv())
+                    character.set_dominant_hand_inv(item=None)
+                    game_window.print_text("You put {} {} {}".format(character.get_dominant_hand_inv().name, kwargs['preposition'][0], room_item.name))
+                    character.set_dominant_hand_inv(item=None)
+                    return
+        elif kwargs['preposition'][0] == "on":
+            game_window.print_text("You cannot stack items yet.")
+            return
+        else:
+            game_window.print_text("That item is not around here, unfortunately.")
+            return
 
 
 @DoActions.register_subclass('quit')
@@ -435,7 +727,7 @@ class Quit(DoActions):
     def __init__(self, character, **kwargs):
         DoActions.__init__(self, character, **kwargs)
 
-        terminal_output.print_text("You will need to find a way to exit the game.")
+        game_window.print_text("You will need to find a way to exit the game.")
 
 
 @DoActions.register_subclass('save')
@@ -464,7 +756,37 @@ class Search(DoActions):
     def __init__(self, character, **kwargs):
         DoActions.__init__(self, character, **kwargs)
 
-        self.character.search(**kwargs)
+        if character.check_round_time():
+            return
+        if character.is_dead():
+            return
+        if not kwargs['direct_object']:
+            items_found = 0
+            for hidden_item in character.room.hidden:
+                if 100 - character.level >= hidden_item.visibility:
+                    character.room.add_item(hidden_item)
+                    character.room.remove_hidden_item(hidden_item)
+                    game_window.print_text('You found {}!'.format(hidden_item.name))
+                    items_found += 1
+            if items_found == 0:
+                game_window.print_text("There doesn't seem to be anything around here.")
+            return
+        else:
+            for object in character.room.objects:
+                if set(object.handle) & set(kwargs['direct_object']):
+                    object.search(character=character)
+                    return
+            for item in character.room.items:
+                if set(item.handle) & set(kwargs['direct_object']):
+                    game_window.print_text("Searching {} will not do you much good.".format(item.name))
+                    return
+            for char in character.room.enemies + character.room.npcs:
+                if set(char.handle) & set(kwargs['direct_object']):
+                    game_window.print_text("{} probably will not appreciate that.".format(char.first_name))
+                    return
+            else:
+                game_window.print_text("That doesn't seem to be around here.")
+                return
 
 
 @DoActions.register_subclass('sell')
@@ -480,7 +802,19 @@ class Sell(DoActions):
     def __init__(self, character, **kwargs):
         DoActions.__init__(self, character, **kwargs)
 
-        self.character.search(**kwargs)
+        if character.check_round_time():
+            return
+        if character.is_dead():
+            return
+        elif not kwargs['direct_object']:
+            game_window.print_text("What is it you are trying to sell?")
+            return
+        for npc in character.room.npcs:
+            if set(npc.handle) & {kwargs['indirect_object']}:
+                npc.sell_item(item=character.get_dominant_hand_inv())
+                return
+        else:
+            game_window.print_text("Who are you trying to sell to?")
         
         
 @DoActions.register_subclass('sit')
@@ -492,22 +826,17 @@ class Sit(DoActions):
     
     def __init__(self, character, **kwargs):
         DoActions.__init__(self, character, **kwargs)
-        
-        self.character = character
-        
-        self.sit()
-        
-    def sit(self):
-        if self.character.check_round_time():
+
+        if character.check_round_time():
             return 
-        if self.character.is_dead():
+        if character.is_dead():
             return 
-        if self.character.position == 'sitting':
-            terminal_output.print_text('You seem to already be sitting.')
+        if character.position == 'sitting':
+            game_window.print_text('You seem to already be sitting.')
             return 
         else:
-            self.character.position = 'sitting'
-            terminal_output.print_text('You move yourself to a sitting position.')
+            character.position = 'sitting'
+            game_window.print_text('You move yourself to a sitting position.')
             return
 
 
@@ -524,7 +853,27 @@ class Skills(DoActions):
     def __init__(self, character, **kwargs):
         DoActions.__init__(self, character, **kwargs)
 
-        self.character.view_skills(**kwargs)
+        game_window.print_text('''
+Edged Weapons Base:  {}
+        
+Edged Weapons:    {}  ({})          Armor:              {}  ({})
+Blunt Weapons:    {}  ({})          Shield:             {}  ({})
+Polearm Weapons:  {}  ({})          Dodging:            {}  ({})
+Thrown Weapons:   {}  ({})          Physical Fitness:   {}  ({})
+Ranged Weapons:   {}  ({})          Perception:         {}  ({})
+
+            '''.format(character.skills_base['edged_weapons'], 
+                       character.skills['edged_weapons'], character.skills_bonus['edged_weapons'],
+                       character.skills['armor'], character.skills_bonus['armor'],
+                       character.skills['blunt_weapons'], character.skills_bonus['blunt_weapons'],
+                       character.skills['shield'], character.skills_bonus['shield'],
+                       character.skills['polearm_weapons'], character.skills_bonus['polearm_weapons'],
+                       character.skills['dodging'], character.skills_bonus['dodging'],
+                       character.skills['thrown_weapons'], character.skills_bonus['thrown_weapons'],
+                       character.skills['physical_fitness'], character.skills_bonus['physical_fitness'],
+                       character.skills['ranged_weapons'], character.skills_bonus['ranged_weapons'],
+                       character.skills['perception'], character.skills_bonus['perception'])
+              )
 
 
 @DoActions.register_subclass('skin')
@@ -540,7 +889,26 @@ class Skin(DoActions):
     def __init__(self, character, **kwargs):
         DoActions.__init__(self, character, **kwargs)
 
-        self.character.skin(**kwargs)
+        if character.check_round_time():
+            return
+        if character.is_dead():
+            return
+        elif not kwargs['direct_object']:
+            game_window.print_text("What are you trying to skin?")
+            return
+        else:
+            for object in character.room.objects:
+                if set(object.handle) & set(kwargs['direct_object']):
+                    object.skin_corpse()
+                    return
+            for item in character.room.items:
+                if set(item.handle) & set(kwargs['direct_object']):
+                    game_window.print_text("You can seem to find any way to skin {}.".format(item.name))
+                    return
+            for npc in character.room.npcs:
+                if set(npc.handle) & set(kwargs['direct_object']):
+                    game_window.print_text("You approach {}, but think better of it.".format(npc.name))
+                    return
 
 
 @DoActions.register_subclass('south')
@@ -552,11 +920,18 @@ class South(DoActions):
 
     def __init__(self, character, **kwargs):
         DoActions.__init__(self, character, **kwargs)
+        
+        if character.check_round_time():
+            return
+        if character.is_dead():
+            return
+        if not character.check_position_to_move():
+            return
 
         if world.tile_exists(x=self.character.location_x, y=self.character.location_y + 1, area=self.character.area):
             self.character.move_south()
         else:
-            terminal_output.print_text("You cannot find a way to move in that direction.")
+            game_window.print_text("You cannot find a way to move in that direction.")
             
             
 @DoActions.register_subclass('stance')
@@ -586,14 +961,14 @@ class Stance(DoActions):
         
     def stance(self, desired_stance):
         if not desired_stance:
-            terminal_output.print_text('''You are currently in the {} stance.'''.format(self.character.stance))
+            game_window.print_text('''You are currently in the {} stance.'''.format(self.character.stance))
             return
         if set(desired_stance) & set(stances):
             self.character.stance = desired_stance[0]
-            terminal_output.print_text('''You are now in {} stance.'''.format(desired_stance[0]))
+            game_window.print_text('''You are now in {} stance.'''.format(desired_stance[0]))
             return
         else:
-            terminal_output.print_text("You cannot form that stance.")
+            game_window.print_text("You cannot form that stance.")
             return
 
 
@@ -616,11 +991,11 @@ class Stand(DoActions):
         if self.character.is_dead():
             return 
         if self.character.position == 'standing':
-            terminal_output.print_text('You seem to already be standing.')
+            game_window.print_text('You seem to already be standing.')
             return 
         else:
             self.character.position = 'standing'
-            terminal_output.print_text('You raise yourself to a standing position.')
+            game_window.print_text('You raise yourself to a standing position.')
             return
 
 
@@ -633,7 +1008,27 @@ class Stats(DoActions):
     def __init__(self, character, **kwargs):
         DoActions.__init__(self, character, **kwargs)
 
-        self.character.view_stats(**kwargs)
+        game_window.print_text('''
+Name:  {} {}
+Level: {}
+Strength:       {}  ({})        Intellect:      {}  ({})
+Constitution:   {}  ({})        Wisdom:         {}  ({})
+Dexterity:      {}  ({})        Logic:          {}  ({})
+Agility:        {}  ({})        Spirit:         {}  ({})
+        '''.format(character.first_name,
+                   character.last_name,
+                   character.level,
+                   character.stats['strength'], character.stats_bonus['strength'],
+                   character.stats['intellect'], character.stats_bonus['intellect'],
+                   character.stats['constitution'], character.stats_bonus['constitution'],
+                   character.stats['wisdom'], character.stats_bonus['wisdom'],
+                   character.stats['dexterity'], character.stats_bonus['dexterity'],
+                   character.stats['logic'], character.stats_bonus['logic'],
+                   character.stats['agility'], character.stats_bonus['agility'],
+                   character.stats['spirit'], character.stats_bonus['spirit'])
+              )
+
+
 
 
 @DoActions.register_subclass('target')
@@ -650,7 +1045,13 @@ class Target(DoActions):
     def __init__(self, character, **kwargs):
         DoActions.__init__(self, character, **kwargs)
 
-        self.character.target_enemy(**kwargs)
+        if not kwargs['direct_object']:
+            game_window.print_text("What do you want to target?")
+            return
+        else:
+            character.target = kwargs['direct_object']
+            game_window.print_text("You are now targeting {}".format(self.target[0]))
+            return
 
 
 @DoActions.register_subclass('west')
@@ -662,11 +1063,18 @@ class West(DoActions):
 
     def __init__(self, character, **kwargs):
         DoActions.__init__(self, character, **kwargs)
+        
+        if character.check_round_time():
+            return
+        if character.is_dead():
+            return
+        if not character.check_position_to_move():
+            return
 
         if world.tile_exists(x=self.character.location_x - 1, y=self.character.location_y, area=self.character.area):
             self.character.move_west()
         else:
-            terminal_output.print_text("You cannot find a way to move in that direction.")
+            game_window.print_text("You cannot find a way to move in that direction.")
 
 
 class Action:
