@@ -31,14 +31,14 @@ lock = threading.Lock()
 logging.basicConfig(level=logging.DEBUG,
                     format='[%(levelname)s] (%(threadName)-10s) %(message)s',
                     )
-
-def link_terminal(terminal):
-    global terminal_output
-    terminal_output = terminal
     
 def link_game_window(window):
     global game_window
     game_window = window
+    
+def link_status_window(window):
+    global status_window
+    status_window = window
     
 
 class MapTile(mixins.DataFileMixin):
@@ -53,6 +53,7 @@ class MapTile(mixins.DataFileMixin):
         self.room_name = self.room_data['name']
         self.area = self.room_data['area']
         self.description = self.room_data['description']
+        self._shop = self.room_data['shop']
         self.objects = []
         self.items = []
         self.npcs = []
@@ -148,6 +149,11 @@ class MapTile(mixins.DataFileMixin):
                 for item in self.room_data['hidden']['items'][category]:
                     self.hidden.append(items.create_item(item_category=category, item_name=item))
             self.room_filled = True
+    
+    @property     
+    def shop(self):
+        with lock:
+            return self._shop
 
     def add_object(self, object):
         with lock:

@@ -1,6 +1,7 @@
 body {
 	margin: 1;
 	font-family: sans-sarif;
+	background-color: #f9f9eb;
 }
 
 .synopsis {
@@ -8,22 +9,44 @@ body {
   font-style: italic;
 }
 
+.interface-window {
+	width: 1320px;
+}
+
 .game-window {
+	width: 1000px;
+	height: 500px;
 	font-family: Courier New, monospace;
 	font-size:  17px;
-	border: solid;
+	background-color: #f2f6e0;
 	overflow: auto;
     display: flex;
     flex-direction: column-reverse;
+    border: solid;
     border-style: inset;
     border-width: thick;
-    border-color: #babade;
+    border-color: #d9d2b6;
+    float: left;
+}
+
+.status-window {
+	width: 300px;
+	height: 505px;
+	font-family: Courier New, monospace;
+	font-size: 17px;
+	background-color: #f2f6e0;
+	overflow: auto;
+	display: flex;
+	border: solid;
+	border-style: groove;
+	border-width: normal;
+	border-color: #d9d2b6;
+	float: right;
 }
 
 .command-line {
 	margin: auto;
 }
-
 
 .error-message {
 	color: red;

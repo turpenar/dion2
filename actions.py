@@ -21,14 +21,14 @@ stances = config.stances
 action_history = []
 wrapper = textwrap.TextWrapper(width=config.TEXT_WRAPPER_WIDTH)
 
-
-def link_terminal(terminal):
-    global terminal_output
-    terminal_output = terminal
     
 def link_game_window(window):
     global game_window
     game_window = window
+    
+def link_status_window(window):
+    global status_window
+    status_window = window
 
 def do_action(action_input, character=None):
     action_history.insert(0,action_input)
@@ -639,6 +639,21 @@ class North(DoActions):
         else:
             game_window.print_text('You cannot find a way to move in that direction.')
             
+            
+@DoActions.register_subclass('order')
+class Order(DoActions):
+    """\
+    In certain rooms, you are able to order products through an ordering system. ORDER initiates the ordering system.\
+    """
+    
+    def __init__(self, character, **kwargs):
+        DoActions.__init__(self, character, **kwargs)
+            
+        if character.room.shop == False:
+            game_window.print_text("You can't seem to find a way to order anything here.")
+            return 
+        else:
+            status_window.print_text("This is a shop from which you can order items.")
 
 @DoActions.register_subclass('position')
 @DoActions.register_subclass('pos')

@@ -41,14 +41,14 @@ all_items = mixins.all_items
 all_items_categories = mixins.items
 lock = threading.Lock()
 
-
-def link_terminal(terminal):
-    global terminal_output
-    terminal_output = terminal
     
 def link_game_window(window):
     global game_window
     game_window = window
+    
+def link_status_window(window):
+    global status_window
+    status_window = window
 
 def create_character(character_name=None):
     global character

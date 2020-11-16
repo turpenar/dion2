@@ -1,6 +1,6 @@
 #Insert Copywrite
 
-from flask import Flask, render_template, url_for, request, redirect
+from flask import Flask, render_template, url_for, request, redirect, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from wtforms import IntegerField
 from datetime import datetime
@@ -37,28 +37,45 @@ lock = threading.Lock()
 class GameWindow():
     
     def __init__(self):
-        self.game_window_text = []
+        self._game_window_text = []
         
     def __str__(self):
-        return game_window_text
+        return _game_window_text
 
     def print_text(self, text):
         text = text.split('\n')
         with lock:
-            self.game_window_text.extend(text)
-            self.game_window_text.extend(['>'])
+            self._game_window_text.extend(text)
+            self._game_window_text.extend(['>'])
         return
     
     def print_command(self, command):
         with lock:
-            self.game_window_text[-1] = '>' + command
-            self.game_window_text.extend(['>'])
+            self._game_window_text[-1] = '>' + command
+            self._game_window_text.extend(['>'])
+        return
+    
+
+class StatusWindow():
+    
+    def __init__(self):
+        self._status_window_text = "This will be the status window."
+        
+    def __str__(self):
+        return status_window_text
+    
+    def print_text(self, text):
+        with lock:
+            self._status_window_text = text
         return
         
 
 global game_window    
 game_window = GameWindow()
 game_window.print_text("")
+
+global status_window
+status_window = StatusWindow()
 
 player.link_game_window(game_window)
 actions.link_game_window(game_window)
@@ -67,6 +84,10 @@ items.link_game_window(game_window)
 enemies.link_game_window(game_window)
 combat.link_game_window(game_window)
 npcs.link_game_window(game_window)
+
+tiles.link_status_window(status_window)
+player.link_status_window(status_window)
+actions.link_status_window(status_window)
 
 @app.route('/', methods=['POST', 'GET'])
 def index():
@@ -78,8 +99,9 @@ def index():
         return redirect('/')
         
     else:
-        game_events = game_window.game_window_text
-        return render_template('index.html', gameEvents=game_events)
+        game_events = game_window._game_window_text
+        status_data = status_window._status_window_text
+        return render_template('index.html', gameEvents=game_events, statusData = status_data)
 
 @app.route('/new_character', methods=['POST', 'GET'])
 def new_character():
@@ -229,6 +251,24 @@ def skills_modify():
     
     return render_template('skills.html', skillCategories=skill_categories, skills=all_skills, skillDataFile=skill_data_file)
 
+
+@app.route('/interactive/')
+def interactive():
+    try:
+        return render_template("interactive.html")
+    except Exception:
+        return(str('Error'))
+
+@app.route('/_background_process')
+def _background_process():
+    try:
+        lang = request.args.get('proglang')
+        if str(lang).lower() == 'python':
+            return jsonify(result='You are wise!')
+        else:
+            return jsonify(result='Try again!')
+    except Exception:
+        return(str('Error'))
 
 
 if __name__ == '__main__':

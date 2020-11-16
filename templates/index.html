@@ -5,6 +5,20 @@
 {% endblock %}
 
 {% block body %}
+
+<head>
+
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	<script type=text/javascript>
+		function submit() {
+    		var myData = $('#command-line-form').serializeArray()
+    		$.post("/receivedata", {"myData": myData})
+		}
+	</script>
+	
+</head>
+
+
 <h1>Dion</h1>
 
 <br>
@@ -14,17 +28,27 @@
 <br>
 <br>
 
-<div class="game-window" style="overflow: auto; width: 1000px; height: 500px">
+<div class="interface-window">
 
-{% for event in gameEvents %}
+	<div class="game-window">
 
-{{ event }}<br>
+	{% for event in gameEvents %}
 
-{% endfor %}
+	{{ event }}<br>
+
+	{% endfor %}
+
+	</div>
+
+	<div class="status-window">
+	
+	{{ statusData }}
+	
+	</div>
 
 </div>
 
-<form class="command-line" action="/" method="POST" autocomplete="off">
+<form id="command-line-form" class="command-line" action="/" method="POST" autocomplete="off">
 	<input type="text" name="content" id="content" autofocus="autofocus" size="190">
 	<input type="submit" value="Enter">
 </form>
