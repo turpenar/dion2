@@ -205,8 +205,27 @@ class East(DoActions):
         
         if world.tile_exists(x=self.character.location_x + 1, y=self.character.location_y, area=self.character.area):
             self.character.move_east()
+            if status_window.showing_status == False:
+                status_window.print_status()
         else:
             game_window.print_text("You cannot find a way to move in that direction.")
+            
+            
+@DoActions.register_subclass('exit')
+class Exit(DoActions):
+    """\
+    When ordering in a shop, EXIT leaves the order menu. In order to see the menu again, you will need to ORDER again.\
+    """
+    
+    def __init__(self, character, **kwargs):
+        DoActions.__init__(self, character, **kwargs)
+        
+        if status_window.showing_status == False:
+            status_window.print_status()
+            return
+        else:
+            game_window.print_status("You have nothing to exit.")
+
             
 @DoActions.register_subclass('experience')
 @DoActions.register_subclass('exp')
@@ -238,6 +257,8 @@ class Flee(DoActions):
             return
         if not character.check_position_to_move():
             return
+        if status_window.showing_status == False:
+            status_window.print_status()
         available_moves = character.room.adjacent_moves()
         r = random.randint(0, len(available_moves) - 1)
         actions.do_action(action_input=available_moves[r], character=character)
@@ -636,6 +657,8 @@ class North(DoActions):
 
         if world.tile_exists(x=self.character.location_x, y=self.character.location_y - 1, area=self.character.area):
             self.character.move_north()
+            if status_window.showing_status == False:
+                status_window.print_status()
         else:
             game_window.print_text('You cannot find a way to move in that direction.')
             
@@ -652,8 +675,12 @@ class Order(DoActions):
         if character.room.shop == False:
             game_window.print_text("You can't seem to find a way to order anything here.")
             return 
-        else:
-            status_window.print_text("This is a shop from which you can order items.")
+        elif character.room.shop == True:
+            character.room.fill_shop()
+            status_window.print_shop_menu(shop_name=character.room.area, shop_text=character.room.shop_menu())
+            status_window.showing_status = False
+            game_window.print_text("Welcome to the shop. Please see the menu to the right.")
+            return
 
 @DoActions.register_subclass('position')
 @DoActions.register_subclass('pos')
@@ -945,6 +972,8 @@ class South(DoActions):
 
         if world.tile_exists(x=self.character.location_x, y=self.character.location_y + 1, area=self.character.area):
             self.character.move_south()
+            if status_window.showing_status == False:
+                status_window.print_status()
         else:
             game_window.print_text("You cannot find a way to move in that direction.")
             
@@ -1067,7 +1096,7 @@ class Target(DoActions):
             character.target = kwargs['direct_object']
             game_window.print_text("You are now targeting {}".format(self.target[0]))
             return
-
+        
 
 @DoActions.register_subclass('west')
 @DoActions.register_subclass('w')
@@ -1088,6 +1117,8 @@ class West(DoActions):
 
         if world.tile_exists(x=self.character.location_x - 1, y=self.character.location_y, area=self.character.area):
             self.character.move_west()
+            if status_window.showing_status == False:
+                status_window.print_status()
         else:
             game_window.print_text("You cannot find a way to move in that direction.")
 

@@ -7,6 +7,15 @@
 			"description": "The streets wind their way through town, just wide enough for a carraige. They have seen many things throughout their existence.",
 			"doors": [],
 			"shop": false,
+			"shop_items":  {
+				"clothing": [],
+				"armor": [],
+				"weapon": [],
+				"ring": [],
+				"neck": [],
+				"skin": [],
+				"miscellaneous": []
+				},
 			"items": {
 				"clothing": [],
 				"armor": [],
@@ -41,6 +50,15 @@
 			"doors": ["dochas_west_gate"],
 			"npcs": ["dochas_town_guard"],
 			"shop": false,
+			"shop_items":  {
+				"clothing": [],
+				"armor": [],
+				"weapon": [],
+				"ring": [],
+				"neck": [],
+				"skin": [],
+				"miscellaneous": []
+				},
 			"items": {
 				"clothing": [],
 				"armor": [],
@@ -74,6 +92,15 @@
 			"doors": [],
 			"npcs": ["dochas_town_guard"],
 			"shop": false,
+			"shop_items":  {
+				"clothing": [],
+				"armor": [],
+				"weapon": [],
+				"ring": [],
+				"neck": [],
+				"skin": [],
+				"miscellaneous": []
+				},
 			"items": {
 				"clothing": [],
 				"armor": [],
@@ -107,6 +134,15 @@
 			"doors": ["dochas_smallhouse_gate"],
 			"npcs": [],
 			"shop": false,
+			"shop_items":  {
+				"clothing": [],
+				"armor": [],
+				"weapon": [],
+				"ring": [],
+				"neck": [],
+				"skin": [],
+				"miscellaneous": []
+				},
 			"items": {
 				"clothing": [],
 				"armor": [],
@@ -140,6 +176,15 @@
 			"doors": [],
 			"npcs": ["dochas_town_guard"],
 			"shop": false,
+			"shop_items":  {
+				"clothing": [],
+				"armor": [],
+				"weapon": [],
+				"ring": [],
+				"neck": [],
+				"skin": [],
+				"miscellaneous": []
+				},
 			"items": {
 				"clothing": [],
 				"armor": [],
@@ -173,6 +218,15 @@
 			"doors": [],
 			"npcs": [],
 			"shop": false,
+			"shop_items":  {
+				"clothing": [],
+				"armor": [],
+				"weapon": [],
+				"ring": [],
+				"neck": [],
+				"skin": [],
+				"miscellaneous": []
+				},
 			"items": {
 				"clothing": [],
 				"armor": [],
@@ -206,6 +260,15 @@
 			"doors": [],
 			"npcs": [],
 			"shop": false,
+			"shop_items":  {
+				"clothing": [],
+				"armor": [],
+				"weapon": [],
+				"ring": [],
+				"neck": [],
+				"skin": [],
+				"miscellaneous": []
+				},
 			"items": {
 				"clothing": [],
 				"armor": [],
@@ -239,6 +302,15 @@
 			"doors": [],
 			"npcs": [],
 			"shop": false,
+			"shop_items":  {
+				"clothing": [],
+				"armor": [],
+				"weapon": [],
+				"ring": [],
+				"neck": [],
+				"skin": [],
+				"miscellaneous": []
+				},
 			"items": {
 				"clothing": [],
 				"armor": [],
@@ -272,6 +344,15 @@
 			"doors": [],
 			"npcs": [],
 			"shop": false,
+			"shop_items":  {
+				"clothing": [],
+				"armor": [],
+				"weapon": [],
+				"ring": [],
+				"neck": [],
+				"skin": [],
+				"miscellaneous": []
+				},
 			"items": {
 				"clothing": [],
 				"armor": [],
@@ -305,6 +386,15 @@
 			"doors": ["dochas_south_gate"],
 			"npcs": ["dochas_town_guard"],
 			"shop": false,
+			"shop_items":  {
+				"clothing": [],
+				"armor": [],
+				"weapon": [],
+				"ring": [],
+				"neck": [],
+				"skin": [],
+				"miscellaneous": []
+				},
 			"items": {
 				"clothing": [],
 				"armor": [],
@@ -338,6 +428,15 @@
 			"doors": ["dochas_leatherworks_door"],
 			"npcs": [],
 			"shop": false,
+			"shop_items":  {
+				"clothing": [],
+				"armor": [],
+				"weapon": [],
+				"ring": [],
+				"neck": [],
+				"skin": [],
+				"miscellaneous": []
+				},
 			"items": {
 				"clothing": [],
 				"armor": [],
@@ -373,6 +472,15 @@
 			"doors": ["dochas_leatherworks_door"],
 			"npcs": [],
 			"shop": false,
+			"shop_items":  {
+				"clothing": [],
+				"armor": [],
+				"weapon": [],
+				"ring": [],
+				"neck": [],
+				"skin": [],
+				"miscellaneous": []
+				},
 			"items": {
 				"clothing": [],
 				"armor": [],
@@ -406,6 +514,15 @@
 			"doors": [],
 			"npcs": [],
 			"shop": false,
+			"shop_items":  {
+				"clothing": [],
+				"armor": [],
+				"weapon": [],
+				"ring": [],
+				"neck": [],
+				"skin": [],
+				"miscellaneous": []
+				},
 			"items": {
 				"clothing": [],
 				"armor": [],
@@ -439,6 +556,15 @@
 			"doors": [],
 			"npcs": [],
 			"shop": false,
+			"shop_items": {
+				"clothing": [],
+				"armor": [],
+				"weapon": [],
+				"ring": [],
+				"neck": [],
+				"skin": [],
+				"miscellaneous": []
+				},
 			"items": {
 				"clothing": [],
 				"armor": [],
@@ -472,6 +598,15 @@
 			"doors": [],
 			"npcs": [],
 			"shop": true,
+			"shop_items": {
+				"clothing": [],
+				"armor": ["leather_arm_greaves", "light_leather"],
+				"weapon": [],
+				"ring": [],
+				"neck": [],
+				"skin": [],
+				"miscellaneous": []
+				},
 			"items": {
 				"clothing": [],
 				"armor": [],
@@ -505,6 +640,15 @@
 			"doors": [],
 			"npcs": ["gander_diggle"],
 			"shop": false,
+			"shop_items": {
+				"clothing": [],
+				"armor": [],
+				"weapon": [],
+				"ring": [],
+				"neck": [],
+				"skin": [],
+				"miscellaneous": []
+				},
 			"items": {
 				"clothing": [],
 				"armor": [],
@@ -540,6 +684,15 @@
 			"doors": ["dochas_smallhouse_gate", "dochas_smallhouse_door"],
 			"npcs": [],
 			"shop": false,
+			"shop_items": {
+				"clothing": [],
+				"armor": [],
+				"weapon": [],
+				"ring": [],
+				"neck": [],
+				"skin": [],
+				"miscellaneous": []
+				},
 			"items": {
 				"clothing": [],
 				"armor": [],
@@ -573,6 +726,15 @@
 			"doors": ["dochas_smallhouse_door"],
 			"npcs": [],
 			"shop": false,
+			"shop_items": {
+				"clothing": [],
+				"armor": [],
+				"weapon": [],
+				"ring": [],
+				"neck": [],
+				"skin": [],
+				"miscellaneous": []
+				},
 			"items": {
 				"clothing": [],
 				"armor": [],
@@ -606,6 +768,15 @@
 			"doors": [],
 			"npcs": [],
 			"shop": false,
+			"shop_items": {
+				"clothing": [],
+				"armor": [],
+				"weapon": [],
+				"ring": [],
+				"neck": [],
+				"skin": [],
+				"miscellaneous": []
+				},
 			"items": {
 				"clothing": [],
 				"armor": [],
@@ -639,6 +810,15 @@
 			"doors": [],
 			"npcs": [],
 			"shop": false,
+			"shop_items": {
+				"clothing": [],
+				"armor": [],
+				"weapon": [],
+				"ring": [],
+				"neck": [],
+				"skin": [],
+				"miscellaneous": []
+				},
 			"items": {
 				"clothing": [],
 				"armor": [],
@@ -674,6 +854,15 @@
 			"doors": [],
 			"npcs": [],
 			"shop": false,
+			"shop_items": {
+				"clothing": [],
+				"armor": [],
+				"weapon": [],
+				"ring": [],
+				"neck": [],
+				"skin": [],
+				"miscellaneous": []
+				},
 			"items": {
 				"clothing": [],
 				"armor": [],
@@ -707,6 +896,15 @@
 			"doors": [],
 			"npcs": [],
 			"shop": false,
+			"shop_items": {
+				"clothing": [],
+				"armor": [],
+				"weapon": [],
+				"ring": [],
+				"neck": [],
+				"skin": [],
+				"miscellaneous": []
+				},
 			"items": {
 				"clothing": [],
 				"armor": [],
@@ -740,6 +938,15 @@
 			"doors": [],
 			"npcs": [],
 			"shop": false,
+			"shop_items": {
+				"clothing": [],
+				"armor": [],
+				"weapon": [],
+				"ring": [],
+				"neck": [],
+				"skin": [],
+				"miscellaneous": []
+				},
 			"items": {
 				"clothing": [],
 				"armor": [],
@@ -773,6 +980,15 @@
 			"doors": [],
 			"npcs": [],
 			"shop": false,
+			"shop_items": {
+				"clothing": [],
+				"armor": [],
+				"weapon": [],
+				"ring": [],
+				"neck": [],
+				"skin": [],
+				"miscellaneous": []
+				},
 			"items": {
 				"clothing": [],
 				"armor": [],
@@ -806,6 +1022,15 @@
 			"doors": [],
 			"npcs": [],
 			"shop": false,
+			"shop_items": {
+				"clothing": [],
+				"armor": [],
+				"weapon": [],
+				"ring": [],
+				"neck": [],
+				"skin": [],
+				"miscellaneous": []
+				},
 			"items": {
 				"clothing": [],
 				"armor": [],
@@ -839,6 +1064,15 @@
 			"doors": [],
 			"npcs": [],
 			"shop": false,
+			"shop_items": {
+				"clothing": [],
+				"armor": [],
+				"weapon": [],
+				"ring": [],
+				"neck": [],
+				"skin": [],
+				"miscellaneous": []
+				},
 			"items": {
 				"clothing": [],
 				"armor": [],
@@ -872,6 +1106,15 @@
 			"doors": [],
 			"npcs": [],
 			"shop": false,
+			"shop_items": {
+				"clothing": [],
+				"armor": [],
+				"weapon": [],
+				"ring": [],
+				"neck": [],
+				"skin": [],
+				"miscellaneous": []
+				},
 			"items": {
 				"clothing": [],
 				"armor": [],
@@ -905,6 +1148,15 @@
 			"doors": [],
 			"npcs": [],
 			"shop": false,
+			"shop_items": {
+				"clothing": [],
+				"armor": [],
+				"weapon": [],
+				"ring": [],
+				"neck": [],
+				"skin": [],
+				"miscellaneous": []
+				},
 			"items": {
 				"clothing": [],
 				"armor": [],
@@ -938,6 +1190,15 @@
 			"doors": ["dochas_west_gate"],
 			"npcs": [],
 			"shop": false,
+			"shop_items": {
+				"clothing": [],
+				"armor": [],
+				"weapon": [],
+				"ring": [],
+				"neck": [],
+				"skin": [],
+				"miscellaneous": []
+				},
 			"items": {
 				"clothing": [],
 				"armor": [],
@@ -973,6 +1234,15 @@
 			"doors": ["dochas_south_gate"],
 			"npcs": [],
 			"shop": false,
+			"shop_items": {
+				"clothing": [],
+				"armor": [],
+				"weapon": [],
+				"ring": [],
+				"neck": [],
+				"skin": [],
+				"miscellaneous": []
+				},
 			"items": {
 				"clothing": [],
 				"armor": [],
@@ -1006,6 +1276,15 @@
 			"doors": [],
 			"npcs": [],
 			"shop": false,
+			"shop_items": {
+				"clothing": [],
+				"armor": [],
+				"weapon": [],
+				"ring": [],
+				"neck": [],
+				"skin": [],
+				"miscellaneous": []
+				},
 			"items": {
 				"clothing": [],
 				"armor": [],
@@ -1039,6 +1318,15 @@
 			"doors": [],
 			"npcs": [],
 			"shop": false,
+			"shop_items": {
+				"clothing": [],
+				"armor": [],
+				"weapon": [],
+				"ring": [],
+				"neck": [],
+				"skin": [],
+				"miscellaneous": []
+				},
 			"items": {
 				"clothing": [],
 				"armor": [],
@@ -1072,6 +1360,15 @@
 			"doors": ["edgwood_forest_path"],
 			"npcs": [],
 			"shop": false,
+			"shop_items": {
+				"clothing": [],
+				"armor": [],
+				"weapon": [],
+				"ring": [],
+				"neck": [],
+				"skin": [],
+				"miscellaneous": []
+				},
 			"items": {
 				"clothing": [],
 				"armor": [],
@@ -1105,6 +1402,15 @@
 			"doors": [],
 			"npcs": [],
 			"shop": false,
+			"shop_items": {
+				"clothing": [],
+				"armor": [],
+				"weapon": [],
+				"ring": [],
+				"neck": [],
+				"skin": [],
+				"miscellaneous": []
+				},
 			"items": {
 				"clothing": [],
 				"armor": [],
@@ -1140,6 +1446,15 @@
 			"doors": ["edgwood_forest_path"],
 			"npcs": [],
 			"shop": false,
+			"shop_items": {
+				"clothing": [],
+				"armor": [],
+				"weapon": [],
+				"ring": [],
+				"neck": [],
+				"skin": [],
+				"miscellaneous": []
+				},
 			"items": {
 				"clothing": [],
 				"armor": [],
@@ -1173,6 +1488,15 @@
 			"doors": [],
 			"npcs": [],
 			"shop": false,
+			"shop_items": {
+				"clothing": [],
+				"armor": [],
+				"weapon": [],
+				"ring": [],
+				"neck": [],
+				"skin": [],
+				"miscellaneous": []
+				},
 			"items": {
 				"clothing": [],
 				"armor": [],
@@ -1206,6 +1530,15 @@
 			"doors": [],
 			"npcs": [],
 			"shop": false,
+			"shop_items": {
+				"clothing": [],
+				"armor": [],
+				"weapon": [],
+				"ring": [],
+				"neck": [],
+				"skin": [],
+				"miscellaneous": []
+				},
 			"items": {
 				"clothing": [],
 				"armor": [],

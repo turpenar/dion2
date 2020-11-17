@@ -42,7 +42,11 @@
 
 	<div class="status-window">
 	
-	{{ statusData }}
+	{% for para in statusData %}
+	
+	{{para}}<br>
+	
+	{% endfor %}
 	
 	</div>
 

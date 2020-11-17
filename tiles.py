@@ -44,23 +44,25 @@ def link_status_window(window):
 class MapTile(mixins.DataFileMixin):
     def __init__(self, x, y, area_name: str, room_name: str):
 
-        self.area_data = self.get_area_by_name(area_name)
-        self.room_data = self.area_data[room_name]
+        self._area_data = self.get_area_by_name(area_name)
+        self._room_data = self._area_data[room_name]
 
         self.x = x
         self.y = y
         self.character = None
-        self.room_name = self.room_data['name']
-        self.area = self.room_data['area']
-        self.description = self.room_data['description']
-        self._shop = self.room_data['shop']
+        self.room_name = self._room_data['name']
+        self.area = self._room_data['area']
+        self.description = self._room_data['description']
+        self._shop = self._room_data['shop']
+        self._shop_items = []
         self.objects = []
         self.items = []
         self.npcs = []
         self.enemies = []
-        self.spawn = self.room_data['spawn']
+        self.spawn = self._room_data['spawn']
         self.hidden = []
         self.room_filled = False
+        self.shop_filled = False
 
     def modify_player(self):
         raise NotImplementedError()
@@ -115,6 +117,7 @@ class MapTile(mixins.DataFileMixin):
         else:
             all_objects_output = all_objects[0]
         return "You also see {}.".format(all_objects_output)
+        
 
     def all_object_handles(self):
         all_object_handles = []
@@ -132,23 +135,39 @@ class MapTile(mixins.DataFileMixin):
 
     def fill_room(self, character):
         if not self.room_filled:
-            for door in self.room_data['doors']:
+            for door in self._room_data['doors']:
                 self.objects.append(objects.create_object(object_category='door', object_name=door, room=self))
-            for category in self.room_data['items']:
-                for item in self.room_data['items'][category]:
+            for category in self._room_data['items']:
+                for item in self._room_data['items'][category]:
                     self.items.append(items.create_item(item_category=category, item_name=item))
-            for npc in self.room_data['npcs']:
+            for npc in self._room_data['npcs']:
                 self.npcs.append(getattr(__import__('npcs'), all_npcs[npc]['name'].replace(" ", ""))(npc_name=npc, character=character, room=self))
                 self.npcs[-1].start()
-            for door in self.room_data['hidden']['doors']:
+            for door in self._room_data['hidden']['doors']:
                 self.hidden.append(objects.Door(object_name=door, room=self))
-            for npc in self.room_data['hidden']['npcs']:
+            for npc in self._room_data['hidden']['npcs']:
                 self.hidden.append(getattr(__import__('npcs'), all_npcs[npc]['name'].replace(" ", ""))(npc_name=npc, character=character, room=self))
                 self.hidden[-1].start()
-            for category in self.room_data['hidden']['items']:
-                for item in self.room_data['hidden']['items'][category]:
+            for category in self._room_data['hidden']['items']:
+                for item in self._room_data['hidden']['items'][category]:
                     self.hidden.append(items.create_item(item_category=category, item_name=item))
             self.room_filled = True
+            
+    def fill_shop(self):
+        if not self.shop_filled:
+            for category in self._room_data['shop_items']:
+                for item in self._room_data['shop_items'][category]:
+                    self._shop_items.append(items.create_item(item_category=category, item_name=item))                
+            self.shop_filled = True
+            
+    def shop_menu(self):
+        item_number = 1
+        menu_text = ""
+        for item in self._shop_items:
+            menu_text = menu_text + "{}.  {}\n".format(item_number, item.name)
+            item_number += 1
+        return menu_text
+            
     
     @property     
     def shop(self):
@@ -300,7 +319,7 @@ class EdgewoodForest(MapTile):
                 if random.randint(0,100) > 50:
                     spawn_room = world.tile_exists(x=spawn_room_coords[0], y=spawn_room_coords[1], area=self.area)
                     spawn_room.enemies.append(
-                        enemies.Enemy(enemy_name=self.room_data['spawn'][0],
+                        enemies.Enemy(enemy_name=self._room_data['spawn'][0],
                                       target=character,
                                       room=spawn_room,
                                       location_x=spawn_room_coords[0],
