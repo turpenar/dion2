@@ -49,12 +49,14 @@ def parser(input):
     relevant_adjectives = set(tokens).intersection(adjectives)
     relevant_prepositions = set(tokens).intersection(prepositions)
     relevant_determiners = set(tokens).intersection(determiners)
+    relevant_numbers = [int(token) for token in tokens if token.isdigit()]
 
     verb_index = find_index(tokens, relevant_verbs)
     noun_index = find_index(tokens, relevant_nouns)
     adjective_index = find_index(tokens, relevant_adjectives)
     preposition_index = find_index(tokens, relevant_prepositions)
-    determiners_index = find_index(tokens, relevant_determiners)
+    determiner_index = find_index(tokens, relevant_determiners)
+    numbers = relevant_numbers
 
     kwargs = {}
 
@@ -91,5 +93,11 @@ def parser(input):
     elif len(adjective_index) == 2:
         kwargs['adjective_1'] = [tokens[adjective_index[0]]] or None
         kwargs['adjective_2'] = [tokens[adjective_index[1]]] or None
+    if len(numbers) == 0:
+        kwargs['number_1'] = None
+    elif len(numbers) == 1:
+        print("code goes here")
+        kwargs['number_1'] = [numbers[0]] 
+        
     return kwargs
 

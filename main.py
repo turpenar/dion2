@@ -78,9 +78,9 @@ class StatusWindow():
     def __str__(self):
         return _status_window_text
     
-    def print_shop_menu(self, shop_name, shop_text):
+    def print_shop_menu(self, shop_text):
         with lock:
-            self._status_window_text = [shop_name, shop_text]
+            self._status_window_text = shop_text
             self._showing_status = False
         return
     
@@ -92,6 +92,11 @@ class StatusWindow():
         return
     
     @property
+    def status_window_text(self):
+        with lock:
+            return self._status_window_text
+    
+    @property
     def showing_status(self):
         with lock:
             return self._showing_status
@@ -100,8 +105,6 @@ class StatusWindow():
         with lock:
             self._showing_status = set_value
         
-        
-
 global game_window    
 game_window = GameWindow()
 game_window.print_text("")
@@ -116,7 +119,6 @@ items.link_game_window(game_window)
 enemies.link_game_window(game_window)
 combat.link_game_window(game_window)
 npcs.link_game_window(game_window)
-
 tiles.link_status_window(status_window)
 player.link_status_window(status_window)
 actions.link_status_window(status_window)
@@ -128,11 +130,11 @@ def index():
         action_content = request.form['content']
         game_window.print_command(action_content)
         actions.do_action(action_input=action_content, character=player.character)
-        return redirect('/')
-        
+        return redirect('/')    
     else:
         game_events = game_window._game_window_text
-        status_data = status_window._status_window_text
+        status_data = status_window.status_window_text
+        print(status_data)
         return render_template('index.html', gameEvents=game_events, statusData = status_data)
 
 @app.route('/new_character', methods=['POST', 'GET'])

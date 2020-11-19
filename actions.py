@@ -2,6 +2,7 @@
 
 
 TODO: Exit out of all demon programs when quit
+TODO: Check the characters position before it moves or performs certain actions.
 
 """
 
@@ -21,6 +22,7 @@ stances = config.stances
 action_history = []
 wrapper = textwrap.TextWrapper(width=config.TEXT_WRAPPER_WIDTH)
 
+in_shop = False
     
 def link_game_window(window):
     global game_window
@@ -196,6 +198,8 @@ class East(DoActions):
     def __init__(self, character, **kwargs):
         DoActions.__init__(self, character, **kwargs)
         
+        global in_shop         
+        
         if character.check_round_time():
             return
         if character.is_dead():
@@ -207,6 +211,7 @@ class East(DoActions):
             self.character.move_east()
             if status_window.showing_status == False:
                 status_window.print_status()
+                in_shop = False
         else:
             game_window.print_text("You cannot find a way to move in that direction.")
             
@@ -220,8 +225,11 @@ class Exit(DoActions):
     def __init__(self, character, **kwargs):
         DoActions.__init__(self, character, **kwargs)
         
+        global in_shop 
+        
         if status_window.showing_status == False:
             status_window.print_status()
+            in_shop = False
             return
         else:
             game_window.print_status("You have nothing to exit.")
@@ -250,6 +258,8 @@ class Flee(DoActions):
 
     def __init__(self, character, **kwargs):
         DoActions.__init__(self, character, **kwargs)
+        
+        global in_shop         
 
         if character.check_round_time():
             return
@@ -259,6 +269,7 @@ class Flee(DoActions):
             return
         if status_window.showing_status == False:
             status_window.print_status()
+            in_shop = False
         available_moves = character.room.adjacent_moves()
         r = random.randint(0, len(available_moves) - 1)
         actions.do_action(action_input=available_moves[r], character=character)
@@ -648,6 +659,8 @@ class North(DoActions):
     def __init__(self, character, **kwargs):
         DoActions.__init__(self, character, **kwargs)
         
+        global in_shop         
+        
         if character.check_round_time():
             return
         if character.is_dead():
@@ -659,6 +672,7 @@ class North(DoActions):
             self.character.move_north()
             if status_window.showing_status == False:
                 status_window.print_status()
+                in_shop = False
         else:
             game_window.print_text('You cannot find a way to move in that direction.')
             
@@ -667,20 +681,45 @@ class North(DoActions):
 class Order(DoActions):
     """\
     In certain rooms, you are able to order products through an ordering system. ORDER initiates the ordering system.\
+    
+    Usage:
+    ORDER:  Enters the shop and displays the shop menu in the status window
+    ORDER <#>:  Orders the relevant item. You cannot order a specific item until you have entered the shop using the ORDER command by itself.
     """
     
     def __init__(self, character, **kwargs):
         DoActions.__init__(self, character, **kwargs)
+        
+        global in_shop 
+         
+        if character.check_round_time():
+            return
+        if character.is_dead():
+            return
+        if not character.check_position_to_move():
+            return 
             
         if character.room.shop == False:
             game_window.print_text("You can't seem to find a way to order anything here.")
             return 
         elif character.room.shop == True:
-            character.room.fill_shop()
-            status_window.print_shop_menu(shop_name=character.room.area, shop_text=character.room.shop_menu())
-            status_window.showing_status = False
-            game_window.print_text("Welcome to the shop. Please see the menu to the right.")
-            return
+            if in_shop == False:                
+                in_shop = True
+                character.room.fill_shop()
+                status_window.print_shop_menu(shop_text=character.room.shop_menu())
+                status_window.showing_status = False
+                game_window.print_text("Welcome to the shop. Please see the menu to the right.")
+                return
+            elif kwargs['number_1'] == None:
+                game_window.print_text("You need to specify an item to order or EXIT.")
+                return
+            elif kwargs['number_1'][0] > len(character.room.shop_items) or kwargs['number_1'][0] <= 0:
+                game_window.print_text("That is an improper selection. Choose again.")
+                return
+            else:
+                game_window.print_text("You have selected {}.  If you would like to buy this item, please respond BUY.".format(character.room.shop_items[kwargs['number_1'][0] - 1].name))
+                return
+                
 
 @DoActions.register_subclass('position')
 @DoActions.register_subclass('pos')
@@ -963,6 +1002,8 @@ class South(DoActions):
     def __init__(self, character, **kwargs):
         DoActions.__init__(self, character, **kwargs)
         
+        global in_shop         
+        
         if character.check_round_time():
             return
         if character.is_dead():
@@ -974,6 +1015,7 @@ class South(DoActions):
             self.character.move_south()
             if status_window.showing_status == False:
                 status_window.print_status()
+                in_shop = False
         else:
             game_window.print_text("You cannot find a way to move in that direction.")
             
@@ -1108,6 +1150,8 @@ class West(DoActions):
     def __init__(self, character, **kwargs):
         DoActions.__init__(self, character, **kwargs)
         
+        global in_shop         
+        
         if character.check_round_time():
             return
         if character.is_dead():
@@ -1119,6 +1163,7 @@ class West(DoActions):
             self.character.move_west()
             if status_window.showing_status == False:
                 status_window.print_status()
+                in_shop = False
         else:
             game_window.print_text("You cannot find a way to move in that direction.")
 

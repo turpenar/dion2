@@ -162,17 +162,26 @@ class MapTile(mixins.DataFileMixin):
             
     def shop_menu(self):
         item_number = 1
-        menu_text = ""
+        menu_text = []
+        menu_text.append(self.area)
+        menu_text.append("")
         for item in self._shop_items:
-            menu_text = menu_text + "{}.  {}\n".format(item_number, item.name)
+            menu_text.append("{}.  {}".format(item_number, item.name))
             item_number += 1
-        return menu_text
-            
+        menu_text.append("")
+        menu_text.append("To order, simply ORDER <#>")
+        menu_text.append("To exit, simply EXIT")
+        return menu_text  
     
     @property     
     def shop(self):
         with lock:
             return self._shop
+        
+    @property
+    def shop_items(self):
+        with lock:
+            return self._shop_items
 
     def add_object(self, object):
         with lock:
