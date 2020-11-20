@@ -73,7 +73,7 @@ class Item(mixins.ReprMixin, mixins.DataFileMixin):
     
     @classmethod
     def register_subclass(cls, item_category):
-        """Catalogues actions in a dictionary for reference purposes"""
+        """Catologues actions in a dictionary for reference purposes"""
         def decorator(subclass):
             cls.item_categories[item_category] = subclass
             return subclass

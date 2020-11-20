@@ -22,6 +22,7 @@ import actions as actions
 import world as world
 import mixins as mixins
 import objects as objects
+import shops as shops
 
 wrapper = textwrap.TextWrapper(width=config.TEXT_WRAPPER_WIDTH)
 
@@ -53,8 +54,8 @@ class MapTile(mixins.DataFileMixin):
         self.room_name = self._room_data['name']
         self.area = self._room_data['area']
         self.description = self._room_data['description']
-        self._shop = self._room_data['shop']
-        self._shop_items = []
+        self._is_shop = self._room_data['shop']
+        self._shop_items = self._room_data['shop_items']
         self.objects = []
         self.items = []
         self.npcs = []
@@ -155,28 +156,23 @@ class MapTile(mixins.DataFileMixin):
             
     def fill_shop(self):
         if not self.shop_filled:
-            for category in self._room_data['shop_items']:
-                for item in self._room_data['shop_items'][category]:
-                    self._shop_items.append(items.create_item(item_category=category, item_name=item))                
+            self.shop = shops.Shop(shop_name=self.area, shop_items=self.shop_items)
+            self.shop.write_shop_menu() 
             self.shop_filled = True
-            
-    def shop_menu(self):
-        item_number = 1
-        menu_text = []
-        menu_text.append(self.area)
-        menu_text.append("")
-        for item in self._shop_items:
-            menu_text.append("{}.  {}".format(item_number, item.name))
-            item_number += 1
-        menu_text.append("")
-        menu_text.append("To order, simply ORDER <#>")
-        menu_text.append("To exit, simply EXIT")
-        return menu_text  
     
     @property     
+    def is_shop(self):
+        with lock:
+            return self._is_shop
+        
+    @property
     def shop(self):
         with lock:
             return self._shop
+    @shop.setter
+    def shop(self, shop):
+        with lock:
+            self._shop = shop
         
     @property
     def shop_items(self):

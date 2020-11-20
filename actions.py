@@ -3,6 +3,7 @@
 
 TODO: Exit out of all demon programs when quit
 TODO: Check the characters position before it moves or performs certain actions.
+TODO: Integrate the BUY function into the shops.
 
 """
 
@@ -21,8 +22,6 @@ verbs = config.verbs
 stances = config.stances
 action_history = []
 wrapper = textwrap.TextWrapper(width=config.TEXT_WRAPPER_WIDTH)
-
-in_shop = False
     
 def link_game_window(window):
     global game_window
@@ -150,6 +149,40 @@ class Attributes(DoActions):
         game_window.print_text('''
 Attribute:  {}
             '''.format(character.attack_strength_base))
+        
+        
+@DoActions.register_subclass('buy')
+class Buy(DoActions):
+    """\
+    BUY enables you to purchase an item from a shop.
+    
+    Usage:
+    
+    BUY <#>:  Finalize purchase of the selected item.\
+    """
+    
+    def __init__(self, character, **kwargs):
+         
+        if character.check_round_time():
+            return
+        if character.is_dead():
+            return
+        if not character.check_position_to_move():
+            return 
+            
+        if character.room.is_shop == False:
+            game_window.print_text("You can't seem to find a way to order anything here.")
+            return
+        if character.room.shop_filled == False:
+            game_window.print_text("You will need to ORDER first.")
+            return
+        if character.room.shop.in_shop == False:
+            game_window.print_text("You have exited the shop. You will need to ORDER again.")
+            return 
+        if character.get_dominant_hand_inv() is not None:
+            game_window.print_text("You will need to empty your right hand first.")
+            return
+        character.set_dominant_hand_inv(character.room.shop.buy_item(number=kwargs['number_1']))
 
 
 @DoActions.register_subclass('drop')
@@ -196,9 +229,7 @@ class East(DoActions):
     """
 
     def __init__(self, character, **kwargs):
-        DoActions.__init__(self, character, **kwargs)
-        
-        global in_shop         
+        DoActions.__init__(self, character, **kwargs)     
         
         if character.check_round_time():
             return
@@ -207,13 +238,15 @@ class East(DoActions):
         if not character.check_position_to_move():
             return
         
+        if character.room.shop_filled == True:
+            if character.room.shop.in_shop == True:
+                character.room.shop.exit_shop()
         if world.tile_exists(x=self.character.location_x + 1, y=self.character.location_y, area=self.character.area):
             self.character.move_east()
-            if status_window.showing_status == False:
-                status_window.print_status()
-                in_shop = False
+            return
         else:
             game_window.print_text("You cannot find a way to move in that direction.")
+            return
             
             
 @DoActions.register_subclass('exit')
@@ -225,14 +258,18 @@ class Exit(DoActions):
     def __init__(self, character, **kwargs):
         DoActions.__init__(self, character, **kwargs)
         
-        global in_shop 
-        
-        if status_window.showing_status == False:
-            status_window.print_status()
-            in_shop = False
-            return
-        else:
+        if character.room.is_shop == False:
             game_window.print_status("You have nothing to exit.")
+            return 
+        if character.room.shop_filled == False:
+            game_window.print_status("You have nothing to exit.")
+            return
+        if character.room.shop.in_shop == False:
+            game_window.print_status("You have nothing to exit.")
+            return            
+        else:
+            character.room.shop.exit_shop()
+            return
 
             
 @DoActions.register_subclass('experience')
@@ -257,9 +294,7 @@ class Flee(DoActions):
     """
 
     def __init__(self, character, **kwargs):
-        DoActions.__init__(self, character, **kwargs)
-        
-        global in_shop         
+        DoActions.__init__(self, character, **kwargs)       
 
         if character.check_round_time():
             return
@@ -267,12 +302,13 @@ class Flee(DoActions):
             return
         if not character.check_position_to_move():
             return
-        if status_window.showing_status == False:
-            status_window.print_status()
-            in_shop = False
+        if character.room.shop_filled == True:
+            if character.room.shop.in_shop == True:
+                character.room.shop.exit_shop()
         available_moves = character.room.adjacent_moves()
         r = random.randint(0, len(available_moves) - 1)
         actions.do_action(action_input=available_moves[r], character=character)
+
         return
 
 
@@ -657,9 +693,7 @@ class North(DoActions):
     """
 
     def __init__(self, character, **kwargs):
-        DoActions.__init__(self, character, **kwargs)
-        
-        global in_shop         
+        DoActions.__init__(self, character, **kwargs)      
         
         if character.check_round_time():
             return
@@ -667,14 +701,15 @@ class North(DoActions):
             return
         if not character.check_position_to_move():
             return
-
+        if character.room.shop_filled == True:
+            if character.room.shop.in_shop == True:
+                character.room.shop.exit_shop()
         if world.tile_exists(x=self.character.location_x, y=self.character.location_y - 1, area=self.character.area):
             self.character.move_north()
-            if status_window.showing_status == False:
-                status_window.print_status()
-                in_shop = False
+            return
         else:
             game_window.print_text('You cannot find a way to move in that direction.')
+            return
             
             
 @DoActions.register_subclass('order')
@@ -689,8 +724,6 @@ class Order(DoActions):
     
     def __init__(self, character, **kwargs):
         DoActions.__init__(self, character, **kwargs)
-        
-        global in_shop 
          
         if character.check_round_time():
             return
@@ -699,26 +732,20 @@ class Order(DoActions):
         if not character.check_position_to_move():
             return 
             
-        if character.room.shop == False:
+        if character.room.is_shop == False:
             game_window.print_text("You can't seem to find a way to order anything here.")
             return 
-        elif character.room.shop == True:
-            if in_shop == False:                
-                in_shop = True
+        elif character.room.is_shop == True:  
+            if character.room.shop_filled == False:             
                 character.room.fill_shop()
-                status_window.print_shop_menu(shop_text=character.room.shop_menu())
-                status_window.showing_status = False
-                game_window.print_text("Welcome to the shop. Please see the menu to the right.")
+                character.room.shop.enter_shop()
                 return
-            elif kwargs['number_1'] == None:
-                game_window.print_text("You need to specify an item to order or EXIT.")
+            if character.room.shop.in_shop == False:
+                character.room.shop.enter_shop()
                 return
-            elif kwargs['number_1'][0] > len(character.room.shop_items) or kwargs['number_1'][0] <= 0:
-                game_window.print_text("That is an improper selection. Choose again.")
-                return
-            else:
-                game_window.print_text("You have selected {}.  If you would like to buy this item, please respond BUY.".format(character.room.shop_items[kwargs['number_1'][0] - 1].name))
-                return
+            character.room.shop.order_item(kwargs['number_1'])
+            return
+
                 
 
 @DoActions.register_subclass('position')
@@ -1000,9 +1027,7 @@ class South(DoActions):
     """
 
     def __init__(self, character, **kwargs):
-        DoActions.__init__(self, character, **kwargs)
-        
-        global in_shop         
+        DoActions.__init__(self, character, **kwargs)        
         
         if character.check_round_time():
             return
@@ -1010,12 +1035,11 @@ class South(DoActions):
             return
         if not character.check_position_to_move():
             return
-
+        if character.room.shop_filled == True:
+            if character.room.shop.in_shop == True:
+                character.room.shop.exit_shop()
         if world.tile_exists(x=self.character.location_x, y=self.character.location_y + 1, area=self.character.area):
             self.character.move_south()
-            if status_window.showing_status == False:
-                status_window.print_status()
-                in_shop = False
         else:
             game_window.print_text("You cannot find a way to move in that direction.")
             
@@ -1148,9 +1172,7 @@ class West(DoActions):
     """
 
     def __init__(self, character, **kwargs):
-        DoActions.__init__(self, character, **kwargs)
-        
-        global in_shop         
+        DoActions.__init__(self, character, **kwargs)       
         
         if character.check_round_time():
             return
@@ -1158,12 +1180,11 @@ class West(DoActions):
             return
         if not character.check_position_to_move():
             return
-
+        if character.room.shop_filled == True:
+            if character.room.shop.in_shop == True:
+                character.room.shop.exit_shop()
         if world.tile_exists(x=self.character.location_x - 1, y=self.character.location_y, area=self.character.area):
             self.character.move_west()
-            if status_window.showing_status == False:
-                status_window.print_status()
-                in_shop = False
         else:
             game_window.print_text("You cannot find a way to move in that direction.")
 

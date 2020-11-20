@@ -24,6 +24,7 @@ import char_gen as character_generator
 import tiles as tiles
 import skills as skills
 import items as items
+import shops as shops
 
 
 app = Flask(__name__)
@@ -88,7 +89,6 @@ class StatusWindow():
         with lock:
             self._status_window_text = ["This will be the status window."]
             self._showing_status = True
-        game_window.print_text("You have exited the shop.")
         return
     
     @property
@@ -119,9 +119,11 @@ items.link_game_window(game_window)
 enemies.link_game_window(game_window)
 combat.link_game_window(game_window)
 npcs.link_game_window(game_window)
+shops.link_game_window(game_window)
 tiles.link_status_window(status_window)
 player.link_status_window(status_window)
 actions.link_status_window(status_window)
+shops.link_status_window(status_window)
 
 @app.route('/', methods=['POST', 'GET'])
 def index():
@@ -134,7 +136,6 @@ def index():
     else:
         game_events = game_window._game_window_text
         status_data = status_window.status_window_text
-        print(status_data)
         return render_template('index.html', gameEvents=game_events, statusData = status_data)
 
 @app.route('/new_character', methods=['POST', 'GET'])
