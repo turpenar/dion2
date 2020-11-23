@@ -36,18 +36,6 @@ available_stat_points = config.available_stat_points
 lock = threading.Lock()
 
 
-class color:
-   PURPLE = '\033[95m'
-   CYAN = '\033[96m'
-   DARKCYAN = '\033[36m'
-   BLUE = '\033[94m'
-   GREEN = '\033[92m'
-   YELLOW = '\033[93m'
-   RED = '\033[91m'
-   BOLD = '\033[1m'
-   UNDERLINE = '\033[4m'
-   END = '\033[0m'
-
 class GameWindow():
     
     def __init__(self):
@@ -73,7 +61,10 @@ class GameWindow():
 class StatusWindow():
     
     def __init__(self):
-        self._status_window_text = ["This will be the status window."]
+        self._status_window_text = ["Right Hand:   empty",
+                                  "Left Hand:    empty",
+                                  "Stance:       none",
+                                  "Position:     none"]
         self._showing_status = True
         
     def __str__(self):
@@ -85,9 +76,9 @@ class StatusWindow():
             self._showing_status = False
         return
     
-    def print_status(self):
+    def print_status(self, status):
         with lock:
-            self._status_window_text = ["This will be the status window."]
+            self._status_window_text = status
             self._showing_status = True
         return
     
@@ -120,6 +111,7 @@ enemies.link_game_window(game_window)
 combat.link_game_window(game_window)
 npcs.link_game_window(game_window)
 shops.link_game_window(game_window)
+objects.link_game_window(game_window)
 tiles.link_status_window(status_window)
 player.link_status_window(status_window)
 actions.link_status_window(status_window)
@@ -211,6 +203,7 @@ Profession:  {}
         player.character.room = world.tile_exists(x=player.character.location_x, y=player.character.location_y, area=player.character.area)
         player.character.room.fill_room(character=player.character)
         player.character.room.intro_text()
+        player.character.print_status()
               
         return redirect('/')
     return render_template('/new_character.html', form=form, Stats=stats)
@@ -233,6 +226,7 @@ def load_character():
                 player.character.room.fill_room(character=player.character)
                 
         player.character.room.intro_text()
+        player.character.print_status()
         
         return redirect('/')
     

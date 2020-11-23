@@ -119,7 +119,6 @@ class MapTile(mixins.DataFileMixin):
             all_objects_output = all_objects[0]
         return "You also see {}.".format(all_objects_output)
         
-
     def all_object_handles(self):
         all_object_handles = []
         if len(self.items) + len(self.npcs) + len(self.objects) + len(self.enemies) == 0:
@@ -136,8 +135,11 @@ class MapTile(mixins.DataFileMixin):
 
     def fill_room(self, character):
         if not self.room_filled:
-            for door in self._room_data['doors']:
-                self.objects.append(objects.create_object(object_category='door', object_name=door, room=self))
+            for category in self._room_data['objects']:
+                for object in self._room_data['objects'][category]:
+                    print(object)
+                    self.objects.append(objects.create_object(object_category=category, object_name=object, room=self))
+            print(self.objects)
             for category in self._room_data['items']:
                 for item in self._room_data['items'][category]:
                     self.items.append(items.create_item(item_category=category, item_name=item))
@@ -289,11 +291,6 @@ class Dochas(Town):
         super().__init__(x=x, y=y, area_name=area_name, room_name=room_name)
 
 
-class Field(Town):
-    def __init__(self, x, y, area_name, room_name):
-        super().__init__(x=x, y=y, area_name=area_name, room_name=room_name)
-
-
 class DochasGrounds(Town):
     def __init__(self, x, y, area_name, room_name):
         super().__init__(x=x, y=y, area_name=area_name, room_name=room_name)
@@ -305,6 +302,11 @@ class DochasLeatherworks(Town):
 
 
 class DochasSmallHouse(Town):
+    def __init__(self, x, y, area_name, room_name):
+        super().__init__(x=x, y=y, area_name=area_name, room_name=room_name)
+        
+    
+class DochasWeaponsmith(Town):
     def __init__(self, x, y, area_name, room_name):
         super().__init__(x=x, y=y, area_name=area_name, room_name=room_name)
 
@@ -339,5 +341,8 @@ class EdgewoodForest(MapTile):
         spawn_thread.start()
 
 
+class Field(Town):
+    def __init__(self, x, y, area_name, room_name):
+        super().__init__(x=x, y=y, area_name=area_name, room_name=room_name)
 
 

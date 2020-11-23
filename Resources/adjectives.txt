@@ -1,5 +1,5 @@
-offensive
+offense
 forward
 neutral
 guarded
-defensive
+defense

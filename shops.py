@@ -35,8 +35,8 @@ class Shop(mixins.ReprMixin, mixins.DataFileMixin):
             self.shop_menu.append("{}.  {}".format(item_number, item.name))
             item_number += 1
         self.shop_menu.append("")
-        self.shop_menu.append("To order, simply ORDER <#>")
-        self.shop_menu.append("To exit, simply EXIT")
+        self.shop_menu.append("To order, simply ORDER <#>.")
+        self.shop_menu.append("To exit, simply EXIT.")
         return
         
     def enter_shop(self):
@@ -47,7 +47,6 @@ class Shop(mixins.ReprMixin, mixins.DataFileMixin):
         
     def exit_shop(self):
         self.in_shop = False
-        status_window.print_status()
         game_window.print_text("You have exited the shop.")
         return
         
@@ -69,7 +68,7 @@ class Shop(mixins.ReprMixin, mixins.DataFileMixin):
             game_window.print_text("You need to specify an item to buy or EXIT.")
             return
         if number is None:
-            game_window.print_text("You have decided to buy {}.".format(self._shop_items[self._item_selected].name))
+            game_window.print_text("Congratulations! You have purchased {}.".format(self._shop_items[self._item_selected].name))
             return self._shop_items[self._item_selected]
         else:
             if number[0] > len(self._shop_items) or number[0] <= 0:

@@ -83,5 +83,5 @@ profession_choices = ['Clairvoyant', 'Enchanter', 'Illusionist', 'Paladin', 'Ran
 stats = ['Strength', 'Constitution', 'Dexterity', 'Agility', 'Intellect', 'Wisdom', 'Logic', 'Spirit']
 gender_choices = ['Female', 'Male']
 positions = ['standing', 'kneeling', 'sitting', 'lying']
-stances = ['offensive', 'forward', 'neutral', 'guarded', 'defensive']
+stances = ['offense', 'forward', 'neutral', 'guarded', 'defense']
 

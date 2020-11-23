@@ -1,50 +1,10 @@
 {
-	"Door": {
-		"dochas_west_gate": {
-			"name": "the town gate", 
-			"description": "Standing just over head-high, the Dochas West Gate is a feeble attempt at keeping out intruders.", 
-			"handle": ["gate"],
-			"adjectives": ["town"],
-			"container": false,
-			"visibility": 100,
-			"location_1": {
-				"name": "Outside the West Gate",
-				"area": "Field",
-				"x": 5,
-				"y": 3
-			},
-			"location_2": {
-				"name": "West Gate",
-				"area": "Dochas",
-				"x": 0,
-				"y": 1
-			}
-		}, 
-		"dochas_south_gate": {
-			"name": "the town gate", 
-			"description": "Standing just over head-high, the Dochas South Gate is a feeble attempt at keeping out intruders.", 
-			"handle": ["gate"],
-			"adjectives": ["town"],
-			"container": false,
-			"visibility": 100,
-			"location_1": {
-				"name": "South Gate",
-				"area": "Dochas",
-				"x": 3,
-				"y": 7
-			},
-			"location_2": {
-				"name": "Outside Gate",
-				"area": "DochasGrounds",
-				"x": 2,
-				"y": 1
-			}
-		}, 
+	"Doors": { 
 		"dochas_leatherworks_door": {
-			"name": "Dochas Leatherworks door", 
+			"name": "a battered door", 
 			"description": "You see a rickety door, worn by years of use.", 
 			"handle": ["door"],
-			"adjectives": [],
+			"adjectives": ["battered"],
 			"container": false,
 			"visibility": 100,
 			"location_1": {
@@ -100,6 +60,66 @@
 				"y": 2
 			}
 		}, 
+		"dochas_south_gate": {
+			"name": "the town gate", 
+			"description": "Standing just over head-high, the Dochas South Gate is a feeble attempt at keeping out intruders.", 
+			"handle": ["gate"],
+			"adjectives": ["town"],
+			"container": false,
+			"visibility": 100,
+			"location_1": {
+				"name": "South Gate",
+				"area": "Dochas",
+				"x": 3,
+				"y": 7
+			},
+			"location_2": {
+				"name": "Outside Gate",
+				"area": "DochasGrounds",
+				"x": 2,
+				"y": 1
+			}
+		}, 
+		"dochas_weaponsmith_opening": {
+			"name": "a wide opening", 
+			"description": "The gap in the stores is less of a door, and more of a missing wall. The bustle of the streets blends in with the shops intereior. There does not appear to be a way to close this opening.", 
+			"handle": ["opening"],
+			"adjectives": ["wide"],
+			"container": false,
+			"visibility": 100,
+			"location_1": {
+				"name": "The North End Outfitters",
+				"area": "Dochas",
+				"x": 5,
+				"y": 0
+			},
+			"location_2": {
+				"name": "Entryway",
+				"area": "DochasWeaponsmith",
+				"x": 0,
+				"y": 0
+			}
+		},
+		"dochas_west_gate": {
+			"name": "the town gate", 
+			"description": "Standing just over head-high, the Dochas West Gate is a feeble attempt at keeping out intruders.", 
+			"handle": ["gate"],
+			"adjectives": ["town"],
+			"container": false,
+			"visibility": 100,
+			"location_1": {
+				"name": "Outside the West Gate",
+				"area": "Field",
+				"x": 5,
+				"y": 3
+			},
+			"location_2": {
+				"name": "West Gate",
+				"area": "Dochas",
+				"x": 0,
+				"y": 1
+			}
+		}, 
 		"edgwood_forest_path": {
 			"name": "a path", 
 			"description": "You see an unassuming path meant for foot traffic through the woods.", 
@@ -128,6 +148,19 @@
 			"handle": ["stool"], 
 			"adjectives": ["sturdy"],
 			"container": false,
+			"stackable": true,
+			"visibility": 100,
+			"location": ""
+		}
+	},
+	"Miscellaneous": {
+			"order_sign": {
+			"name": "a sign", 
+			"description": "The sign reads: if you would like anything, simply ORDER.",
+			"handle": ["sign"], 
+			"adjectives": [],
+			"container": false,
+			"stackable": false,
 			"visibility": 100,
 			"location": ""
 		}

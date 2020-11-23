@@ -218,6 +218,7 @@ class Drop(DoActions):
             character.room.items.append(character.get_dominant_hand_inv())
             game_window.print_text("You drop " + character.get_dominant_hand_inv().name)
             character.set_dominant_hand_inv(item=None)
+            character.print_status()
             return
 
 
@@ -237,12 +238,12 @@ class East(DoActions):
             return
         if not character.check_position_to_move():
             return
-        
-        if character.room.shop_filled == True:
-            if character.room.shop.in_shop == True:
-                character.room.shop.exit_shop()
         if world.tile_exists(x=self.character.location_x + 1, y=self.character.location_y, area=self.character.area):
+            if character.room.shop_filled == True:
+                if character.room.shop.in_shop == True:
+                    character.room.shop.exit_shop()             
             self.character.move_east()
+            character.print_status()
             return
         else:
             game_window.print_text("You cannot find a way to move in that direction.")
@@ -269,6 +270,7 @@ class Exit(DoActions):
             return            
         else:
             character.room.shop.exit_shop()
+            character.print_status()
             return
 
             
@@ -308,6 +310,7 @@ class Flee(DoActions):
         available_moves = character.room.adjacent_moves()
         r = random.randint(0, len(available_moves) - 1)
         actions.do_action(action_input=available_moves[r], character=character)
+        character.print_status()
 
         return
 
@@ -345,6 +348,7 @@ class Get(DoActions):
                     character.set_dominant_hand_inv(room_item)
                     character.room.items.remove(room_item)
                     game_window.print_text("You pick up {}.".format(room_item.name))
+                    character.print_status()
                     return
             if not item_found:
                 for inv_item in character.inventory:
@@ -354,6 +358,7 @@ class Get(DoActions):
                                 character.set_dominant_hand_inv(sub_item)
                                 inv_item.items.remove(sub_item)
                                 game_window.print_text("You take {} from {}.".format(sub_item.name, inv_item.name))
+                                character.print_status()
                                 return
             if not item_found:
                 game_window.print_text("A " + kwargs['direct_object'][0] + " is nowhere to be found")
@@ -395,6 +400,7 @@ class Give(DoActions):
                 if {npc.first_name.lower()} & set(kwargs['indirect_object']):
                     if npc.give_item(character.get_dominant_hand_inv()):
                         character.set_dominant_hand_inv(item=None)
+                        character.print_status()
                         return
                     else:
                         return
@@ -424,28 +430,18 @@ class Go(DoActions):
         if not kwargs['direct_object']:
             game_window.print_text("Go where?")
             return
-        else:
-            object_found = False
-            for room_object in character.room.objects:
-                if set(room_object.handle) & set(kwargs['direct_object']):
-                    new_location = room_object.go_object(character=character)
-                    character.room = world.tile_exists(x=new_location['x'], y=new_location['y'], area=new_location['area'].replace(" ",""))
-                    character.location_x = new_location['x']
-                    character.location_y = new_location['y']
-                    character.area = new_location['area']
-                    character.room.fill_room(character=character)
-                    character.room.intro_text()
-                    character.room.run(character=character)
-                    object_found = True
-            if object_found == False:
-                for room_item in character.room.items:
-                    if set(room_item.handle) & set(kwargs['direct_object']):
-                        game_window.print_text("You move toward {}.".format(room_item.name))
-                        object_found = True
-            if object_found == False:
-                for room_npc in character.room.npcs:
-                    if set(room_npc.handle) & set(kwargs['direct_object']):
-                        game_window.print_text("You move toward {}.".format(room_npc.name))
+        for room_object in character.room.objects:
+            if set(room_object.handle) & set(kwargs['direct_object']):
+                room_object.go_object(character=character)
+                return
+        for room_item in character.room.items:
+            if set(room_item.handle) & set(kwargs['direct_object']):
+                game_window.print_text("You move toward {}.".format(room_item.name))
+                return
+        for room_npc in character.room.npcs:
+            if set(room_npc.handle) & set(kwargs['direct_object']):
+                game_window.print_text("You move toward {}.".format(room_npc.name))
+                return
         
 @DoActions.register_subclass('health')
 class Health(DoActions):
@@ -582,10 +578,12 @@ class Kneel(DoActions):
             return 
         if character.position == 'kneeling':
             game_window.print_text('You seem to already be kneeling.')
+            character.print_status()
             return 
         else:
             character.position = 'kneeling'
             game_window.print_text('You move yourself to a kneeling position.')
+            character.print_status()
             return
         
         
@@ -599,17 +597,18 @@ class Lie(DoActions):
     def __init__(self, character, **kwargs):
         DoActions.__init__(self, character, **kwargs)
         
-    def lie(self):
         if character.check_round_time():
             return 
         if character.is_dead():
             return 
         if character.position == 'lying':
             game_window.print_text('You seem to already be lying down.')
+            character.print_status()
             return 
         else:
             character.position = 'lying'
             game_window.print_text('You lower yourself to the ground and lie down.')
+            character.print_status()
             return
 
 
@@ -701,11 +700,12 @@ class North(DoActions):
             return
         if not character.check_position_to_move():
             return
-        if character.room.shop_filled == True:
-            if character.room.shop.in_shop == True:
-                character.room.shop.exit_shop()
         if world.tile_exists(x=self.character.location_x, y=self.character.location_y - 1, area=self.character.area):
+            if character.room.shop_filled == True:
+                if character.room.shop.in_shop == True:
+                    character.room.shop.exit_shop()        
             self.character.move_north()
+            character.print_status()
             return
         else:
             game_window.print_text('You cannot find a way to move in that direction.')
@@ -729,8 +729,6 @@ class Order(DoActions):
             return
         if character.is_dead():
             return
-        if not character.check_position_to_move():
-            return 
             
         if character.room.is_shop == False:
             game_window.print_text("You can't seem to find a way to order anything here.")
@@ -807,6 +805,7 @@ class Put(DoActions):
                     inv_item.items.append(character.get_dominant_hand_inv())
                     game_window.print_text("You put {} {} {}".format(character.get_dominant_hand_inv().name, kwargs['preposition'][0], inv_item.name))
                     character.set_dominant_hand_inv(item=None)
+                    character.print_status()
                     return
             for room_item in character.room.items:
                 if set(room_item.handle) & set(kwargs['indirect_object']):
@@ -817,6 +816,7 @@ class Put(DoActions):
                     character.set_dominant_hand_inv(item=None)
                     game_window.print_text("You put {} {} {}".format(character.get_dominant_hand_inv().name, kwargs['preposition'][0], room_item.name))
                     character.set_dominant_hand_inv(item=None)
+                    character.print_status()
                     return
         elif kwargs['preposition'][0] == "on":
             game_window.print_text("You cannot stack items yet.")
@@ -941,10 +941,12 @@ class Sit(DoActions):
             return 
         if character.position == 'sitting':
             game_window.print_text('You seem to already be sitting.')
+            character.print_status()
             return 
         else:
             character.position = 'sitting'
             game_window.print_text('You move yourself to a sitting position.')
+            character.print_status()
             return
 
 
@@ -1035,11 +1037,12 @@ class South(DoActions):
             return
         if not character.check_position_to_move():
             return
-        if character.room.shop_filled == True:
-            if character.room.shop.in_shop == True:
-                character.room.shop.exit_shop()
         if world.tile_exists(x=self.character.location_x, y=self.character.location_y + 1, area=self.character.area):
+            if character.room.shop_filled == True:
+                if character.room.shop.in_shop == True:
+                    character.room.shop.exit_shop()        
             self.character.move_south()
+            character.print_status()        
         else:
             game_window.print_text("You cannot find a way to move in that direction.")
             
@@ -1059,7 +1062,7 @@ class Stance(DoActions):
     forward
     neutral
     guarded
-    defensive\
+    defense\
     """
     
     def __init__(self, character, **kwargs):
@@ -1067,15 +1070,16 @@ class Stance(DoActions):
         
         self.character = character
         
-        self.stance(kwargs['adjective_1'])
+        self.stance(character=character, desired_stance=kwargs['adjective_1'])
         
-    def stance(self, desired_stance):
+    def stance(self, character, desired_stance):
         if not desired_stance:
             game_window.print_text('''You are currently in the {} stance.'''.format(self.character.stance))
             return
         if set(desired_stance) & set(stances):
             self.character.stance = desired_stance[0]
             game_window.print_text('''You are now in {} stance.'''.format(desired_stance[0]))
+            character.print_status()
             return
         else:
             game_window.print_text("You cannot form that stance.")
@@ -1093,19 +1097,21 @@ class Stand(DoActions):
         
         self.character = character
         
-        self.stand()
+        self.stand(character=self.character)
         
-    def stand(self):
+    def stand(self, character):
         if self.character.check_round_time():
             return 
         if self.character.is_dead():
             return 
         if self.character.position == 'standing':
             game_window.print_text('You seem to already be standing.')
+            character.print_status()
             return 
         else:
             self.character.position = 'standing'
             game_window.print_text('You raise yourself to a standing position.')
+            character.print_status()
             return
 
 
@@ -1180,11 +1186,12 @@ class West(DoActions):
             return
         if not character.check_position_to_move():
             return
-        if character.room.shop_filled == True:
-            if character.room.shop.in_shop == True:
-                character.room.shop.exit_shop()
         if world.tile_exists(x=self.character.location_x - 1, y=self.character.location_y, area=self.character.area):
+            if character.room.shop_filled == True:
+                if character.room.shop.in_shop == True:
+                    character.room.shop.exit_shop()        
             self.character.move_west()
+            character.print_status()
         else:
             game_window.print_text("You cannot find a way to move in that direction.")
 

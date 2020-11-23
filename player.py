@@ -224,8 +224,8 @@ class Player(mixins.ReprMixin, mixins.DataFileMixin):
             
     def check_position_to_move(self):
         non_moving_positions = [x for x in positions if x is not 'standing']
-        if set(self.position) & set(non_moving_positions):
-            game_window.print_text('''You cannot move, you are {} down.'''.format(self.position[0]))
+        if set([self.position]) & set(non_moving_positions):
+            game_window.print_text('''You cannot move.  You are {}.'''.format(self.position))
             return False
         else:
             return True
@@ -618,6 +618,22 @@ class Player(mixins.ReprMixin, mixins.DataFileMixin):
     def move_west(self, **kwargs):
         self.move(dx=-1, dy=0)
         return
+    
+    def print_status(self, **kwargs):
+        if self.right_hand_inv is None:
+            right_hand_status = "empty"
+        else:
+            right_hand_status = self.right_hand_inv.name
+        
+        if self.left_hand_inv is None:
+            left_hand_status = "empty"
+        else:
+            left_hand_status = self.left_hand_inv.name
+        
+        status_window.print_status(status=["Right Hand:  {}".format(right_hand_status),
+                                           "Left Hand:   {}".format(left_hand_status),
+                                           "Stance:      {}".format(self.stance),
+                                           "Position:    {}".format(self.position)])
     
     def save(self,):
         save_data = self.__getstate__()
