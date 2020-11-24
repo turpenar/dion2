@@ -987,7 +987,7 @@
 			"shop_items":  {
 				"clothing": [],
 				"armor": [],
-				"weapon": ["dagger01", "rapier01", "short_sword01", "longsword01"],
+				"weapon": ["dagger01", "rapier01", "short_sword01", "longsword01", "broadsword01", "handaxe01", "battle_axe01", "whip01", "cudgel01", "mace01", "morning_star01", "flail01", "hammer01", "pilum01", "spear01", "halberd01", "trident01"],
 				"ring": [],
 				"neck": [],
 				"skin": [],
