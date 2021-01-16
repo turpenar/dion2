@@ -472,16 +472,19 @@ class Help(DoActions):
         DoActions.__init__(self, character, **kwargs)
         
         verb_list = ""
-        
-        for a, b, c in zip(verbs[::3], verbs[1::3], verbs[2::3]):
-            verb_list = verb_list + '{:<30}{:<30}{:<}\n'.format(a,b,c)
 
         if kwargs['subject_verb'] == None:
+                    
+            for a, b, c in zip(verbs[::3], verbs[1::3], verbs[2::3]):
+                verb_list = verb_list + '{:30s}{:30s}{:30s}\n'.format(a,b,c)
+            
             game_window.print_text("""
 Below are the list of actions for which you can ask for help.
 Type HELP <verb> for more information about that specific verb.
 {}\
             """.format(verb_list))
+            
+            print("""verb list:  {}""".format(verb_list))
 
             
         elif kwargs['subject_verb'] in DoActions.do_actions:
