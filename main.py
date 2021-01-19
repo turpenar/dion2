@@ -29,6 +29,8 @@ import shops as shops
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'Dion'
+app.jinja_env.trim_blocks = True
+app.jinja_env.lstrip_blocks = True
 profession_choices = config.profession_choices
 stats = config.stats
 available_stat_points = config.available_stat_points
@@ -121,7 +123,7 @@ shops.link_status_window(status_window)
 def index():
     
     if request.method == "POST":
-        action_content = request.form['content']
+        action_content = request.form['action']
         game_window.print_command(action_content)
         actions.do_action(action_input=action_content, character=player.character)
         return redirect('/')    
@@ -286,17 +288,6 @@ def skills_modify():
 def interactive():
     try:
         return render_template("interactive.html")
-    except Exception:
-        return(str('Error'))
-
-@app.route('/_background_process')
-def _background_process():
-    try:
-        lang = request.args.get('proglang')
-        if str(lang).lower() == 'python':
-            return jsonify(result='You are wise!')
-        else:
-            return jsonify(result='Try again!')
     except Exception:
         return(str('Error'))
 

@@ -483,8 +483,6 @@ Below are the list of actions for which you can ask for help.
 Type HELP <verb> for more information about that specific verb.
 {}\
             """.format(verb_list))
-            
-            print("""verb list:  {}""".format(verb_list))
 
             
         elif kwargs['subject_verb'] in DoActions.do_actions:

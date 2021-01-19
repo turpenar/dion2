@@ -257,8 +257,7 @@ class MapTile(mixins.DataFileMixin):
 [{}, {}] 
 {}
 {}
-{}
-        \
+{}\
         """.format(self.area,
                    self.room_name,
                    wrapper.fill(text=self.description),

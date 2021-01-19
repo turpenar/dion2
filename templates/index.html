@@ -18,8 +18,15 @@
 	
 </head>
 
+<body>
+
+<div class="title">
 
 <h1>Dion</h1>
+
+</div>
+
+<div class="menu">
 
 <br>
 <a href="new_character"><button>New Character</button></a>
@@ -28,35 +35,33 @@
 <br>
 <br>
 
+</div>
+
 <div class="interface-window">
 
 	<div class="game-window">
-
-	{% for event in gameEvents %}
-
-	{{ event }}<br>
-
-	{% endfor %}
-
+{% for event in gameEvents %}
+{{ event }}
+{% endfor %}
 	</div>
 
 	<div class="status-window">
 	
-	{% for para in statusData %}
-	
-	{{para}}<br>
-	
-	{% endfor %}
+{% for para in statusData %}	
+{{para}}<br>
+{% endfor %}
 	
 	</div>
 
 </div>
 
 <form id="command-line-form" class="command-line" action="/" method="POST" autocomplete="off">
-	<input type="text" name="content" id="content" autofocus="autofocus" size="190">
-	<input type="submit" value="Enter">
+	<input type="text" name="action" id="action" autofocus="autofocus" width="100%">
+	<input type="submit" id="enter-button" value="Enter">
 </form>
 
+</body>
+<br>
 
 <p class='synopsis'>Copyright</p>
 
