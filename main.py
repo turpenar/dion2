@@ -2,6 +2,7 @@
 
 from flask import Flask, render_template, url_for, request, redirect, jsonify
 from flask_sqlalchemy import SQLAlchemy
+from flask_wtf.csrf import CsrfProtect
 from wtforms import IntegerField
 from datetime import datetime
 import threading as threading
@@ -27,8 +28,11 @@ import items as items
 import shops as shops
 
 
+csrf = CsrfProtect()
+
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'Dion'
+csrf.init_app(app)
 app.jinja_env.trim_blocks = True
 app.jinja_env.lstrip_blocks = True
 profession_choices = config.profession_choices
@@ -142,7 +146,7 @@ def new_character():
     stats_initial = {}
     stats_total = 0
 
-    if form.is_submitted():
+    if form.validate_on_submit():
         result = request.form
         first_name = result['first_name']
         last_name = result['last_name']
@@ -208,6 +212,7 @@ Profession:  {}
         player.character.print_status()
               
         return redirect('/')
+        
     return render_template('/new_character.html', form=form, Stats=stats)
 
 @app.route('/load_character', methods=['POST', 'GET'])

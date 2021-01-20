@@ -5,9 +5,7 @@
 {% endblock %}
 
 {% block body %}
-
 <head>
-
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 	<script type=text/javascript>
 		function submit() {
@@ -15,25 +13,17 @@
     		$.post("/receivedata", {"myData": myData})
 		}
 	</script>
-	
 </head>
 
-<body>
-
 <div class="title">
-
 <h1>Dion</h1>
-
 </div>
 
 <div class="menu">
 
-<br>
-<a href="new_character"><button>New Character</button></a>
-<a href="load_character"><button>Load Character</button></a>
-<a href="skills_modify"><button>Skills</button></a>
-<br>
-<br>
+<a href="new_character" class="interface-button"><button>New Character</button></a>
+<a href="load_character" class="interface-button"><button>Load Character</button></a>
+<a href="skills_modify" class="interface-button" id="skills-button"><button>Skills</button></a>
 
 </div>
 
@@ -56,14 +46,15 @@
 </div>
 
 <form id="command-line-form" class="command-line" action="/" method="POST" autocomplete="off">
+	<input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
 	<input type="text" name="action" id="action" autofocus="autofocus" width="100%">
-	<input type="submit" id="enter-button" value="Enter">
+	<input type="submit" class="interface-button" id="enter-button" value="Enter">
 </form>
 
-</body>
 <br>
 
+<div class="footer">
 <p class='synopsis'>Copyright</p>
-
+</div>
 
 {% endblock %}

@@ -4,7 +4,7 @@ from wtforms.validators import DataRequired, NumberRange
 
 import config as config
 
-stats = config.stats
+stats_list = config.stats
 
 class NewCharacterForm(FlaskForm):
     first_name = StringField('First Name', [DataRequired()])
@@ -12,12 +12,27 @@ class NewCharacterForm(FlaskForm):
     gender = SelectField(u'Gender', choices=config.gender_choices)
     profession = SelectField(u'Profession', choices=config.profession_choices)
     
-    stats = {}
+    stat_total_validation = IntegerField('stat_total_validation')
     
     submit = SubmitField('Create Character')
     
-for stat in stats:
-    setattr(NewCharacterForm, stat, IntegerField(stat, [DataRequired(), NumberRange(min=20, max=100)], default=u'Between 20 and 100'))
+    def validate(self):
+        
+        rv = FlaskForm.validate(self)
+        if not rv:
+            return False
+        
+        stat_total = 0
+        for stat in stats_list:
+            stat_total += int(getattr(self, stat).data)
+            
+        if stat_total >= config.available_stat_points:
+            self.stat_total_validation.errors.append('Total stats must be less than ' + str(config.available_stat_points))
+            return False
+        return True
+    
+for stat in stats_list:
+    setattr(NewCharacterForm, stat, IntegerField(stat, validators=[DataRequired(), NumberRange(min=20, max=100, message="Please choose a number between 20 and 100")]))
     
     
 class Skills(FlaskForm):

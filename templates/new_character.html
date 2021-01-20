@@ -5,38 +5,76 @@
 {% endblock %}
 
 {% block body %}
+
+
+<div class="title">
+
 <h1>Character Creator</h1>
 
+</div>
 
-<form action="" method="post">
-	<p>
-		{{form.first_name.label}} <br>
-		{{form.first_name(size=30)}}
-	</p>
-	<p>
-		{{form.last_name.label}} <br>
-		{{form.last_name(size=30)}}
-	</p>
-	<p>
-		{{form.gender.label}} <br>
-		{{form.gender(size=1)}}
-	</p>
-	<p>
-		{{form.profession.label}} <br>
-		{{form.profession(size=1)}}
-	</p>
-	<p>
-		{% for stat in Stats %}
-		{{form[stat].label}}
-		{{form[stat](size=5)}}<br>
-		{% endfor %}
-	</p>
-	
-	<p>{{form.submit()}}</p>
+<div class="menu">
 
-</form>
+</div>
 
-<p class="error-message">{{ outputMessage }}</p>
+<div class="interface-window">
+
+	<form action="{{ url_for('new_character') }}" method="post" role="form">
+		{{ form.hidden_tag() }}
+		<div>
+			{{form.first_name.label}} <br>
+			{{form.first_name(size=30)}}
+		</div>
+		<br>
+		<div>
+			{{form.last_name.label}} <br>
+			{{form.last_name(size=30)}}
+		</div>
+		<br>
+		<div>
+			{{form.gender.label}} <br>
+			{{form.gender(size=1)}}
+		</div>
+		<br>
+		<div>
+			{{form.profession.label}} <br>
+			{{form.profession(size=1)}}
+		</div>
+		<br>
+		<div class="container">
+			<div id="stats-left">
+				<div id="stats-instruction">
+				Please choose your stats. You have 528 stat points to place where you see fit. You may not have a stat lower than 20 or higher than 100.
+				</div>
+				{% for stat in Stats %}
+				<div class="stat">
+				{{form[stat].label}}
+				{{form[stat](size=5)}}
+				</div>
+				<div class="stat-error">
+				{% for error in form[stat].errors %}
+		    		{{ error }}
+				{% endfor %}
+				</div>
+				{% endfor %}
+				
+				<div class="stat-error">
+				{%for error in form.stat_total_validation.errors %}
+					{{error}}
+				{% endfor %}
+				</div>
+				
+			</div>
+			<div id="stats-description">
+				Stat descriptions will go here.
+			</div>
+		</div>
+			
+		<p>{{form.submit()}}</p>
+
+	</form>
+
+</div>
 
 
 {% endblock %}

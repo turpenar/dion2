@@ -1,0 +1,22 @@
+Blue and Refreshing
+#25274D - Terminal
+#464866 - Background
+#AAABB8 - Borders
+#2E9CCA - Accents
+#29648A - Title
+White - Text
+
+Accent Colors that Pop
+#802BB1 - Accent
+#2D283E - Terminal
+#564F6F - Borders
+#4C495D - Borders
+#D1D7E0 - Text
+
+Gorgeous Contrast
+#61892F - Accent
+#86C232 - Accent
+#222629 - Terminal
+#474B4F - Borders
+#6B6E70 - borders
+White - Text

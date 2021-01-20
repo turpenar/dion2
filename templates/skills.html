@@ -5,31 +5,72 @@
 {% endblock %}
 
 {% block body %}
-<h1>Skills</h1>
 
+<div class="title">
+	<h1>Skills</h1>
+</div>
 
-<label for="phyiscal_training_points">Physical Training Points</label>
+<div class="menu">
 
-<label for="mental_training_points">Mental Training Points</label>
+</div>
 
-<br>
+<div class="interface-window">
 
-{% for category in skillCategories %}
-<label for="{{category}}"><strong>{{category}}</strong></label>
-<br>
-{% for skill in skills[category] %}
-<label for="{{skill}}">{{skill}}</label>
-<button>+</button>
-<label for="number">1</label>
-<button>-</button>
-<br>
-{% endfor %}
-<br>
-{% endfor %}
-<br>
+	<label for="physical_training_points">Physical Training Points</label>
+	<span id="physical_training_points">200</span>
+	
+	<label for="mental_training_points">Mental Training Points</label>
+	<span id="mental_training_points">100</span>
+	
+	<br>
+	
+	{% for category in skillCategories %}
+	<label for="{{category}}" class="skill_category"><strong>{{category}}</strong></label>
+	<br>
+	{% for skill in skills[category] %}
+	<label for="{{skill}}" class="skill_name" id="skill_name_{{skill}}">{{skill}}</label>
+	<button id="skill_add_{{skill}}" onClick="increase_skill_value('{{skill}}')">+</button>
+	<label for="number" id="skill_value_{{skill}}">0</label>
+	<button id="skill_subtract_{{skill}}" onClick="decrease_skill_value('{{skill}}')">-</button>
+	
+	<br>
+	{% endfor %}
+	<br>
+	{% endfor %}
+	<br>
+	
+	<input type="submit" value="Enter">
 
-<input type="submit" value="Enter">
+</div>
 
+<script>
+	var total_physical_training_points = document.getElementById("physical_training_points").innerHTML;
+	var total_mental_training_points = document.getElementById("mental_training_points").innerHTML;
+	
+	function increase_skill_value(skill) {
+		var value = parseInt(document.getElementById("skill_value_" + skill).innerHTML)
+		value ++
+		total_physical_training_points --
+		total_mental_training_points --
+		document.getElementById("skill_value_" + skill).innerHTML = value
+		document.getElementById("physical_training_points").innerHTML = total_physical_training_points
+		document.getElementById("mental_training_points").innerHTML = total_mental_training_points
+	}
+	
+	function decrease_skill_value(skill) {
+		var value = parseInt(document.getElementById("skill_value_" + skill).innerHTML)
+		if (value == 0) {
+			return
+		}
+		value--
+		total_physical_training_points ++
+		total_mental_training_points ++
+		document.getElementById("skill_value_" + skill).innerHTML = value
+		document.getElementById("physical_training_points").innerHTML = total_physical_training_points
+		document.getElementById("mental_training_points").innerHTML = total_mental_training_points
+	}
+	
+</script>
 
 
 {% endblock %}

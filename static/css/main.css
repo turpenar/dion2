@@ -2,19 +2,23 @@ body {
 	margin: 0;
 	width: 98%;
 	font-family: sans-sarif;
-	background-color: #f9f9eb;
+	color: #FFFFFF;
+	background-color: #464866;
 }
 
 .title {
 	width: 100%;
 	margin-left: 10px;
-	margin-right: 10px
+	margin-right: 10px;
+	font-family: luminari, fantasy;
+	color: #FFFFFF;
 }
 
 .menu {
 	width: 100%;
 	margin-left: 10px;
-	margin-right: 10px
+	margin-right: 10px;
+	margin-bottom: 10px;
 }
 
 .interface-window {
@@ -28,7 +32,8 @@ body {
 	height: 500px;
 	font-family: Courier New, monospace;
 	font-size:  17px;
-	background-color: #f2f6e0;
+	font-weight: 500;
+	background-color: #25274D;
 	overflow: auto;
     display: flex;
     flex-direction: column-reverse;
@@ -36,7 +41,7 @@ body {
     border: solid;
     border-style: inset;
     border-width: thick;
-    border-color: #d9d2b6;
+    border-color: #AAABB8;
     float: left;
 }
 
@@ -45,13 +50,14 @@ body {
 	height: 505px;
 	font-family: Courier New, monospace;
 	font-size: 17px;
-	background-color: #f2f6e0;
+	font-weight: 500;
+	background-color: #25274D;
 	overflow: auto;
 	display: flex;
 	border: solid;
 	border-style: groove;
 	border-width: normal;
-	border-color: #d9d2b6;
+	border-color: #AAABB8;
 	float: right;
 }
 
@@ -59,15 +65,78 @@ body {
 	width: 90%;
 	margin-left: 10px;
 	margin-right: 10px;
-	align: left;
+	margin-top: 10px;
+	float: left;
+	display: inline;
 }
 
 .command-line input {
 	width: 94%;
 	float: left;
+	display: inline;
+}
+
+.interface-button {
+	background-color: #2E9CCA;
+	border-color: #AAABB8;
+}
+
+#skills-button {
+	float: right;
 }
 
 #enter-button {
 	width: 5%;
-	float: right;
+	float: left;
+	display: inline;
+}
+
+.container {
+	overflow: hidden;
+}
+
+#stats-left {
+	width: 30%;
+	float: left;
+	padding-bottom: 500em;
+  	margin-bottom: -500em;
+}
+
+#stats-instruction {
+	width: 100%;
+}
+
+#stats-description {
+	width: 70%;
+	float: left;
+	color: #29648A;
+  	padding-bottom: 500em;
+  	margin-bottom: -500em;
+}
+
+.stat {
+	display: block;
+	width: 100%;
+}
+
+.stat:hover {
+	background-color: #2E9CCA;
+}
+
+.stat:active {
+	background-color: #2E9CCA;
+}
+
+.stat-error{
+	display: inline;
+	font-family: Georgia;
+	color: red;
+	font-size: 75%;
+}
+
+.footer {
+	width: 100%;
+	margin-left: 10px;
+	margin-right: 10px;
+	float: left;
 }
