@@ -69,6 +69,14 @@ class DataFileMixin(metaclass=abc.ABCMeta):
     
     def get_skill_category_by_name(self, name: str, file=config.SKILLS_FILE) -> dict:
         return self._get_by_name(name, 'skills', file)
+    
+    def get_skill_data_file(file=config.SKILLS_FILE, file_format=config.DATA_FORMAT) -> dict:
+        with open(file) as fl:
+            if file_format == "json":
+                data = json.load(fl, parse_int=int, parse_float=float)
+            else:
+                raise NotImplementedError(fl, "Missing support for opening files of type: {file_format}")
+        return data
 
 
 class ReprMixin(metaclass=abc.ABCMeta):

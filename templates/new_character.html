@@ -20,6 +20,7 @@
 <div class="interface-window">
 
 	<form action="{{ url_for('new_character') }}" method="post" role="form">
+		<input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
 		{{ form.hidden_tag() }}
 		<div>
 			{{form.first_name.label}} <br>
@@ -47,18 +48,18 @@
 				Please choose your stats. You have 528 stat points to place where you see fit. You may not have a stat lower than 20 or higher than 100.
 				</div>
 				{% for stat in Stats %}
-				<div class="stat">
-				{{form[stat].label}}
-				{{form[stat](size=5)}}
-				</div>
-				<div class="stat-error">
-				{% for error in form[stat].errors %}
-		    		{{ error }}
-				{% endfor %}
-				</div>
+					<div class="stat" id="stat_{{stat}}" onmouseover=highlightStat()>
+					{{form[stat].label}}
+					{{form[stat](size=5)}}
+					</div>
+					<div class="error">
+					{% for error in form[stat].errors %}
+			    		{{ error }}
+					{% endfor %}
+					</div>
 				{% endfor %}
 				
-				<div class="stat-error">
+				<div class="error">
 				{%for error in form.stat_total_validation.errors %}
 					{{error}}
 				{% endfor %}
@@ -75,6 +76,16 @@
 	</form>
 
 </div>
+
+
+<script>
+
+	function highlightStat() {
+		return false;
+	}
+
+
+<</script>
 
 
 {% endblock %}

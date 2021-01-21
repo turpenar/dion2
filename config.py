@@ -1,5 +1,6 @@
 import pathlib as pathlib
 import pandas as pd
+import json as json
 
 DATA_DIR = pathlib.Path(__file__).parent / "Resources"
 DATA_FORMAT = "json"
@@ -84,4 +85,12 @@ stats = ['Strength', 'Constitution', 'Dexterity', 'Agility', 'Intellect', 'Wisdo
 gender_choices = ['Female', 'Male']
 positions = ['standing', 'kneeling', 'sitting', 'lying']
 stances = ['offense', 'forward', 'neutral', 'guarded', 'defense']
+
+def get_skill_data_file(file=SKILLS_FILE, file_format=DATA_FORMAT) -> dict:
+    with open(file) as fl:
+        if file_format == "json":
+            data = json.load(fl, parse_int=int, parse_float=float)
+        else:
+            raise NotImplementedError(fl, "Missing support for opening files of type: {file_format}")
+    return data
 

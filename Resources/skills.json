@@ -11,6 +11,14 @@
 		"polearm_weapons": {
 			"physical_points": 3,
 			"mental_points": 1
+			},
+		"thrown_weapons": {
+			"physical_points": 2,
+			"mental_points": 2
+			},
+		"ranged_weapons": {
+			"physical_points": 2,
+			"mental_points": 2
 			}
 	},
 	"Armor": {

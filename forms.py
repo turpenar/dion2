@@ -1,10 +1,14 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, IntegerField, SelectField, PasswordField, SubmitField
+from wtforms import StringField, IntegerField, SelectField, PasswordField, SubmitField, HiddenField
 from wtforms.validators import DataRequired, NumberRange
 
 import config as config
+import player as player
+from numpy import integer
+import mixins as mixins
 
 stats_list = config.stats
+skills_data_file = config.get_skill_data_file()
 
 class NewCharacterForm(FlaskForm):
     first_name = StringField('First Name', [DataRequired()])
@@ -35,5 +39,13 @@ for stat in stats_list:
     setattr(NewCharacterForm, stat, IntegerField(stat, validators=[DataRequired(), NumberRange(min=20, max=100, message="Please choose a number between 20 and 100")]))
     
     
-class Skills(FlaskForm):
-    pass
+class SkillsForm(FlaskForm):
+    
+    physical_training_points_var = IntegerField('Physical Training Points', id="physical_training_points_var", validators=[NumberRange(min=0, message="You do not have enough physical training points")])
+    mental_training_points_var = IntegerField('Mental Training Points', id="mental_training_points_var", validators=[NumberRange(min=0, message="You do not have enough mental training points")])
+
+    submit = SubmitField('Update Skills')
+    
+for category in skills_data_file:
+    for skill in skills_data_file[category]:
+        setattr(SkillsForm, skill, IntegerField(skill, id="skill_value_var_" + skill))

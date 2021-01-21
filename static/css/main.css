@@ -127,7 +127,7 @@ body {
 	background-color: #2E9CCA;
 }
 
-.stat-error{
+.error{
 	display: inline;
 	font-family: Georgia;
 	color: red;

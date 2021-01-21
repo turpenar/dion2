@@ -156,24 +156,7 @@ def new_character():
         for stat in stats:
             stats_initial[stat.lower()] = int(result[stat])
             stats_total += stats_initial[stat.lower()]
-        
-        character_print  = '''
-*** You have created a new character! ***
-First Name:  {}
-Last Name:  {}
-Gender:  {}
-Profession:  {}
-            '''.format(first_name,
-                       last_name,
-                       gender,
-                       profession)
-        stat_print = ""
-        for stat in stats:
-            stat_print = stat_print + "\n" + stat + ":  " + str(stats_initial[stat.lower()])
-        character_print = character_print + "\n" + stat_print
-            
-        game_window.print_text(character_print)
-        
+
         world.load_tiles()
         player.create_character('new_player')
         
@@ -190,6 +173,23 @@ Profession:  {}
         player.character.set_gender(player.character.gender)
         skills.level_up_skill_points()
         player.character.save()
+
+        character_print  = '''
+*** You have created a new character! ***
+First Name:  {}
+Last Name:  {}
+Gender:  {}
+Profession:  {}
+            '''.format(first_name,
+                       last_name,
+                       gender,
+                       profession)
+        stat_print = ""
+        for stat in stats:
+            stat_print = stat_print + "\n" + stat + ":  " + str(stats_initial[stat.lower()])
+        character_print = character_print + "\n" + stat_print
+            
+        game_window.print_text(character_print)
         
         game_intro = '''
     The beast becomes restless...  hungry and tired...
@@ -255,38 +255,31 @@ def get_characters():
         character_names.append(character['_first_name'] + " " + character['_last_name'])
     
     return saved_characters, character_names
-
-def _get_by_name(obj_type: str, file: str, file_format=config.DATA_FORMAT) -> dict:
-    with open(file) as fl:
-        if file_format == "json":
-            data = json.load(fl, parse_int=int, parse_float=float)
-        else:
-            raise NotImplementedError(fl, "Missing support for opening files of type: {file_format}")
-    return data
-
-def get_skill_data_file(file=config.SKILLS_FILE, file_format=config.DATA_FORMAT) -> dict:
-    with open(file) as fl:
-        if file_format == "json":
-            data = json.load(fl, parse_int=int, parse_float=float)
-        else:
-            raise NotImplementedError(fl, "Missing support for opening files of type: {file_format}")
     
-    return data
 
 @app.route('/skills', methods=['POST', 'GET'])
 def skills_modify():
     
-    skill_data_file = get_skill_data_file()
-    skill_categories = list(skill_data_file.keys())
-    all_skills = {}
-    for category in skill_categories:
-        all_skills[category] = [x.replace("_", " ").title() for x in list(skill_data_file[category].keys())]
-
-    
-    if request.method == "POST":
+    if not player.character:
+        game_window.print_text('You do not yet have a character. Please create a new character or load a character.')
         return redirect('/')
     
-    return render_template('skills.html', skillCategories=skill_categories, skills=all_skills, skillDataFile=skill_data_file)
+    form = forms.SkillsForm()
+    skill_data_file = config.get_skill_data_file()
+    
+    if form.validate_on_submit():
+        
+        result = request.form
+        
+        player.character.physical_training_points = result['physical_training_points_var']
+        player.character.mental_training_points = result['mental_training_points_var']
+        
+        for skill in player.character.skills:
+            player.character.skills[skill] = int(result[skill])
+        
+        return redirect('/')
+    
+    return render_template('skills.html', form=form, player=player.character, skillDataFile=skill_data_file)
 
 
 @app.route('/interactive/')

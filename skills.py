@@ -14,7 +14,6 @@ import mixins as mixins
 
 global terminal_output
 profession_skillpoint_bonus_file = config.PROFESSION_SKILLPOINT_BONUS_FILE
-skills_file = config.SKILLS_FILE
 base_training_points = config.base_training_points
 
 
