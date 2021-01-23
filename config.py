@@ -13,6 +13,7 @@ QUEST_FILE = str(DATA_DIR / f"quests.{DATA_FORMAT}")
 OBJECT_FILE = str(DATA_DIR / f"objects.{DATA_FORMAT}")
 PLAYER_FILE = str(DATA_DIR / f"players.{DATA_FORMAT}")
 SKILLS_FILE = str(DATA_DIR / f"skills.{DATA_FORMAT}")
+STATS_FILE = str(DATA_DIR / f"stats.{DATA_FORMAT}")
 
 TEXT_WRAPPER_WIDTH = 100
 
@@ -87,6 +88,14 @@ positions = ['standing', 'kneeling', 'sitting', 'lying']
 stances = ['offense', 'forward', 'neutral', 'guarded', 'defense']
 
 def get_skill_data_file(file=SKILLS_FILE, file_format=DATA_FORMAT) -> dict:
+    with open(file) as fl:
+        if file_format == "json":
+            data = json.load(fl, parse_int=int, parse_float=float)
+        else:
+            raise NotImplementedError(fl, "Missing support for opening files of type: {file_format}")
+    return data
+
+def get_stats_data_file(file=STATS_FILE, file_format=DATA_FORMAT) -> dict:
     with open(file) as fl:
         if file_format == "json":
             data = json.load(fl, parse_int=int, parse_float=float)

@@ -7,7 +7,7 @@ import player as player
 from numpy import integer
 import mixins as mixins
 
-stats_list = config.stats
+stats_list = config.get_stats_data_file()
 skills_data_file = config.get_skill_data_file()
 
 class NewCharacterForm(FlaskForm):

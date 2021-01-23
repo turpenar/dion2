@@ -36,7 +36,7 @@ csrf.init_app(app)
 app.jinja_env.trim_blocks = True
 app.jinja_env.lstrip_blocks = True
 profession_choices = config.profession_choices
-stats = config.stats
+stats = config.get_stats_data_file()
 available_stat_points = config.available_stat_points
 
 lock = threading.Lock()
@@ -134,7 +134,7 @@ def index():
     else:
         game_events = game_window._game_window_text
         status_data = status_window.status_window_text
-        return render_template('index.html', gameEvents=game_events, statusData = status_data)
+        return render_template('index.html', gameEvents=game_events, statusData=status_data)
 
 @app.route('/new_character', methods=['POST', 'GET'])
 def new_character():

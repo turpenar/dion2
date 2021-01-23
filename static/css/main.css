@@ -106,10 +106,10 @@ body {
 	width: 100%;
 }
 
-#stats-description {
+.stats-description {
 	width: 70%;
 	float: left;
-	color: #29648A;
+	background-color: #25274D;
   	padding-bottom: 500em;
   	margin-bottom: -500em;
 }
@@ -119,12 +119,12 @@ body {
 	width: 100%;
 }
 
-.stat:hover {
+.stat-mouseenter {
 	background-color: #2E9CCA;
 }
 
-.stat:active {
-	background-color: #2E9CCA;
+.stat-click {
+	background-color: #25274D;
 }
 
 .error{

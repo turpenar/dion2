@@ -2,6 +2,7 @@
 
 {% block head %}
 <title>Dion - New Character</title>
+
 {% endblock %}
 
 {% block body %}
@@ -48,7 +49,7 @@
 				Please choose your stats. You have 528 stat points to place where you see fit. You may not have a stat lower than 20 or higher than 100.
 				</div>
 				{% for stat in Stats %}
-					<div class="stat" id="stat_{{stat}}" onmouseover=highlightStat()>
+					<div class="stat" id="{{stat}}">
 					{{form[stat].label}}
 					{{form[stat](size=5)}}
 					</div>
@@ -66,9 +67,17 @@
 				</div>
 				
 			</div>
-			<div id="stats-description">
-				Stat descriptions will go here.
+			
+			<div class="stats-description">
+			Please select a stat to learn more.
 			</div>
+	
+ 			{% for stat in Stats %}	
+				<div class="stats-description" id="stats-description-{{stat}}" style="display: none">
+				{{Stats[stat]['description']}}
+				</div>
+			{% endfor %}
+				
 		</div>
 			
 		<p>{{form.submit()}}</p>
@@ -77,15 +86,29 @@
 
 </div>
 
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
 <script>
 
-	function highlightStat() {
-		return false;
-	}
+	$(document).ready(function(){
+	  $(".stat").mouseenter(function() {
+	    $("#"+this.id).addClass('stat-mouseenter');
+	  });
+	  
+	  $(".stat").mouseout(function() {
+		$("#"+this.id).removeClass('stat-mouseenter');
+	  });
+	  
+	  $(".stat").click(function() {
+		$(".stat").removeClass('stat-click');
+		$("#"+this.id).addClass('stat-click');
+		$(".stats-description").hide();
+		$("#stats-description-"+this.id).show();
+	  });
+	  	
+	});
 
-
-<</script>
+</script>
 
 
 {% endblock %}

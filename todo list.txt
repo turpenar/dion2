@@ -1,0 +1,12 @@
+1. Skills page - make sure training points are integers and do not have decimal places.
+2. Add thrown weapons
+3. Add ranged weapons
+4. Remove "right_hand" from inventory text.
+5. Add read action
+6. Add wear action
+7. Add swap action
+8. Delete print function for path (outputs in terminal)
+9. In attacking, offense key error
+10. Defense seems to be off in combat
+11. Add basic spell
+
