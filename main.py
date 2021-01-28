@@ -1,8 +1,9 @@
-#Insert Copywrite
+#Insert Copywright
 
 from flask import Flask, render_template, url_for, request, redirect, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import CsrfProtect
+from flask_socketio import SocketIO, send, emit
 from wtforms import IntegerField
 from datetime import datetime
 import threading as threading
@@ -29,17 +30,20 @@ import shops as shops
 
 
 csrf = CsrfProtect()
+thread = None
+lock = threading.Lock()
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'Dion'
+app.config['DEBUG'] = True
 csrf.init_app(app)
 app.jinja_env.trim_blocks = True
 app.jinja_env.lstrip_blocks = True
+socketio = SocketIO(app)
+
 profession_choices = config.profession_choices
 stats = config.get_stats_data_file()
 available_stat_points = config.available_stat_points
-
-lock = threading.Lock()
 
 
 class GameWindow():
@@ -123,18 +127,21 @@ player.link_status_window(status_window)
 actions.link_status_window(status_window)
 shops.link_status_window(status_window)
 
-@app.route('/', methods=['POST', 'GET'])
+@app.route('/')
 def index():
+        return render_template('index.html', async_mode=socketio.async_mode)
     
-    if request.method == "POST":
-        action_content = request.form['action']
-        game_window.print_command(action_content)
-        actions.do_action(action_input=action_content, character=player.character)
-        return redirect('/')    
-    else:
-        game_events = game_window._game_window_text
-        status_data = status_window.status_window_text
-        return render_template('index.html', gameEvents=game_events, statusData=status_data)
+@socketio.event
+def connect():
+    emit('message', {'data': 'You are connected to the server.'})
+    
+@socketio.event
+def game_action(msg):
+    emit('message', {'data': msg['data']})
+    
+@socketio.event
+def game_event(game_event_text):
+    emit('game_event_print', {'data': game_event_text})
 
 @app.route('/new_character', methods=['POST', 'GET'])
 def new_character():
@@ -190,6 +197,8 @@ Profession:  {}
         character_print = character_print + "\n" + stat_print
             
         game_window.print_text(character_print)
+        global socketio
+        socketio.emit('game_event_print', {'data': character_print})
         
         game_intro = '''
     The beast becomes restless...  hungry and tired...
@@ -282,16 +291,8 @@ def skills_modify():
     return render_template('skills.html', form=form, player=player.character, skillDataFile=skill_data_file)
 
 
-@app.route('/interactive/')
-def interactive():
-    try:
-        return render_template("interactive.html")
-    except Exception:
-        return(str('Error'))
-
-
 if __name__ == '__main__':
-    app.run(debug=True)
+    socketio.run(app)
 
 
 # host='127.0.0.1', port=8080, 

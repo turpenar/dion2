@@ -28,7 +28,7 @@ body {
 }
 
 .game-window {
-	width: 83%;
+	width: 80%;
 	height: 500px;
 	font-family: Courier New, monospace;
 	font-size:  17px;
@@ -43,6 +43,7 @@ body {
     border-width: thick;
     border-color: #AAABB8;
     float: left;
+    list-style-type: none;
 }
 
 .status-window {

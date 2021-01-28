@@ -49,11 +49,13 @@ def calculate_stance_factor_for_defense(character):
     
 def calculate_attack_strength(character, weapon):
     attack_strength = character.attack_strength_base
+    print("attack strength before weapon:  " + str(attack_strength))
     if character.category == "player":
         if weapon:
             if weapon.category == 'weapon':
                 attack_strength += character.skills_bonus[weapon.sub_category] 
     attack_strength = int(attack_strength * calculate_position_factor_for_attack(character) * calculate_stance_factor_for_attack(character))
+    print("attack strength after weapon:  " + str(attack_strength))
     return attack_strength
     
 def calculate_defense_strength_evade(character):
@@ -187,6 +189,7 @@ STR {} - DEF {} + AF {} + D100 ROLL {} = {}
 {}\
     """.format(self.name, character.name, attack_strength, defense_strength, attack_factor, att_random, att_end_roll, result))
 
+    print(result)
     return character
 
 

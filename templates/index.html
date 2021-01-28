@@ -6,13 +6,6 @@
 
 {% block body %}
 <head>
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-	<script type=text/javascript>
-		function submit() {
-    		var myData = $('#command-line-form').serializeArray()
-    		$.post("/receivedata", {"myData": myData})
-		}
-	</script>
 </head>
 
 <div class="title">
@@ -21,8 +14,8 @@
 
 <div class="menu">
 
-<a href="new_character" class="interface-button"><button>New Character</button></a>
-<a href="load_character" class="interface-button"><button>Load Character</button></a>
+<a href="new_character" class="interface-button" target="_blank"><button>New Character</button></a>
+<a href="load_character" class="interface-button" target="_blank"><button>Load Character</button></a>
 
 <a href="skills" class="interface-button" id="skills-button"><button>Skills</button></a>
 
@@ -30,23 +23,15 @@
 
 <div class="interface-window">
 
-	<div class="game-window">
-{% for event in gameEvents %}
-{{ event }}
-{% endfor %}
+	<div class="game-window" id="game-window-id">
 	</div>
 
 	<div class="status-window">
-	
-{% for para in statusData %}	
-{{para}}<br>
-{% endfor %}
-	
 	</div>
 
 </div>
 
-<form id="command-line-form" class="command-line" action="/" method="POST" autocomplete="off">
+<form id="command-line-form" class="command-line" autocomplete="off">
 	<input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
 	<input type="text" name="action" id="action" autofocus="autofocus" width="100%">
 	<input type="submit" class="interface-button" id="enter-button" value="Enter">
@@ -57,5 +42,42 @@
 <div class="footer">
 <p class='synopsis'>Copyright</p>
 </div>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.0/socket.io.js"></script>
+<script>
+
+	$(document).ready(function(){
+		// sending a connect request to the server.
+        var socket = io.connect('http://127.0.0.1:5000');
+		 
+ 		function scrollBottom(id) {
+			var objDiv = document.getElementById(id);
+			objDiv.scrollTop = objDiv.scrollHeight;
+		};	
+		
+		socket.on('connect', function() {
+			socket.emit('msg', {'data': 'I am connected to the server.'});
+		});
+		
+		socket.on('message', function(msg) {			
+			$("#game-window-id").prepend('<li>>'+msg.data+'</li>');
+			scrollBottom("#game-window-id");
+		});
+		
+		socket.on('game_event_print', function(game_event_text) {
+			$("#game-window-id").prepend('<li>'+game_event_text.data+'</li>');
+		});
+		
+		$("form#command-line-form").submit(function(event) {
+			socket.emit('game_action', {'data': $('#action').val()});
+			$('#action').val('');
+			return false;
+		});
+		
+	});
+
+</script>
 
 {% endblock %}

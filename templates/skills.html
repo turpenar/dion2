@@ -21,7 +21,7 @@
 
 		{{form.physical_training_points_var.label}}
 		{{form.physical_training_points_var(value=player.physical_training_points, type="hidden")}}
-		<span id="physical_training_points">{{player.physical_training_points}}</span>
+		<span id="physical_training_points">{{player.physical_training_points|int}}</span>
 		<div class="error">
 			{% for error in form.physical_training_points_var.errors %}
 				{{error}}
@@ -30,7 +30,7 @@
 		
 		{{form.mental_training_points_var.label}}
 		{{form.mental_training_points_var(value=player.mental_training_points, type="hidden")}}
-		<span id="mental_training_points">{{player.mental_training_points}}</span>
+		<span id="mental_training_points">{{player.mental_training_points|int}}</span>
 		<div class="error">
 			{% for error in form.mental_training_points_var.errors %}
 				{{error}}

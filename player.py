@@ -424,7 +424,7 @@ class Player(mixins.ReprMixin, mixins.DataFileMixin):
 
     def set_character_attributes(self):
         for stat in self.stats:
-            self.stats_bonus[stat] = ((self.stats[stat] - available_stat_points / 8) / 2 + int(race_stats_file.loc[self.race][stat]))
+            self.stats_bonus[stat] = ((self.stats[stat] - 50 / 8) / 2 + int(race_stats_file.loc[self.race][stat]))
 
         self.health = int(math.floor((self.stats['strength'] + self.stats['constitution']) / 10))
         self.health_max = int(math.floor((self.stats['strength'] + self.stats['constitution']) / 10))

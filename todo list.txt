@@ -1,12 +1,17 @@
-1. Skills page - make sure training points are integers and do not have decimal places.
-2. Add thrown weapons
-3. Add ranged weapons
+1. Skills page - make sure training points are integers and do not have decimal places. - Done
+2. Later - Add thrown weapons
+3. Later - Add ranged weapons
 4. Remove "right_hand" from inventory text.
 5. Add read action
 6. Add wear action
 7. Add swap action
-8. Delete print function for path (outputs in terminal)
+8. Delete print function for path (outputs in terminal) - Done
 9. In attacking, offense key error
 10. Defense seems to be off in combat
 11. Add basic spell
+12. Add gulden rewards for kills and searches.
+13. Add costs in shops
+14. boar stops attack after being attacked.
+15. Incorporate dominant hand in character selection.
+16. Find a way to exit the game and restart at the last save point.
 
