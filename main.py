@@ -108,7 +108,6 @@ class StatusWindow():
         
 global game_window    
 game_window = GameWindow()
-game_window.print_text("")
 
 global status_window
 status_window = StatusWindow()
@@ -139,9 +138,11 @@ def connect():
 def game_action(msg):
     emit('message', {'data': msg['data']})
     
-@socketio.event
-def game_event(game_event_text):
-    emit('game_event_print', {'data': game_event_text})
+def game_event_print(game_event_text):
+    socketio.emit('game_event_print', {'data': game_event_text})
+
+def status_window_print(status_window_text):
+    socketio.emit('status_window_print', {'data': status_window_text})
 
 @app.route('/new_character', methods=['POST', 'GET'])
 def new_character():
@@ -195,10 +196,8 @@ Profession:  {}
         for stat in stats:
             stat_print = stat_print + "\n" + stat + ":  " + str(stats_initial[stat.lower()])
         character_print = character_print + "\n" + stat_print
-            
-        game_window.print_text(character_print)
-        global socketio
-        socketio.emit('game_event_print', {'data': character_print})
+
+        game_event(character_print)
         
         game_intro = '''
     The beast becomes restless...  hungry and tired...
@@ -213,14 +212,14 @@ Profession:  {}
     You open your eyes...
             '''.format(player.character.object_pronoun)
             
-        game_window.print_text(game_intro)
+        game_event_print(game_intro)
         
         player.character.room = world.tile_exists(x=player.character.location_x, y=player.character.location_y, area=player.character.area)
         player.character.room.fill_room(character=player.character)
         player.character.room.intro_text()
         player.character.print_status()
               
-        return redirect('/')
+        return
         
     return render_template('/new_character.html', form=form, Stats=stats)
 
@@ -244,7 +243,7 @@ def load_character():
         player.character.room.intro_text()
         player.character.print_status()
         
-        return redirect('/')
+        return
     
     return render_template('load_character.html', Characters=character_names)
 
@@ -270,7 +269,7 @@ def get_characters():
 def skills_modify():
     
     if not player.character:
-        game_window.print_text('You do not yet have a character. Please create a new character or load a character.')
+        game_event_print('You do not yet have a character. Please create a new character or load a character.')
         return redirect('/')
     
     form = forms.SkillsForm()
@@ -286,7 +285,7 @@ def skills_modify():
         for skill in player.character.skills:
             player.character.skills[skill] = int(result[skill])
         
-        return redirect('/')
+        return
     
     return render_template('skills.html', form=form, player=player.character, skillDataFile=skill_data_file)
 

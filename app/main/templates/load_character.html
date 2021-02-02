@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Dion - Load Character</title>
+{% endblock %}
+
+{% block body %}
+<div class="title">
+
+<h1>Character Loader</h1>
+
+</div>
+
+<div class="menu">
+
+</div>
+
+<div class="interface-window">
+
+	<p>Select a Character to load</p>
+	
+	<form action="{{ url_for('main.load_character') }}" method="POST">
+		<input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+		
+		<select name="character" id="character" required>
+		<option value="" selected="selected" disabled>Select One</option>
+		{% for character in Characters %}
+		<option value="{{character}}">{{character}}</option>
+		<br>
+		{% endfor %}
+		</select>
+		
+		<input type="submit" value="Enter">
+	</form>
+
+</div>
+
+
+
+{% endblock %}

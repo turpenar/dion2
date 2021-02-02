@@ -1,0 +1,143 @@
+body {
+	margin: 0;
+	width: 98%;
+	font-family: sans-sarif;
+	color: #FFFFFF;
+	background-color: #464866;
+}
+
+.title {
+	width: 100%;
+	margin-left: 10px;
+	margin-right: 10px;
+	font-family: luminari, fantasy;
+	color: #FFFFFF;
+}
+
+.menu {
+	width: 100%;
+	margin-left: 10px;
+	margin-right: 10px;
+	margin-bottom: 10px;
+}
+
+.interface-window {
+	width: 100%;
+	margin-left: 10px;
+	margin-right: 10px;
+}
+
+.game-window {
+	width: 80%;
+	height: 500px;
+	font-family: Courier New, monospace;
+	font-size:  17px;
+	font-weight: 500;
+	background-color: #25274D;
+	overflow: auto;
+    display: flex;
+    flex-direction: column-reverse;
+    white-space: pre-wrap;
+    border: solid;
+    border-style: inset;
+    border-width: thick;
+    border-color: #AAABB8;
+    float: left;
+    list-style-type: none;
+}
+
+.status-window {
+	width: 15%;
+	height: 505px;
+	font-family: Courier New, monospace;
+	font-size: 17px;
+	font-weight: 500;
+	background-color: #25274D;
+	overflow: auto;
+	display: flex;
+	border: solid;
+	border-style: groove;
+	border-width: normal;
+	border-color: #AAABB8;
+	float: right;
+}
+
+.command-line {
+	width: 90%;
+	margin-left: 10px;
+	margin-right: 10px;
+	margin-top: 10px;
+	float: left;
+	display: inline;
+}
+
+.command-line input {
+	width: 94%;
+	float: left;
+	display: inline;
+}
+
+.interface-button {
+	background-color: #2E9CCA;
+	border-color: #AAABB8;
+}
+
+#skills-button {
+	float: right;
+}
+
+#enter-button {
+	width: 5%;
+	float: left;
+	display: inline;
+}
+
+.container {
+	overflow: hidden;
+}
+
+#stats-left {
+	width: 30%;
+	float: left;
+	padding-bottom: 500em;
+  	margin-bottom: -500em;
+}
+
+#stats-instruction {
+	width: 100%;
+}
+
+.stats-description {
+	width: 70%;
+	float: left;
+	background-color: #25274D;
+  	padding-bottom: 500em;
+  	margin-bottom: -500em;
+}
+
+.stat {
+	display: block;
+	width: 100%;
+}
+
+.stat-mouseenter {
+	background-color: #2E9CCA;
+}
+
+.stat-click {
+	background-color: #25274D;
+}
+
+.error{
+	display: inline;
+	font-family: Georgia;
+	color: red;
+	font-size: 75%;
+}
+
+.footer {
+	width: 100%;
+	margin-left: 10px;
+	margin-right: 10px;
+	float: left;
+}

@@ -34,7 +34,7 @@ def link_status_window(window):
 def do_action(action_input, character=None):
     action_history.insert(0,action_input)
     if not character:
-        game_window.print_text(text="No character loaded. You will need to create a new character or load an existing character.")
+        main.game_event_print(game_event_text="No character loaded. You will need to create a new character or load an existing character.")
         return
     if len(action_input) == 0:
         game_window.print_text("")
