@@ -13,7 +13,7 @@ import threading as threading
 import textwrap as textwrap
 import logging as logging
 
-from app.main import config, events, items, enemies, actions, world, mixins, objects, shops
+from app.main import config, events, items, enemies, actions, world, mixins, objects, shops, npcs
 
 
 wrapper = textwrap.TextWrapper(width=config.TEXT_WRAPPER_WIDTH)
@@ -24,14 +24,6 @@ lock = threading.Lock()
 logging.basicConfig(level=logging.DEBUG,
                     format='[%(levelname)s] (%(threadName)-10s) %(message)s',
                     )
-    
-def link_game_window(window):
-    global game_window
-    game_window = window
-    
-def link_status_window(window):
-    global status_window
-    status_window = window
     
 
 class MapTile(mixins.DataFileMixin):

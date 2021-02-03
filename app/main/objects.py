@@ -1,15 +1,12 @@
 
 import random as random
 
-from app.main import world, mixins, items
+from app.main import world, mixins, items, events, npcs
 
 
 all_items_categories = mixins.items
-    
-def link_game_window(window):
-    global game_window
-    game_window = window
-    
+
+
 def create_object(object_category, object_name, **kwargs):
     return Object.new_object(object_category, object_name, **kwargs)
 
@@ -31,13 +28,13 @@ class Object(mixins.ReprMixin, mixins.DataFileMixin):
             return "{} cannot hold anything".format(self.name)
 
     def go_object(self, **kwargs):
-        game_window.print_text("I'm not sure how you intend on doing that.")
+        events.game_event("I'm not sure how you intend on doing that.")
 
     def view_description(self):
-        game_window.print_text("{}".format(self.description))
+        events.game_event("{}".format(self.description))
 
     def skin(self, room):
-        game_window.print_text("You cannot skin {}.".format(self.name))
+        events.game_event("You cannot skin {}.".format(self.name))
 
     def search(self, character):
         NotImplementedError()
@@ -56,7 +53,7 @@ class Object(mixins.ReprMixin, mixins.DataFileMixin):
     def new_object(cls, object_category, object_name, **kwargs):
         """Method used to initiate an object"""
         if object_category not in cls.object_categories:
-            game_window.print_text("I am sorry, I did not understand.")
+            events.game_event("I am sorry, I did not understand.")
             return
         return cls.object_categories[object_category](object_name, **kwargs)
 
@@ -131,9 +128,9 @@ class Corpse(Object):
 
     def skin_corpse(self):
         if self.skin == None:
-            game_window.print_text("You cannot skin {}".format(self.name))
+            events.game_event("You cannot skin {}".format(self.name))
         else:
-            game_window.print_text("You skin {} to yield {}.".format(self.name, all_items_categories['Skin'][self.skin]['name']))
+            events.game_event("You skin {} to yield {}.".format(self.name, all_items_categories['Skin'][self.skin]['name']))
             self.room.add_item(items.create_item(item_category='skin', item_name=self.skin))
         return
 
@@ -145,17 +142,17 @@ class Corpse(Object):
                 if all_items_categories[category][item]['level'] <= self.level and all_items_categories[category][item]['area'] == area:
                     possible_items[item] = all_items_categories[category][item]
         if len(possible_items) == 0:
-            game_window.print_text("You did not find any items on {}.".format(self.name))
+            events.game_event("You did not find any items on {}.".format(self.name))
         else:
             found_item = random.choice(list(possible_items))
             found_item = getattr(__import__('items'), possible_items[found_item]['category'])(item_name=found_item)
-            game_window.print_text("You found {}!".format(found_item.name))
+            events.game_event("You found {}!".format(found_item.name))
             self.room.add_item(found_item)
         if self.loot_money == 0:
-            game_window.print_text("You did not find any gulden on {}.".format(self.name))
+            events.game_event("You did not find any gulden on {}.".format(self.name))
         else:
             character.add_money(self.loot_money)
-            game_window.print_text("You found {} gulden on {}!".format(self.loot_money, self.name))
+            events.game_event("You found {} gulden on {}!".format(self.loot_money, self.name))
         self.room.remove_object(self)
         self.room = None
         return

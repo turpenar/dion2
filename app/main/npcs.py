@@ -3,21 +3,13 @@ import threading as threading
 import time as time
 import textwrap as textwrap
 
-from app.main import mixins, items, config, quests
+from app.main import mixins, items, config, quests, events
 
 
 wrapper = textwrap.TextWrapper(width=config.TEXT_WRAPPER_WIDTH)
 
 all_items_categories = mixins.items
 
-
-def link_terminal(terminal):
-    global terminal_output
-    terminal_output = terminal
-    
-def link_game_window(window):
-    global game_window
-    game_window = window
 
 class NPC(mixins.ReprMixin, mixins.DataFileMixin, threading.Thread):
     def __init__(self, npc_name: str, character: object, room: object, **kwargs):
@@ -87,7 +79,7 @@ class NPC(mixins.ReprMixin, mixins.DataFileMixin, threading.Thread):
             inventory_armor = "{} is also wearing {}.".format(self.object_pronoun, inventory_armor[0])
         else:
             inventory_armor = "{} is also wearing no armor.".format(self.object_pronoun)
-        game_window.print_text('''\
+        events.game_event('''\
 {}
 {}
 {}
@@ -134,7 +126,7 @@ class SanndRedra(NPC):
         # if self.character.room == self.room and self.character.quests['the_first_quest'].steps_complete['step_1'] == False:
         #     self.character.set_round_time(seconds=13)
         #     print(wrapper.fill(self.intro_text()))
-        game_window.print_text('''\
+        events.game_event('''\
 {} says, 'Hey {}, how have you been?!"\
             '''.format(self.first_name, self.character.first_name))
 #             time.sleep(3)
@@ -196,24 +188,24 @@ class GanderDiggle(NPC):
         super().__init__(npc_name=npc_name, character=character, room=room, **kwargs)
 
     def sell_item(self, item):
-        game_window.print_text("""\
+        events.game_event("""\
 Gander takes {} and gives it a quizzitive look.\
         """.format(item.name))
 
         if not isinstance(item, items.Skin):
-            game_window.print_text("""\
+            events.game_event("""\
 "Why did you bring this to me? I have no use for it, unfortunately."
 Gander hands you back {}.
             """.format(item.name))
             return False
 
         if item.value == 0:
-            game_window.print_text("""\
+            events.game_event("""\
 He quickly returns it to you, mutters something under his breath, and shakes his head. "This is worth nothing to me."\
             """)
             return False
 
-        game_window.print_text("""\
+        events.game_event("""\
 Gander smiles. "Thank you for finding this. I can definitely put it to use."
 He gives you {} gulden which you quickly pocket.\
         """.format(item.name, item.value))
@@ -229,7 +221,7 @@ He gives you {} gulden which you quickly pocket.\
 #                 return
 #             self.quest01_step1()
 #         else:
-            game_window.print_text("""\
+            events.game_event("""\
 Gander glances quickly at you and raises an eyebrow. "I'm not sure what you're talking about."\
             """)
 
@@ -241,7 +233,7 @@ Gander glances quickly at you and raises an eyebrow. "I'm not sure what you're t
 #                 '''.format(self.first_name, item.name, self.object_pronoun, self.possessive_pronoun))
 #         else:
 #             if not self.character.check_quest(quest=self.quests['the_first_quest']):
-                game_window.print_text("""\
+                events.game_event("""\
 Gander looks you up and down. "Did someone tell you to come to me? No? Then I can't help you unfortunately."\
                             """)
                 return
@@ -345,7 +337,7 @@ Gander looks you up and down. "Did someone tell you to come to me? No? Then I ca
 
     def run(self):
         time.sleep(2)
-        game_window.print_text(wrapper.fill(self.intro_text()))
+        events.game_event(wrapper.fill(self.intro_text()))
         
         
 class EmmeraSadana(NPC):

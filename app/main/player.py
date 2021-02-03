@@ -34,14 +34,6 @@ all_items = mixins.all_items
 all_items_categories = mixins.items
 lock = threading.Lock()
 
-    
-def link_game_window(window):
-    global game_window
-    game_window = window
-    
-def link_status_window(window):
-    global status_window
-    status_window = window
 
 def create_character(character_name=None):
     global character
@@ -584,7 +576,7 @@ class Player(mixins.ReprMixin, mixins.DataFileMixin):
 
     def load(self, state):
         self.__setstate__(state)
-        events.game_event(text="You have loaded {} {}".format(self.first_name, self.last_name))
+        events.game_event(game_event_text="You have loaded {} {}".format(self.first_name, self.last_name))
         return
         
     def move(self, dx, dy):

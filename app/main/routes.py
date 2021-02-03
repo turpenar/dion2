@@ -1,7 +1,13 @@
 from flask import session, redirect, url_for, render_template, request
+from datetime import datetime
+import threading as threading
+import pathlib as pathlib
+import pickle as pickle
+import abc as abc
+import json as json
 
 from app import socketio
-from app.main import main, events, world, player, skills, config
+from app.main import main, events, world, player, skills, config, items
 from app.main.forms import NewCharacterForm, SkillsForm
 
 
@@ -86,7 +92,79 @@ Profession:  {}
         player.character.room.fill_room(character=player.character)
         player.character.room.intro_text()
         player.character.print_status()
+        
+        landing_page_text = "Character Created! Please close the window and return to the game window."
               
-        return render_template('/close.html')
+        return render_template('/close.html', text=landing_page_text)
         
     return render_template('/new_character.html', form=form, Stats=stats)
+
+@main.route('/load_character', methods=['POST', 'GET'])
+def load_character():
+    
+    saved_characters, character_names = get_characters()
+
+    if request.method == "POST":
+        character_name = request.form['character'].split()
+        
+        world.load_tiles()
+                
+        for char_data in saved_characters:
+            if char_data['_first_name'] == character_name[0] and char_data['_last_name'] == character_name[1]:
+                player.create_character("new_player")
+                player.character.load(state=char_data)
+                player.character.room = world.tile_exists(x=player.character.location_x, y=player.character.location_y, area=player.character.area)
+                player.character.room.fill_room(character=player.character)
+                
+        player.character.room.intro_text()
+        player.character.print_status()
+        
+        landing_page_text = "Character Loaded! Please close the window and return to the game window."
+        
+        return render_template('/close.html', text=landing_page_text)
+    
+    return render_template('/load_character.html', Characters=character_names)
+
+def get_characters():
+    
+    saved_characters = []
+    character_names = []
+
+    path_load = pathlib.Path.cwd() / 'Profiles'
+    filenames = path_load.glob('*.p')
+    for filename in filenames:
+        path_load_file = path_load / filename
+        f = open(path_load_file.absolute().as_posix(), 'rb')
+        saved_characters.append(pickle.load(f))
+        
+    for character in saved_characters:
+        character_names.append(character['_first_name'] + " " + character['_last_name'])
+    
+    return saved_characters, character_names
+    
+
+@main.route('/skills', methods=['POST', 'GET'])
+def skills_modify():
+    
+    if not player.character:
+        landing_page_text = "You do not yet have a character. Please create a new character or load a character."
+        return render_template('/close.html', text=landing_page_text)
+    
+    form = SkillsForm()
+    skill_data_file = config.get_skill_data_file()
+    
+    if form.validate_on_submit():
+        
+        result = request.form
+        
+        player.character.physical_training_points = result['physical_training_points_var']
+        player.character.mental_training_points = result['mental_training_points_var']
+        
+        for skill in player.character.skills:
+            player.character.skills[skill] = int(result[skill])
+            
+        landing_page_text = "Skills updated! Please close the window and return to the game window."
+        
+        return render_template('/close.html', text=landing_page_text)
+    
+    return render_template('/skills.html', form=form, player=player.character, skillDataFile=skill_data_file)

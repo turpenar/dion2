@@ -8,7 +8,7 @@
 import random as random
 import threading as threading
 
-from app.main import items, config
+from app.main import items, config, events
 
 lock = threading.Lock()
 
@@ -18,13 +18,6 @@ experience_adjustment_factors = config.EXPERIENCE_ADJUSTMENT_FACTORS
 position_factors = config.POSITION_FACTORS
 stance_factors = config.STANCE_FACTORS
 
-def link_terminal(terminal):
-    global terminal_output
-    terminal_output = terminal
-    
-def link_game_window(window):
-    global game_window
-    game_window = window
     
 def calculate_position_factor_for_attack(character):
     position = character.position
@@ -48,13 +41,11 @@ def calculate_stance_factor_for_defense(character):
     
 def calculate_attack_strength(character, weapon):
     attack_strength = character.attack_strength_base
-    print("attack strength before weapon:  " + str(attack_strength))
     if character.category == "player":
         if weapon:
             if weapon.category == 'weapon':
                 attack_strength += character.skills_bonus[weapon.sub_category] 
     attack_strength = int(attack_strength * calculate_position_factor_for_attack(character) * calculate_stance_factor_for_attack(character))
-    print("attack strength after weapon:  " + str(attack_strength))
     return attack_strength
     
 def calculate_defense_strength_evade(character):
@@ -152,7 +143,7 @@ Round time:  {} seconds
 {}\
             """.format(self.name, target.name, att_damage, round_time, death_text)
 
-    game_window.print_text("""\
+    events.game_event("""\
 {} attacks {}!
 STR {} - DEF {} + AF {} + D100 ROLL {} = {}
 {}\
@@ -182,7 +173,7 @@ def melee_attack_character(self, character):
 {}\
             """.format(self.name, character.name, att_damage, death_text)
 
-    game_window.print_text("""\
+    events.game_event("""\
 {} attacks {}!
 STR {} - DEF {} + AF {} + D100 ROLL {} = {}
 {}\

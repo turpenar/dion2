@@ -12,7 +12,7 @@ import textwrap as textwrap
 import random as random
 import math as math
 
-from app.main import mixins, combat, objects, world, config
+from app.main import mixins, combat, objects, world, config, events
 
 
 enemy_level_base = config.enemy_level_base
@@ -23,13 +23,6 @@ positions = config.positions
 stances = config.stances
 lock = threading.Lock()
 
-def link_terminal(terminal):
-    global terminal_output
-    terminal_output = terminal
-    
-def link_game_window(window):
-    global game_window
-    game_window = window
 
 class Enemy(mixins.ReprMixin, mixins.DataFileMixin, threading.Thread):
     def __init__(self, enemy_name: str, target: object, room: object, location_x: int, location_y: int, area: str, **kwargs):
@@ -80,7 +73,7 @@ class Enemy(mixins.ReprMixin, mixins.DataFileMixin, threading.Thread):
 
         if self.room == target.room:
             for line in textwrap.wrap(self._enemy_data['entrance_text'], 80):
-                game_window.print_text(line)
+                events.game_event(line)
 
         self._right_hand_inv = self._enemy_data['right_hand']
         self._left_hand_inv = self._enemy_data['left_hand']
@@ -94,13 +87,13 @@ class Enemy(mixins.ReprMixin, mixins.DataFileMixin, threading.Thread):
     def move(self, dx, dy):
         self.room.remove_enemy(self)
         if self.room == self.target.room:
-            game_window.print_text(self.text_move_out)
+            events.game_event(self.text_move_out)
         self.location_x += dx
         self.location_y += dy
         self.room = world.tile_exists(x=self.location_x, y=self.location_y, area=self.area)
         self.room.add_enemy(self)
         if self.room == self.target.room:
-            game_window.print_text(self.text_move_in)
+            events.game_event(self.text_move_in)
 
     def move_north(self, **kwargs):
         self.move(dx=0, dy=-1)
@@ -181,7 +174,7 @@ class Enemy(mixins.ReprMixin, mixins.DataFileMixin, threading.Thread):
     def check_position_to_move(self):
         non_moving_positions = [x for x in positions if x is not 'standing']
         if set(self.position) & set(non_moving_positions):
-            game_window.print_text('''{} struggles to move.'''.format(self.name[0]))
+            events.game_event('''{} struggles to move.'''.format(self.name[0]))
             return False
         else:
             return True
@@ -295,12 +288,12 @@ class Enemy(mixins.ReprMixin, mixins.DataFileMixin, threading.Thread):
 
     def run(self):
         if self.room == self.target.room:
-            game_window.print_text(self.text_move_in)
+            events.game_event(self.text_move_in)
         while self.health > 0:
             if self.health <= 0:
                 break
             elif (self.room == self.target.room) and (self.target.health > 0):
-                game_window.print_text(self.text_engage)
+                events.game_event(self.text_engage)
                 time.sleep(self.round_time_engage)
                 if (self.room == self.target.room) and (self.target.health > 0) and (self.is_alive):
                     combat.melee_attack_character(self, self.target)
@@ -314,7 +307,7 @@ class Enemy(mixins.ReprMixin, mixins.DataFileMixin, threading.Thread):
         return
 
     def view_description(self):
-        game_window.print_text(self.description)
+        events.game_event(self.description)
 
 
 

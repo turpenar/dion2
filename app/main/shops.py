@@ -1,16 +1,7 @@
 
 
 
-from app.main import mixins, items
-
-
-def link_game_window(window):
-    global game_window
-    game_window = window
-    
-def link_status_window(window):
-    global status_window
-    status_window = window
+from app.main import mixins, items, events
     
     
 class Shop(mixins.ReprMixin, mixins.DataFileMixin):
@@ -42,41 +33,41 @@ class Shop(mixins.ReprMixin, mixins.DataFileMixin):
         
     def enter_shop(self):
         self.in_shop = True
-        status_window.print_shop_menu(shop_text=self.shop_menu)        
-        game_window.print_text("Welcome to the shop. Please see the menu to the right.")
+        events.status_window(shop_text=self.shop_menu)        
+        events.game_event("Welcome to the shop. Please see the menu to the right.")
         return
         
     def exit_shop(self):
         self.in_shop = False
-        game_window.print_text("You have exited the shop.")
+        events.game_event("You have exited the shop.")
         return
         
     def order_item(self, number):
         
         if number == None:
-            game_window.print_text("You need to specify an item to order or EXIT.")
+            events.game_event("You need to specify an item to order or EXIT.")
             return
         elif number[0] > len(self._shop_items) or number[0] <= 0:
-            game_window.print_text("That is an improper selection. Choose again.")
+            events.game_event("That is an improper selection. Choose again.")
             return
         else:
-            game_window.print_text("You have selected {}.  If you would like to buy this item, please respond BUY.".format(self._shop_items[number[0] - 1].name))
+            events.game_event("You have selected {}.  If you would like to buy this item, please respond BUY.".format(self._shop_items[number[0] - 1].name))
             self._item_selected = number[0] - 1
             return
         
     def buy_item(self, number):
         if number is None and self._item_selected is None:
-            game_window.print_text("You need to specify an item to buy or EXIT.")
+            events.game_event("You need to specify an item to buy or EXIT.")
             return
         if number is None:
-            game_window.print_text("Congratulations! You have purchased {}.".format(self._shop_items[self._item_selected].name))
+            events.game_event("Congratulations! You have purchased {}.".format(self._shop_items[self._item_selected].name))
             return self._shop_items[self._item_selected]
         else:
             if number[0] > len(self._shop_items) or number[0] <= 0:
-                game_window.print_text("That is an improper selection. Choose again.")
+                events.game_event("That is an improper selection. Choose again.")
                 return
             else:
-                game_window.print_text("Congratulations! You have purchased {}.".format(self._shop_items[number[0] - 1].name))
+                events.game_event("Congratulations! You have purchased {}.".format(self._shop_items[number[0] - 1].name))
                 return self._shop_items[number[0] - 1]
             
         
