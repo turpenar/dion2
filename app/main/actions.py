@@ -420,6 +420,7 @@ class Go(DoActions):
             return
         for room_object in character.room.objects:
             if set(room_object.handle) & set(kwargs['direct_object']):
+                events.game_event("You move toward {}.".format(room_object.name))
                 room_object.go_object(character=character)
                 return
         for room_item in character.room.items:

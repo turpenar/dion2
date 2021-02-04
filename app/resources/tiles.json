@@ -332,7 +332,7 @@
 				"furniture": [],
 				"miscellaneous": []
 				},
-			"npcs": ["dochas_town_guard"],
+			"npcs": ["dochas town guard"],
 			"shop": false,
 			"shop_items":  {
 				"clothing": [],
@@ -378,7 +378,7 @@
 				"furniture": [],
 				"miscellaneous": []
 				},
-			"npcs": ["dochas_town_guard"],
+			"npcs": ["dochas town guard"],
 			"shop": false,
 			"shop_items":  {
 				"clothing": [],
@@ -424,7 +424,7 @@
 				"furniture": [],
 				"miscellaneous": []
 				},
-			"npcs": ["dochas_town_guard"],
+			"npcs": ["dochas town guard"],
 			"shop": false,
 			"shop_items":  {
 				"clothing": [],
@@ -447,7 +447,7 @@
 			"spawn": [],
 			"hidden": {
 				"doors": [],
-				"npcs": ["sannd_redra"],
+				"npcs": ["sannd redra"],
 				"items": {
 					"clothing": [],
 					"armor": [],
@@ -516,7 +516,7 @@
 				"furniture": [],
 				"miscellaneous": []
 				},
-			"npcs": ["dochas_town_guard"],
+			"npcs": ["dochas town guard"],
 			"shop": false,
 			"shop_items":  {
 				"clothing": [],
@@ -748,7 +748,7 @@
 				"furniture": [],
 				"miscellaneous": []
 				},
-			"npcs": ["gander_diggle"],
+			"npcs": ["gander diggle"],
 			"shop": false,
 			"shop_items": {
 				"clothing": [],
@@ -1561,7 +1561,7 @@
 			"spawn": [],
 			"hidden": {
 				"doors": [],
-				"npcs": ["emmera_sadana"],
+				"npcs": ["emmera sadana"],
 				"items": {
 					"clothing": [],
 					"armor": [],

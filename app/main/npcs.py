@@ -11,6 +11,10 @@ wrapper = textwrap.TextWrapper(width=config.TEXT_WRAPPER_WIDTH)
 all_items_categories = mixins.items
 
 
+def create_npc(npc_category, npc_name, **kwargs):
+    return NPC.new_npc(npc_category.title().replace(" ",""), npc_name, **kwargs)
+
+
 class NPC(mixins.ReprMixin, mixins.DataFileMixin, threading.Thread):
     def __init__(self, npc_name: str, character: object, room: object, **kwargs):
         super(NPC, self).__init__()
@@ -44,9 +48,10 @@ class NPC(mixins.ReprMixin, mixins.DataFileMixin, threading.Thread):
 
         for category in self.npc_data['inventory']:
             for item_handle in self.npc_data['inventory'][category]:
-                for item in all_items_categories[category]:
-                    if item_handle == item:
-                        self.inventory.append(getattr(__import__('items'), category)(item_name=item_handle))
+                try:
+                    self.inventory.append(items.create_item(item_category=category, item_name=item_handle))
+                except:
+                    print("could not create " + item_handle)
 
         self.quests = {}
 
@@ -103,8 +108,27 @@ class NPC(mixins.ReprMixin, mixins.DataFileMixin, threading.Thread):
 
     def give_item(self, item):
         NotImplementedError()
+        
+    npc_categories = {}
+    
+    @classmethod
+    def register_subclass(cls, npc_category):
+        """Catalogues npcs in a dictionary for reference purposes"""
+        def decorator(subclass):
+            cls.npc_categories[npc_category] = subclass
+            return subclass
+        return decorator
+    
+    @classmethod
+    def new_npc(cls, npc_category, npc_name, **kwargs):
+        """Method used to initiate an npc"""
+        if npc_category not in cls.npc_categories:
+            events.game_event("I am sorry, I did not understand.")
+            return
+        return cls.npc_categories[npc_category](npc_name, **kwargs)
 
 
+@NPC.register_subclass('SanndRedra')
 class SanndRedra(NPC):
     def __init__(self, npc_name: str, character: object, room: object, **kwargs):
         super().__init__(npc_name=npc_name, character=character, room=room, **kwargs)
@@ -183,6 +207,7 @@ class SanndRedra(NPC):
         return
 
 
+@NPC.register_subclass('GanderDiggle')
 class GanderDiggle(NPC):
     def __init__(self, npc_name: str, character: object, room: object, **kwargs):
         super().__init__(npc_name=npc_name, character=character, room=room, **kwargs)
@@ -339,7 +364,8 @@ Gander looks you up and down. "Did someone tell you to come to me? No? Then I ca
         time.sleep(2)
         events.game_event(wrapper.fill(self.intro_text()))
         
-        
+
+@NPC.register_subclass('EmmeraSadana')        
 class EmmeraSadana(NPC):
     def __init__(self, npc_name: str, character: object, room: object, **kwargs):
         super().__init__(npc_name=npc_name, character=character, room=room, **kwargs)
@@ -517,6 +543,7 @@ class EmmeraSadana(NPC):
         #             self.quest02_step2()
 
 
+@NPC.register_subclass('DochasTownGuard')
 class DochasTownGuard(NPC):
     def __init__(self, npc_name: str, character: object, room: object, **kwargs):
         super().__init__(npc_name=npc_name, character=character, room=room, **kwargs)

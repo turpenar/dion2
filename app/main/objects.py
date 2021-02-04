@@ -77,6 +77,7 @@ class Door(Object):
         character.location_y = new_location['y']
         character.area = new_location['area']
         character.room.fill_room(character=character)
+        print("does code go here?")
         character.room.intro_text()
         character.print_status()
         character.room.run(character=character)

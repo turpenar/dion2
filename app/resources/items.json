@@ -1,6 +1,6 @@
 {
-	"Clothing": {
-		"a simple shirt": {
+	"clothing": {
+		"a_simple_shirt": {
 			"name": "a simple shirt", 
 			"description": "a simple shirt with slightly worn shoulders", 
 			"value": 0, 
@@ -20,7 +20,7 @@
 			"loot": true,
 			"area": "Wilds"
 		}, 
-		"some simple trousers": {
+		"some_simple_trousers": {
 			"name": "some simple trousers", 
 			"description": "some simple, active trousers", 
 			"value": 0, 
@@ -40,7 +40,7 @@
 			"loot": true,
 			"area": "Wilds"
 		},
-		"leather backpack": {
+		"leather_backpack": {
 			"name": "a leather backpack", 
 			"description": "a simple leather backpack", 
 			"value": 0, 
@@ -161,7 +161,7 @@
 			"area": "Wilds"
 		}
 	},
-	"Armor": {
+	"armor": {
 		 "leather_arm_greaves": {
 			"name": "some leather arm greaves", 
 			"description": "You see some leather arm greaves", 
@@ -268,7 +268,7 @@
 			"area": "Wilds"
 		} 
 	},
-	"Weapons": {
+	"weapons": {
 		"dagger01": {
 			"name": "a rusty dagger", 
 			"description": "a small, dull dagger covered in rust", 
@@ -648,7 +648,7 @@
 			"area": "Wilds"
 		}
 	},
-	"Ring": {
+	"ring": {
 		"some_ring1": {
 			"name": "", 
 			"description": "", 
@@ -690,7 +690,7 @@
 			"area": "Wilds"
 		}
 	},
-	"Neck": {
+	"neck": {
 		"some_necklace1": {
 			"name": "", 
 			"description": "", 
@@ -732,7 +732,7 @@
 			"area": "Wilds"
 		}
 	},
-	"Skin": {
+	"skin": {
 		"boar_hide": {
 			"name": "a boar hide", 
 			"description": "The boar hide stiff and rigid. Someone may have use for this.", 
@@ -754,7 +754,7 @@
 			"area": "Wilds"
 		}
 	},
-	"Miscellaneous": {
+	"miscellaneous": {
 		"emmera_message": {
 			"name": "Emmera's message",
 			"description": "The message is made of fine parchment, artfully crafted with crisp edges. The message is rolled tightly, sealed with a silk ribbon and a blot of dried wax. The message glows somewhat, as if the word on the parchment, if there are any at all, are not the only thing the message is carrying.",

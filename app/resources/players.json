@@ -101,7 +101,7 @@
 		"dominance": "",
 		"money": 0,
 		"inventory": {
-			"clothing": ["a simple shirt", "some simple trousers", "leather backpack"],
+			"clothing": ["a_simple_shirt", "some_simple_trousers", "leather_backpack"],
 			"ring": [],
 			"neck": []
 			},

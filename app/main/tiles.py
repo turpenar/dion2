@@ -126,12 +126,12 @@ class MapTile(mixins.DataFileMixin):
                 for item in self._room_data['items'][category]:
                     self.items.append(items.create_item(item_category=category, item_name=item))
             for npc in self._room_data['npcs']:
-                self.npcs.append(getattr(__import__('npcs'), all_npcs[npc]['name'].replace(" ", ""))(npc_name=npc, character=character, room=self))
+                self.npcs.append(npcs.create_npc(npc_category=npc, npc_name=npc, character=character, room=self))
                 self.npcs[-1].start()
             for door in self._room_data['hidden']['doors']:
                 self.hidden.append(objects.Door(object_name=door, room=self))
             for npc in self._room_data['hidden']['npcs']:
-                self.hidden.append(getattr(__import__('npcs'), all_npcs[npc]['name'].replace(" ", ""))(npc_name=npc, character=character, room=self))
+                self.hidden.append(npcs.create_npc(npc_category=npc, npc_name=npc, character=character, room=self))
                 self.hidden[-1].start()
             for category in self._room_data['hidden']['items']:
                 for item in self._room_data['hidden']['items'][category]:

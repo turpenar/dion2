@@ -83,7 +83,7 @@ class Item(mixins.ReprMixin, mixins.DataFileMixin):
 @Item.register_subclass('clothing')
 class Clothing(Item):
     def __init__(self, item_name: str, **kwargs):
-        category_data = self.get_item_by_name('Clothing')
+        category_data = self.get_item_by_name('clothing')
         item_data = category_data[item_name]
         super().__init__(item_data=item_data, **kwargs)
 
@@ -91,7 +91,7 @@ class Clothing(Item):
 @Item.register_subclass('weapon')
 class Weapon(Item):
     def __init__(self, item_name: str, **kwargs):
-        category_data = self.get_item_by_name('Weapons')
+        category_data = self.get_item_by_name('weapons')
         item_data = category_data[item_name]
         super().__init__(item_data=item_data, **kwargs)
         
@@ -101,7 +101,7 @@ class Weapon(Item):
 @Item.register_subclass('money')
 class Money(Item):
     def __init__(self, item_name: str, **kwargs):
-        category_data = self.get_item_by_name('Money')
+        category_data = self.get_item_by_name('money')
         item_data = category_data[item_name]
         super().__init__(item_data=item_data, **kwargs)
 
@@ -109,7 +109,7 @@ class Money(Item):
 @Item.register_subclass('armor')
 class Armor(Item):
     def __init__(self, item_name: str, **kwargs):
-        category_data = self.get_item_by_name('Armor')
+        category_data = self.get_item_by_name('armor')
         item_data = category_data[item_name]
         super().__init__(item_data=item_data, **kwargs)
 
@@ -118,7 +118,7 @@ class Armor(Item):
 @Item.register_subclass('ring')
 class Ring(Item):
     def __init__(self, item_name: str, **kwargs):
-        category_data = self.get_item_by_name('Rings')
+        category_data = self.get_item_by_name('rings')
         item_data = category_data[item_name]
         super().__init__(item_data=item_data, **kwargs)
 
@@ -126,7 +126,7 @@ class Ring(Item):
 @Item.register_subclass('neck')
 class Neck(Item):
     def __init__(self, item_name: str, **kwargs):
-        category_data = self.get_item_by_name('Neck')
+        category_data = self.get_item_by_name('neck')
         item_data = category_data[item_name]
         super().__init__(item_data=item_data, **kwargs)
 
@@ -134,7 +134,7 @@ class Neck(Item):
 @Item.register_subclass('skin')
 class Skin(Item):
     def __init__(self, item_name: str, **kwargs):
-        category_data = self.get_item_by_name('Skin')
+        category_data = self.get_item_by_name('skin')
         item_data = category_data[item_name]
         super().__init__(item_data=item_data, **kwargs)
 
@@ -142,7 +142,7 @@ class Skin(Item):
 @Item.register_subclass('miscellaneous')
 class Miscellaneous(Item):
     def __init__(self, item_name: str, **kwargs):
-        category_data = self.get_item_by_name('Miscellaneous')
+        category_data = self.get_item_by_name('miscellaneous')
         item_data = category_data[item_name]
         super().__init__(item_data=item_data, **kwargs)
 

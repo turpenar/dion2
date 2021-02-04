@@ -1,5 +1,5 @@
 {
-	"sannd_redra": {
+	"sannd redra": {
 		"name": "Sannd Redra",
 		"first_name": "Sannd",
 		"last_name": "Redra",
@@ -12,12 +12,12 @@
 		"right_hand": "",
 		"left_hand": "",
 		"inventory": {
-			"Money": [],
-			"Clothing": [],
-			"Armor": [],
-			"Weapons": [],
-			"Rings": [],
-			"Neck": []
+			"money": [],
+			"clothing": [],
+			"armor": [],
+			"weapons": [],
+			"rings": [],
+			"neck": []
 			},	
 		"location_x": 0,
 		"location_y": 0,
@@ -25,7 +25,7 @@
 		"area": "Dochas",
 		"quests": ["the_first_quest"]
 	}, 
-	"gander_diggle": {
+	"gander diggle": {
 		"name": "Gander Diggle", 
 		"first_name": "Gander",
 		"last_name": "Diggle",
@@ -38,12 +38,12 @@
 		"right_hand": "",
 		"left_hand": "",
 		"inventory": {
-			"Money": [],
-			"Clothing": [],
-			"Armor": [],
-			"Weapons": [],
-			"Rings": [],
-			"Neck": []
+			"money": [],
+			"clothing": [],
+			"armor": [],
+			"weapons": [],
+			"rings": [],
+			"neck": []
 			},	
 		"location_x": 0,
 		"location_y": 0,
@@ -51,7 +51,7 @@
 		"area": "DochasLeatherworks",
 		"quests": ["the_first_quest"]
 	}, 
-	"emmera_sadana": {
+	"emmera sadana": {
 		"name": "Emmera Sadana", 
 		"first_name": "Emmera",
 		"last_name": "Sadana",
@@ -64,12 +64,12 @@
 		"right_hand": "",
 		"left_hand": "",
 		"inventory": {
-			"Money": [],
-			"Clothing": ["cloth_gambeson", "leather_leggings", "dark_forest_boots"],
-			"Armor": ["mithril_gorget", "mithril_pauldrons", "mithril_arm_harness"],
-			"Weapons": [],
-			"Rings": [],
-			"Neck": []
+			"money": [],
+			"clothing": ["cloth_gambeson", "leather_leggings", "dark_forest_boots"],
+			"armor": ["mithril_gorget", "mithril_pauldrons", "mithril_arm_harness"],
+			"weapons": [],
+			"rings": [],
+			"neck": []
 			},	
 		"location_x": 0,
 		"location_y": 0,
@@ -77,7 +77,7 @@
 		"area": "DochasGrounds",
 		"quests": ["prologue"]
 	},
-	"dochas_town_guard": {
+	"dochas town guard": {
 		"name": "Dochas Town Guard", 
 		"first_name": "Town",
 		"last_name": "Guard",
@@ -90,12 +90,12 @@
 		"right_hand": "",
 		"left_hand": "",
 		"inventory": {
-			"Money": [],
-			"Clothing": ["tattered_clothes"],
-			"Armor": ["worn_leather_armor"],
-			"Weapons": [],
-			"Rings": [],
-			"Neck": []
+			"money": [],
+			"clothing": ["tattered_clothes"],
+			"armor": ["worn_leather_armor"],
+			"weapons": [],
+			"rings": [],
+			"neck": []
 			},	
 		"location_x": 0,
 		"location_y": 0,
