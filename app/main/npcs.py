@@ -51,7 +51,7 @@ class NPC(mixins.ReprMixin, mixins.DataFileMixin, threading.Thread):
                 try:
                     self.inventory.append(items.create_item(item_category=category, item_name=item_handle))
                 except:
-                    print("could not create " + item_handle)
+                    print("WARNING:  Could not create " + item_handle + " for " + self.name + " in " + self.room.room_name)
 
         self.quests = {}
 

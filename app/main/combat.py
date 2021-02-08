@@ -176,10 +176,10 @@ def melee_attack_character(self, character):
     events.game_event("""\
 {} attacks {}!
 STR {} - DEF {} + AF {} + D100 ROLL {} = {}
-{}\
+{}
+\
     """.format(self.name, character.name, attack_strength, defense_strength, attack_factor, att_random, att_end_roll, result))
 
-    print(result)
     return character
 
 

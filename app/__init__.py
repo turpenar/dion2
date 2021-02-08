@@ -1,9 +1,11 @@
 from flask import Flask
 from flask_socketio import SocketIO
-from flask_wtf.csrf import CsrfProtect
+from flask_wtf import CsrfProtect
+import eventlet
 
-socketio = SocketIO()
+socketio = SocketIO(async_mode="eventlet")
 csrf = CsrfProtect()
+eventlet.monkey_patch()
 
 def create_app(debug=True):
     app = Flask(__name__)

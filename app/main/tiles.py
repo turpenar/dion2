@@ -121,21 +121,39 @@ class MapTile(mixins.DataFileMixin):
         if not self.room_filled:
             for category in self._room_data['objects']:
                 for object in self._room_data['objects'][category]:
-                    self.objects.append(objects.create_object(object_category=category, object_name=object, room=self))
+                    try:
+                        self.objects.append(objects.create_object(object_category=category, object_name=object, room=self))
+                    except:
+                        print("WARNING:  Could not create object " + object.name + " in room " + self.room_name)
             for category in self._room_data['items']:
                 for item in self._room_data['items'][category]:
-                    self.items.append(items.create_item(item_category=category, item_name=item))
+                    try:
+                        self.items.append(items.create_item(item_category=category, item_name=item))
+                    except:
+                        print("WARNING:  Could not create item " + item.name + " in room " + self.room_name)
             for npc in self._room_data['npcs']:
-                self.npcs.append(npcs.create_npc(npc_category=npc, npc_name=npc, character=character, room=self))
-                self.npcs[-1].start()
+                try:
+                    self.npcs.append(npcs.create_npc(npc_category=npc, npc_name=npc, character=character, room=self))
+                    self.npcs[-1].start()
+                except:
+                    print("WARNING:  Could not create npc " + npc.name + " in room " + self.room_name)
             for door in self._room_data['hidden']['doors']:
-                self.hidden.append(objects.Door(object_name=door, room=self))
+                try:
+                    self.hidden.append(objects.Door(object_name=door, room=self))
+                except:
+                    print("WARNING:  Could not create hidden door " + door.name + " in room " + self.room_name)
             for npc in self._room_data['hidden']['npcs']:
-                self.hidden.append(npcs.create_npc(npc_category=npc, npc_name=npc, character=character, room=self))
-                self.hidden[-1].start()
+                try:
+                    self.hidden.append(npcs.create_npc(npc_category=npc, npc_name=npc, character=character, room=self))
+                    self.hidden[-1].start()
+                except:
+                    print("WARNING:  Could not create hidden npc " + npc.name + " in room " + self.room_name)
             for category in self._room_data['hidden']['items']:
                 for item in self._room_data['hidden']['items'][category]:
-                    self.hidden.append(items.create_item(item_category=category, item_name=item))
+                    try:
+                        self.hidden.append(items.create_item(item_category=category, item_name=item))
+                    except:
+                        print("WARNING:  Could not create hidden item " + item.name + " in room " + self.room_name)
             self.room_filled = True
             
     def fill_shop(self):
