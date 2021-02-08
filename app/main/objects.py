@@ -131,7 +131,7 @@ class Corpse(Object):
         if self.skin == None:
             events.game_event("You cannot skin {}".format(self.name))
         else:
-            events.game_event("You skin {} to yield {}.".format(self.name, all_items_categories['Skin'][self.skin]['name']))
+            events.game_event("You skin {} to yield {}.".format(self.name, all_items_categories['skin'][self.skin]['name']))
             self.room.add_item(items.create_item(item_category='skin', item_name=self.skin))
         return
 

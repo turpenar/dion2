@@ -1,4 +1,0 @@
-house_doorstep	
-	
-house_triage	house_livingroom
-house_kitchen	

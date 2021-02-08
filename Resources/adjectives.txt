@@ -1,5 +1,0 @@
-offense
-forward
-neutral
-guarded
-defense

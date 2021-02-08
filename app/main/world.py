@@ -9,12 +9,16 @@ module = imp.load_source('tiles', 'app/main/tiles.py')
 
 _world = {}
 starting_position = (0, 0)
+area_count = 10
+room_count = 100
 
 lock = threading.Lock()
 
 
 def load_tiles():
     """Parses a file that describes the world space into the _world object."""
+    global area_count
+    global room_count
     for path in map_list:
         _area = {}
         with open(path.resolve().as_posix(), 'r') as f:
@@ -28,8 +32,10 @@ def load_tiles():
                 if tile_name == 'field_glade':
                     global starting_position
                     starting_position = (x, y)
-                _area[(x, y)] = None if tile_name == '' else getattr(module, area)(x, y, area, tile_name)
+                _area[(x, y)] = None if tile_name == '' else getattr(module, area)(x, y, area, tile_name, room_number=int(str(area_count) + str(room_count)))
                 _world[area] = _area
+                room_count += 1
+        area_count += 1
 
 
 def tile_exists(x, y, area):

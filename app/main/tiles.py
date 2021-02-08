@@ -27,7 +27,7 @@ logging.basicConfig(level=logging.DEBUG,
     
 
 class MapTile(mixins.DataFileMixin):
-    def __init__(self, x, y, area_name: str, room_name: str):
+    def __init__(self, x, y, area_name: str, room_name: str, room_number: int):
 
         self._area_data = self.get_area_by_name(area_name)
         self._room_data = self._area_data[room_name]
@@ -37,6 +37,7 @@ class MapTile(mixins.DataFileMixin):
         self.character = None
         self.room_name = self._room_data['name']
         self.area = self._room_data['area']
+        self._room_number = room_number
         self.description = self._room_data['description']
         self._is_shop = self._room_data['shop']
         self._shop_items = self._room_data['shop_items']
@@ -162,6 +163,15 @@ class MapTile(mixins.DataFileMixin):
             self.shop.write_shop_menu() 
             self.shop_filled = True
     
+    @property
+    def room_number(self):
+        with lock:
+            return self._room_number
+    @room_number.setter
+    def room_number(self, room_number):
+        with lock:
+            self._room_number = room_number
+            
     @property     
     def is_shop(self):
         with lock:
@@ -275,8 +285,8 @@ class MapTile(mixins.DataFileMixin):
 
 
 class Town(MapTile):
-    def __init__(self, x, y, area_name, room_name):
-        super().__init__(x=x, y=y, area_name=area_name, room_name=room_name)
+    def __init__(self, x, y, area_name, room_name, room_number):
+        super().__init__(x=x, y=y, area_name=area_name, room_name=room_name, room_number=room_number)
 
     def spawn_generator(self, character):
         pass
@@ -286,33 +296,33 @@ class Town(MapTile):
 
 
 class Dochas(Town):
-    def __init__(self, x, y, area_name, room_name):
-        super().__init__(x=x, y=y, area_name=area_name, room_name=room_name)
+    def __init__(self, x, y, area_name, room_name, room_number):
+        super().__init__(x=x, y=y, area_name=area_name, room_name=room_name, room_number=room_number)
 
 
 class DochasGrounds(Town):
-    def __init__(self, x, y, area_name, room_name):
-        super().__init__(x=x, y=y, area_name=area_name, room_name=room_name)
+    def __init__(self, x, y, area_name, room_name, room_number):
+        super().__init__(x=x, y=y, area_name=area_name, room_name=room_name, room_number=room_number)
 
 
 class DochasLeatherworks(Town):
-    def __init__(self, x, y, area_name, room_name):
-        super().__init__(x=x, y=y, area_name=area_name, room_name=room_name)
+    def __init__(self, x, y, area_name, room_name, room_number):
+        super().__init__(x=x, y=y, area_name=area_name, room_name=room_name, room_number=room_number)
 
 
 class DochasSmallHouse(Town):
-    def __init__(self, x, y, area_name, room_name):
-        super().__init__(x=x, y=y, area_name=area_name, room_name=room_name)
+    def __init__(self, x, y, area_name, room_name, room_number):
+        super().__init__(x=x, y=y, area_name=area_name, room_name=room_name, room_number=room_number)
         
     
 class DochasWeaponsmith(Town):
-    def __init__(self, x, y, area_name, room_name):
-        super().__init__(x=x, y=y, area_name=area_name, room_name=room_name)
+    def __init__(self, x, y, area_name, room_name, room_number):
+        super().__init__(x=x, y=y, area_name=area_name, room_name=room_name, room_number=room_number)
 
 
 class EdgewoodForest(MapTile):
-    def __init__(self, x, y, area_name, room_name):
-        super().__init__(x=x, y=y, area_name=area_name, room_name=room_name)
+    def __init__(self, x, y, area_name, room_name, room_number):
+        super().__init__(x=x, y=y, area_name=area_name, room_name=room_name, room_number=room_number)
 
     def spawn_generator(self, character):
         area_rooms = world.area_rooms(self.area)
@@ -341,7 +351,7 @@ class EdgewoodForest(MapTile):
 
 
 class Field(Town):
-    def __init__(self, x, y, area_name, room_name):
-        super().__init__(x=x, y=y, area_name=area_name, room_name=room_name)
+    def __init__(self, x, y, area_name, room_name, room_number):
+        super().__init__(x=x, y=y, area_name=area_name, room_name=room_name, room_number=room_number)
 
 
