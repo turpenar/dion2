@@ -9,6 +9,10 @@ from app.main import config, player, mixins
 stats_list = config.get_stats_data_file()
 skills_data_file = config.get_skill_data_file()
 
+class LoginForm(FlaskForm):
+    username = StringField('username', [DataRequired()])
+    password = StringField('password', [DataRequired()])
+
 class NewCharacterForm(FlaskForm):
     first_name = StringField('First Name', [DataRequired()])
     last_name = StringField('Last Name', [DataRequired()])

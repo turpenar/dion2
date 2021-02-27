@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Login</title>
+{% endblock %}
+
+{% block body %}
+<head>
+</head>
+
+<div class="title">
+<h1>Login</h1>
+</div>
+
+{% if session['logged_in'] %}
+
+You're logged in already!
+
+{% else %}
+
+<div class="interface-window">
+
+	<form action="{{ url_for('main.login') }}" method="post" role="form">
+		<input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+		{{ form.hidden_tag() }}
+		<div>
+			{{form.username.label}} <br>
+			{{form.username(size=30)}}
+		</div>
+		<br>
+		<div>
+			{{form.password.label}} <br>
+			{{form.passowrd(size=30)}}
+		</div>
+		<br>
+
+
+	</form>
+
+</div>
+
+{% endif %}
+
+{% endblock %}

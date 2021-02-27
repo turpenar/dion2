@@ -5,15 +5,47 @@ import pathlib as pathlib
 import pickle as pickle
 import abc as abc
 import json as json
+from sqlalchemy.orm import sessionmaker
 
 from app import socketio
 from app.main import main, events, world, player, skills, config, items
-from app.main.forms import NewCharacterForm, SkillsForm
+from app.main.forms import LoginForm, NewCharacterForm, SkillsForm
+from app.main.datadef import *
+
+engine = create_engine('sqlite:///users.db', echo=True)
 
 
 @main.route('/')
 def index():
+    if not session.get('logged_in'):
+        form = LoginForm()
+        return render_template('login.html', form=form)
     return render_template('/index.html', async_mode=socketio.async_mode)
+
+@main.route('/login', methods=['POST'])
+def do_admin_login():
+    
+    if form.validate_on_sumbit():
+        result = request.form
+        
+        POST_USERNAME = str(result['username'])
+        POST_PASSWORD = str(result['password'])
+        
+        Session = sessionmaker(bind=engine)
+        s = Session()
+        query = s.query(User).filter(User.username.in_([POST_USERNAME]), User.password.in_([POST_PASSWORD]))
+        user_result = query.first()
+        if user_result:
+            session['logged_in'] = True
+        else:
+            flash('wrong password!')
+
+    return index()
+
+@main.route('/logout')
+def logout():
+    session['logged_in'] = False
+    return index()
     
 @main.route('/new_character', methods=['POST', 'GET'])
 def new_character():
