@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, IntegerField, SelectField, PasswordField, SubmitField, HiddenField
+from wtforms import StringField, IntegerField, SelectField, PasswordField, SubmitField, HiddenField, BooleanField
 from wtforms.validators import DataRequired, NumberRange
 from numpy import integer
 
@@ -12,6 +12,14 @@ skills_data_file = config.get_skill_data_file()
 class LoginForm(FlaskForm):
     username = StringField('username', [DataRequired()])
     password = StringField('password', [DataRequired()])
+    remember = BooleanField('remember me')
+    submit = SubmitField('Login')
+    
+    
+class SignUpForm(FlaskForm):
+    username = StringField('username', [DataRequired()])
+    password = StringField('password', [DataRequired()])
+    submit = SubmitField('Sign Up')
 
 class NewCharacterForm(FlaskForm):
     first_name = StringField('First Name', [DataRequired()])

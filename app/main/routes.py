@@ -1,4 +1,4 @@
-from flask import session, redirect, url_for, render_template, request
+from flask import session, redirect, url_for, render_template, request, flash
 from datetime import datetime
 import threading as threading
 import pathlib as pathlib
@@ -6,48 +6,59 @@ import pickle as pickle
 import abc as abc
 import json as json
 from sqlalchemy.orm import sessionmaker
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import login_user, login_required, logout_user, current_user
 
-from app import socketio
-from app.main import main, events, world, player, skills, config, items
-from app.main.forms import LoginForm, NewCharacterForm, SkillsForm
-from app.main.datadef import *
+from app import socketio, login_manager, db
+from app.main import datadef, main, events, world, player, skills, config, items
+from app.main.forms import LoginForm, SignUpForm, NewCharacterForm, SkillsForm
 
-engine = create_engine('sqlite:///users.db', echo=True)
-
+@login_manager.user_loader
+def load_user(user_id):
+    return datadef.User.query.get(int(user_id))
 
 @main.route('/')
+@login_required
 def index():
-    if not session.get('logged_in'):
-        form = LoginForm()
-        return render_template('login.html', form=form)
     return render_template('/index.html', async_mode=socketio.async_mode)
 
-@main.route('/login', methods=['POST'])
-def do_admin_login():
+@main.route('/login', methods=['POST', 'GET'])
+def login():
     
-    if form.validate_on_sumbit():
-        result = request.form
-        
-        POST_USERNAME = str(result['username'])
-        POST_PASSWORD = str(result['password'])
-        
-        Session = sessionmaker(bind=engine)
-        s = Session()
-        query = s.query(User).filter(User.username.in_([POST_USERNAME]), User.password.in_([POST_PASSWORD]))
-        user_result = query.first()
-        if user_result:
-            session['logged_in'] = True
-        else:
-            flash('wrong password!')
+    form = LoginForm()
+    
+    if form.validate_on_submit():
+        user = datadef.User.query.filter_by(username=form.username.data).first()
+        if user:
+            if check_password_hash(user.password, form.password.data):
+                login_user(user, remember=form.remember.data)
+                return redirect(url_for('main.index'))
 
-    return index()
+        return '<h1>Invalid username or password</h1>'
+    return render_template('/login.html', form=form)
 
 @main.route('/logout')
+@login_required
 def logout():
-    session['logged_in'] = False
-    return index()
+    logout_user()
+    return redirect(url_for('main.index'))
+
+@main.route('/signup', methods=['POST', 'GET'])
+def signup():
+    form = SignUpForm()
+    
+    if form.validate_on_submit():
+        hashed_password = generate_password_hash(form.password.data, method='sha256')
+        new_user = datadef.User(username=form.username.data, password=hashed_password)
+        db.session.add(new_user)
+        db.session.commit()
+        
+        return '<h1>New user has been created!</h1>'
+    
+    return render_template('/signup.html', form=form)
     
 @main.route('/new_character', methods=['POST', 'GET'])
+@login_required
 def new_character():
     
     message = ""
@@ -86,7 +97,9 @@ def new_character():
         player.character.set_character_attributes()    
         player.character.set_gender(player.character.gender)
         skills.level_up_skill_points()
-        player.character.save()
+        
+        current_user.character_1 = player.character
+        db.session.commit()
 
         character_print  = '''
 *** You have created a new character! ***
@@ -132,19 +145,34 @@ Profession:  {}
     return render_template('/new_character.html', form=form, Stats=stats)
 
 @main.route('/load_character', methods=['POST', 'GET'])
+@login_required
 def load_character():
     
-    saved_characters, character_names = get_characters()
+    characters = []
+    character_names = []
+    
+    if current_user.character_1:
+        characters.append(current_user.character_1)
+    if current_user.character_2:
+        characters.append(current_user.character_2)
+    if current_user.character_3:
+        characters.append(current_user.character_3)            
+    if current_user.character_4:
+        characters.append(current_user.character_4)    
+    if current_user.character_5:
+        characters.append(current_user.character_5) 
+        
+    for character in characters:
+           character_names.append(character.first_name)
 
     if request.method == "POST":
-        character_name = request.form['character'].split()
+        character_name = request.form['character']
         
         world.load_tiles()
                 
-        for char_data in saved_characters:
-            if char_data['_first_name'] == character_name[0] and char_data['_last_name'] == character_name[1]:
-                player.create_character("new_player")
-                player.character.load(state=char_data)
+        for character in characters:
+            if character.first_name == character_name:
+                player.character = character
                 player.character.room = world.tile_exists(x=player.character.location_x, y=player.character.location_y, area=player.character.area)
                 player.character.room.fill_room(character=player.character)
                 
