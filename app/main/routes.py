@@ -136,7 +136,7 @@ Profession:  {}
         player.character.room = world.tile_exists(x=player.character.location_x, y=player.character.location_y, area=player.character.area)
         player.character.room.fill_room(character=player.character)
         player.character.room.intro_text()
-        player.character.print_status()
+        player.character.get_status()
         
         landing_page_text = "Character Created! Please close the window and return to the game window."
               
@@ -184,23 +184,6 @@ def load_character():
         return render_template('/close.html', text=landing_page_text)
     
     return render_template('/load_character.html', Characters=character_names)
-
-def get_characters():
-    
-    saved_characters = []
-    character_names = []
-
-    path_load = pathlib.Path.cwd() / 'Profiles'
-    filenames = path_load.glob('*.p')
-    for filename in filenames:
-        path_load_file = path_load / filename
-        f = open(path_load_file.absolute().as_posix(), 'rb')
-        saved_characters.append(pickle.load(f))
-        
-    for character in saved_characters:
-        character_names.append(character['_first_name'] + " " + character['_last_name'])
-    
-    return saved_characters, character_names
     
 
 @main.route('/skills', methods=['POST', 'GET'])

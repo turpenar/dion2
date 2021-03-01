@@ -12,10 +12,14 @@ def connect():
 def game_action(msg):
     emit('message', {'data': msg['data']})
     start_room_number = player.character.room.room_number
-    actions.do_action(action_input=msg['data'], character=player.character)
-    end_room_number = player.character.room.room_number
-    if end_room_number != start_room_number:
-        join_room(str(end_room_number))
+    action_result = actions.do_action(action_input=msg['data'], character=player.character)
+    if action_result['character_output']:
+        emit('message', {'data': action_result['character_output']})
+    if action_result['room_output']:
+        for room in action_result['room_output']:
+            emit('message', {'data': action_result['room_output'][room]}, room=room, include_self=False)
+    if action_result['status_window']:
+        emit('status_window_print', {'data': action_result['status_window']})
     emit('message', {'data': 'You joined:  ' + ','.join(rooms())})
     
 def game_event(game_event_text):

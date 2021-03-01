@@ -28,12 +28,19 @@ def do_action(action_input, character=None):
         events.game_event("")
         return
     kwargs = command_parser.parser(action_input)
-    DoActions.do_action(kwargs['action_verb'], character, **kwargs)
+    return DoActions.do_action(kwargs['action_verb'], character, **kwargs).action_result
 
 
 class DoActions:
     def __init__(self, character, **kwargs):
         self.character = character
+        self.action_result = {"room_change": {"room_change_flag":  False,
+                                              "old_room":  None,
+                                              "new_room":  None},
+                              "character_output":  None,
+                              "room_output":  {},
+                              "area_output":  None,
+                              "status_window":  None}
 
     do_actions = {}
 
@@ -52,6 +59,25 @@ class DoActions:
             events.game_event("I am sorry, I did not understand.")
             return
         return cls.do_actions[action](character, **kwargs)
+    
+    def update_room(self, old_room_number, new_room_number):
+        self.action_result['room_change']['room_change_flag'] = True
+        self.action_result['room_change']['old_room'] = old_room_number
+        self.action_result['room_change']['new_room'] = new_room_number
+        return
+    
+    def update_character_output(self, character_output_text):
+        self.action_result['character_output'] = character_output_text
+        
+    def update_room_output(self, room_output_text):
+        self.action_result['room_output'] = room_output_text
+        
+    def update_area_output(self, area_output_text):
+        self.action_result['area_output'] = area_output_text
+    
+    def update_status(self, status_text):
+        self.action_result['status_window'] = status_text
+        
 
 
 @DoActions.register_subclass('ask')
@@ -229,9 +255,11 @@ class East(DoActions):
         if world.tile_exists(x=self.character.location_x + 1, y=self.character.location_y, area=self.character.area):
             if character.room.shop_filled == True:
                 if character.room.shop.in_shop == True:
-                    character.room.shop.exit_shop()             
+                    character.room.shop.exit_shop()
+            old_room = self.character.room.room_number             
             self.character.move_east()
-            character.print_status()
+            self.update_room(old_room_number=old_room, new_room_number=self.character.room.room_number)
+            self.update_status(character.get_status())
             return
         else:
             events.game_event("You cannot find a way to move in that direction.")
@@ -1095,13 +1123,14 @@ class Stand(DoActions):
         if self.character.is_dead():
             return 
         if self.character.position == 'standing':
-            events.game_event('You seem to already be standing.')
-            character.print_status()
+            self.update_character_output(character_output_text="You seem to already be standing.")
+            self.update_status(status_text=character.get_status())
             return 
         else:
             self.character.position = 'standing'
-            events.game_event('You raise yourself to a standing position.')
-            character.print_status()
+            self.update_character_output(character_output_text="You raise yourself to a standing position.")
+            self.update_room_output(room_output_text={character.room.room_number: "{} raises {}self to a standing position".format(character.first_name, character.possessive_pronoun)})
+            self.update_status(status_text=character.get_status())
             return
 
 

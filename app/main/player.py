@@ -573,18 +573,12 @@ class Player(mixins.ReprMixin, mixins.DataFileMixin):
             self.quests[quest].start()
         del state['quests']
         self.__dict__.update(state)
-
-    def load(self, state):
-        self.__setstate__(state)
-        events.game_event(game_event_text="You have loaded {} {}".format(self.first_name, self.last_name))
-        return
         
     def move(self, dx, dy):
         self.location_x += dx
         self.location_y += dy
         self.room = world.tile_exists(x=self.location_x, y=self.location_y, area=self.area)
         self.room.fill_room(character=self)
-        self.room.intro_text()
         return
 
     def move_north(self, **kwargs):
@@ -603,7 +597,7 @@ class Player(mixins.ReprMixin, mixins.DataFileMixin):
         self.move(dx=-1, dy=0)
         return
     
-    def print_status(self, **kwargs):
+    def get_status(self, **kwargs):
         if self.right_hand_inv is None:
             right_hand_status = "empty"
         else:
@@ -614,10 +608,10 @@ class Player(mixins.ReprMixin, mixins.DataFileMixin):
         else:
             left_hand_status = self.left_hand_inv.name
         
-        events.status_window(status_window_text=["Right Hand:  {}".format(right_hand_status),
-                                           "Left Hand:   {}".format(left_hand_status),
-                                           "Stance:      {}".format(self.stance),
-                                           "Position:    {}".format(self.position)])
+        return ["Right Hand:  {}".format(right_hand_status),
+                "Left Hand:   {}".format(left_hand_status),
+                "Stance:      {}".format(self.stance),
+                "Position:    {}".format(self.position)]
     
     def save(self,):
         save_data = self.__getstate__()
