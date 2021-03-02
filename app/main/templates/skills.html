@@ -16,7 +16,7 @@
 
 <div class="interface-window">
 
-	<form class="form" id="skills_form" action="{{ url_for('skills_modify') }}" method="POST">
+	<form class="form" id="skills_form" action="{{ url_for('main.skills_modify') }}" method="POST">
 		<input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
 
 		{{form.physical_training_points_var.label}}

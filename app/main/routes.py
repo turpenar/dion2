@@ -177,7 +177,7 @@ def load_character():
                 player.character.room.fill_room(character=player.character)
                 
         player.character.room.intro_text()
-        player.character.print_status()
+        player.character.get_status()
         
         landing_page_text = "Character Loaded! Please close the window and return to the game window."
         

@@ -45,6 +45,36 @@ body {
 	font-size: 25px;
 }
 
+.secondnav {
+  background-color: #555;
+  overflow: hidden;
+}
+
+/* Style the links inside the navigation bar */
+.secondnav a {
+  float: right;
+  color: #f2f2f2;
+  font-family: luminari, fantasy;
+  text-align: center;
+  padding: 12px 14px;
+  text-decoration: none;
+  font-size: 14px;
+  display: inline;
+}
+
+/* Change the color of links on hover */
+.secondnav a:hover {
+  background-color: #ddd;
+  color: black;
+}
+
+/* Add a color to the active/current link */
+.secondnav a.active {
+  background-color: #4CAF50;
+  color: white;
+}
+
+
 .title {
 	width: 100%;
 	margin-left: 10px;
