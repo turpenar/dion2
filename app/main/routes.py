@@ -20,7 +20,7 @@ def load_user(user_id):
 @main.route('/')
 @login_required
 def index():
-    return render_template('/index.html', async_mode=socketio.async_mode)
+    return render_template('/index.html', async_mode=socketio.async_mode, user=current_user.username)
 
 @main.route('/login', methods=['POST', 'GET'])
 def login():

@@ -36,6 +36,15 @@ body {
   color: white;
 }
 
+.topnav p {
+  float: right;
+  color: #f2f2f2;
+  font-family: sans-serif;
+  text-align: center;
+  text-decoration: none;
+  font-size: 10px;
+}
+
 .page_title {
 	float: left;
 	font-family: luminari, fantasy;

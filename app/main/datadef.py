@@ -15,6 +15,7 @@ class User(UserMixin, db.Model):
     character_4 = db.Column(db.PickleType)
     character_5 = db.Column(db.PickleType)
     
-db.create_all()
+    def __repr__(self):
+        return '<User {}>'.format(self.username)
         
     
