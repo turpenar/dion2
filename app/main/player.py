@@ -28,6 +28,8 @@ experience_points_base = config.experience_points_base
 experience_growth = config.experience_growth
 profession_stats_growth_file = config.PROFESSION_STATS_GROWTH_FILE
 race_stats_file = config.RACE_STATS_FILE
+profession_skillpoint_bonus_file = config.PROFESSION_SKILLPOINT_BONUS_FILE
+base_training_points = config.base_training_points
 positions = config.positions
 stances = config.stances
 all_items = mixins.all_items
@@ -36,8 +38,8 @@ lock = threading.Lock()
 
 
 def create_character(character_name=None):
-    global character
     character = Player(player_name=character_name)
+    return character
 
 
 class Player(mixins.ReprMixin, mixins.DataFileMixin):
@@ -418,6 +420,24 @@ class Player(mixins.ReprMixin, mixins.DataFileMixin):
         self.defense_strength_block_base = int(round(self.stats_bonus['strength'] / 4 + self.stats_bonus['dexterity'] /4,0))
         self.defense_strength_parry_base = int(round(self.stats_bonus['strength'] / 4 + self.stats_bonus['dexterity'] / 4,0))
 
+    def level_up_skill_points(self):
+        stat_value = {}
+        for stat in self.stats:
+            stat_value[stat] = int(round(float(self.stats[stat]))) * int(profession_skillpoint_bonus_file.loc[self.profession, stat])
+        added_physical_points = base_training_points + ((stat_value['strength']
+                                                        + stat_value['constitution']
+                                                        + stat_value['dexterity']
+                                                        + stat_value['agility']) / 20)
+        added_mental_points = base_training_points + ((stat_value['intellect']
+                                                       + stat_value['wisdom']
+                                                       + stat_value['logic']
+                                                       + stat_value['spirit']) / 20)
+        self.physical_training_points = self.physical_training_points + added_physical_points
+        self.mental_training_points = self.mental_training_points + added_mental_points
+        for skill in self.skills:
+            self.skills_base[skill] = self.skills[skill]
+    
+    
     def add_money(self, amount):
         with lock:
             self.money += amount

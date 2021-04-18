@@ -263,7 +263,7 @@ class MapTile(mixins.DataFileMixin):
 
 
     def intro_text(self):
-        events.game_event("""\
+        intro_text = """\
 [{}, {}] 
 {}
 {}
@@ -272,7 +272,8 @@ class MapTile(mixins.DataFileMixin):
                    self.room_name,
                    wrapper.fill(text=self.description),
                    self.obvious_exits(),
-                   self.all_objects()))
+                   self.all_objects())
+        return intro_text
 
     def spawn_generator(self, character):
         return NotImplementedError()

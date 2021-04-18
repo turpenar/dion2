@@ -12,38 +12,13 @@
 	<div class="page_title">Dion</div>
   	<a href="logout">Log Out</a>
   	<a href="new_character" target="_blank">New Character</a>
-  	<a href="load_character" target="_blank">Load Character</a>
+  	<a href="characters" target="_blank">Play</a>
 </div>
 
 <div class="topnav">
 	<p>Logged in as {{user}}</p>
 </div>
 
-<div class="secondnav">
-  	<a href="skills" target="_blank">Skills</a>
-</div>
-
-<div>
-	<p>{{username}}</p>
-</div>
-
-<div class="interface-window">
-
-	<div class="game-window" id="game-window-id">
-	<span>You are not yet connected to the server.</span>
-	</div>
-
-	<div class="status-window" id="status-window-id">
-	<span>Your character status will be displayed here.</span>
-	</div>
-
-</div>
-
-<form id="command-line-form" class="command-line" autocomplete="off">
-	<input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-	<input type="text" name="action" id="action" autofocus="autofocus" width="100%">
-	<input type="submit" class="interface-button" id="enter-button" value="Enter">
-</form>
 
 <br>
 
@@ -51,46 +26,5 @@
 <p class='synopsis'>Copyright</p>
 </div>
 
-
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.0/socket.io.js"></script>
-<script>
-
-	$(document).ready(function(){
-		// sending a connect request to the server.
-        var socket = io.connect('http://127.0.0.1:5000');
-		 
- 		function scrollBottom(id) {
-			var objDiv = document.getElementById(id);
-			objDiv.scrollTop = objDiv.scrollHeight;
-		};
-		
-		
-		socket.on('connect', function() {
-			socket.emit('msg', {'data': 'I am connected to the server.'});
-		});
-		
-		socket.on('message', function(msg) {			
-			$("#game-window-id").prepend('<li>>'+msg.data+'</li>');
-			scrollBottom("#game-window-id");
-		});
-		
-		socket.on('game_event_print', function(game_event_text) {
-			$("#game-window-id").prepend('<li>'+game_event_text.data+'</li>');
-		});
-		
-		$("form#command-line-form").submit(function(event) {
-			socket.emit('game_action', {'data': $('#action').val()});
-			$('#action').val('');
-			return false;
-		});
-		
-		socket.on('status_window_print', function(status_window_text) {
-			$("status-window-id").text(status_window_text.data)
-		});
-		
-	});
-
-</script>
 
 {% endblock %}

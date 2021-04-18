@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Dion</title>
+{% endblock %}
+
+{% block body %}
+<head>
+</head>
+
+<div class="topnav">
+	<div class="page_title">Dion</div>
+</div>
+
+<div class="topnav">
+	<p>Logged in as {{user}}</p>
+</div>
+
+<div class="secondnav">
+  	<a href="skills" target="_blank">Skills</a>
+</div>
+
+<div class="interface-window">
+
+	<div class="game-window" id="game-window-id">
+	<span>You are not yet connected to the server.</span>
+	</div>
+
+	<div class="status-window" id="status-window-id">
+	<span>Your character status will be displayed here.</span>
+	</div>
+
+</div>
+
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+<input type="text" name="action" id="action" autofocus="autofocus" width="100%">
+<button class="interface-button" id="enter-button">Button</button>
+
+<br>
+
+<div class="footer">
+<p class='synopsis'>Copyright</p>
+</div>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.0/socket.io.js"></script>
+<script>
+
+	$(document).ready(function(){
+		// sending a connect request to the server.
+        var socket = io.connect('http://127.0.0.1:5000');
+		 
+ 		function scrollBottom(id) {
+			var objDiv = document.getElementById(id);
+			objDiv.scrollTop = objDiv.scrollHeight;
+		};
+		
+		
+		socket.on('connect', function() {
+			socket.emit('msg', {'data': 'I am connected to the server.'});
+		});
+		
+		socket.on('message', function(msg) {			
+			$("#game-window-id").prepend('<li>'+msg.data+'</li>');
+			scrollBottom("#game-window-id");
+		});
+		
+		socket.on('game_event', function(msg) {			
+			$("#game-window-id").prepend('<li>'+msg.data+'</li>');
+			scrollBottom("#game-window-id");
+		});
+		
+		socket.on('game_event_print', function(game_event_text) {
+			$("#game-window-id").prepend('<li>'+game_event_text.data+'</li>');
+		});
+		
+		socket.on('status_window_print', function(status_window_text) {
+			$("status-window-id").text(status_window_text.data)
+		});
+		
+		$("#enter-button").on('click', function(event) {
+			socket.emit('game_action', {'data': document.getElementById('action').value});
+			$('#action').val('');
+			return false;
+		});
+		
+	});
+
+</script>
+
+{% endblock %}

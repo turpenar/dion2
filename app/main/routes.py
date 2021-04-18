@@ -10,8 +10,9 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, login_required, logout_user, current_user
 
 from app import socketio, login_manager, db
-from app.main import datadef, main, events, world, player, skills, config, items
+from app.main import datadef, main, events, world, player, skills, config, items, tiles
 from app.main.forms import LoginForm, SignUpForm, NewCharacterForm, SkillsForm
+
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -56,6 +57,39 @@ def signup():
         return '<h1>New user has been created!</h1>'
     
     return render_template('/signup.html', form=form)
+
+@main.route('/play')
+@login_required
+def play():
+    return render_template('/play.html', async_mode=socketio.async_mode, user=current_user.username)
+
+@main.route('/characters', methods=['POST', 'GET'])
+@login_required
+def characters():
+    
+    characters = []
+    character_names = []
+    
+    if current_user.character_1:
+        characters.append(current_user.character_1)
+    if current_user.character_2:
+        characters.append(current_user.character_2)
+    if current_user.character_3:
+        characters.append(current_user.character_3)            
+    if current_user.character_4:
+        characters.append(current_user.character_4)    
+    if current_user.character_5:
+        characters.append(current_user.character_5) 
+        
+    for character in characters:
+           character_names.append(character.first_name)
+
+    if request.method == "POST":
+        
+        return render_template('/play.html', async_mode=socketio.async_mode, user=current_user.username)
+    
+    return render_template('/characters.html', Characters=character_names)
+    
     
 @main.route('/new_character', methods=['POST', 'GET'])
 @login_required
@@ -82,24 +116,20 @@ def new_character():
             stats_initial[stat.lower()] = int(result[stat])
             stats_total += stats_initial[stat.lower()]
 
-        world.load_tiles()
-        player.create_character('new_player')
+        new_character = player.create_character('new_player')
         
-        player.character.name = first_name
-        player.character.first_name = first_name
-        player.character.last_name = last_name
-        player.character.gender = gender
-        player.character.profession = profession
+        new_character.name = first_name
+        new_character.first_name = first_name
+        new_character.last_name = last_name
+        new_character.gender = gender
+        new_character.profession = profession
         
-        for stat in player.character.stats:
-            player.character.stats[stat] = stats_initial[stat]
+        for stat in new_character.stats:
+            new_character.stats[stat] = stats_initial[stat]
             
-        player.character.set_character_attributes()    
-        player.character.set_gender(player.character.gender)
-        skills.level_up_skill_points()
-        
-        current_user.character_1 = player.character
-        db.session.commit()
+        new_character.set_character_attributes()    
+        new_character.set_gender(new_character.gender)
+        new_character.level_up_skill_points()
 
         character_print  = '''
 *** You have created a new character! ***
@@ -129,61 +159,23 @@ Profession:  {}
     at least that's what they say. "{} really knows how to get things done," they would say.
 
     You open your eyes...
-            '''.format(player.character.object_pronoun)
+            '''.format(new_character.object_pronoun)
             
         events.game_event(game_intro)
         
-        player.character.room = world.tile_exists(x=player.character.location_x, y=player.character.location_y, area=player.character.area)
-        player.character.room.fill_room(character=player.character)
-        player.character.room.intro_text()
-        player.character.get_status()
+        new_character.room = world.tile_exists(x=new_character.location_x, y=new_character.location_y, area=new_character.area)
         
-        landing_page_text = "Character Created! Please close the window and return to the game window."
+        current_user.character_1 = new_character
+        
+        db.session.commit()
+        
+        new_character.room.fill_room(character=new_character)
+        new_character.room.intro_text()
+        new_character.get_status()
               
-        return render_template('/close.html', text=landing_page_text)
+        return '<h1>Character Created! Please close the window and return to the main page.</h1>'
         
     return render_template('/new_character.html', form=form, Stats=stats)
-
-@main.route('/load_character', methods=['POST', 'GET'])
-@login_required
-def load_character():
-    
-    characters = []
-    character_names = []
-    
-    if current_user.character_1:
-        characters.append(current_user.character_1)
-    if current_user.character_2:
-        characters.append(current_user.character_2)
-    if current_user.character_3:
-        characters.append(current_user.character_3)            
-    if current_user.character_4:
-        characters.append(current_user.character_4)    
-    if current_user.character_5:
-        characters.append(current_user.character_5) 
-        
-    for character in characters:
-           character_names.append(character.first_name)
-
-    if request.method == "POST":
-        character_name = request.form['character']
-        
-        world.load_tiles()
-                
-        for character in characters:
-            if character.first_name == character_name:
-                player.character = character
-                player.character.room = world.tile_exists(x=player.character.location_x, y=player.character.location_y, area=player.character.area)
-                player.character.room.fill_room(character=player.character)
-                
-        player.character.room.intro_text()
-        player.character.get_status()
-        
-        landing_page_text = "Character Loaded! Please close the window and return to the game window."
-        
-        return render_template('/close.html', text=landing_page_text)
-    
-    return render_template('/load_character.html', Characters=character_names)
     
 
 @main.route('/skills', methods=['POST', 'GET'])
