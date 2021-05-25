@@ -7,30 +7,26 @@ from app import socketio, db
 from app.main import actions, player, world
 
 @socketio.on('connect')
-def connect():
-    if current_user.character_1:
-        current_user.character_1.room = world.tile_exists(x=current_user.character_1.location_x, y=current_user.character_1.location_y, area=current_user.character_1.area)
-        if not current_user.character_1.room.room_filled:
-            current_user.character_1.room.fill_room(character=current_user.character_1)
-        join_room(current_user.character_1.room.room_number)
-        emit('game_event', {'data': 'You are connected to the server. You are connected as ' 
-                         + current_user.character_1.first_name 
-                         + '<br>'
-                         + current_user.character_1.room.intro_text()}) 
-        print(current_user.character_1.room.room_number)
-        print(current_user.character_1.room.intro_text())
-        print(current_user.character_1)
-        print(rooms())
+def test_connect():
+    emit('after_connect', {'data': 'connected'})
+    # if current_user.character_1:
+    #     current_user.character_1.room = world.tile_exists(x=current_user.character_1.location_x, y=current_user.character_1.location_y, area=current_user.character_1.area)
+    #     if not current_user.character_1.room.room_filled:
+    #         current_user.character_1.room.fill_room(character=current_user.character_1)
+    #     join_room(current_user.character_1.room.room_number)
+    #     emit('after_connect', {'data': 'You are connected to the server. You are connected as ' 
+    #                      + current_user.character_1.first_name 
+    #                      + '<br>'
+    #                      + current_user.character_1.room.intro_text()}) 
         
-    else:
-        emit('result', {'data': 'You have not yet set up a character.'})
+    # else:
+    #     emit('after_connect', {'data': 'You have not yet set up a character.'})
     
-@socketio.on('game_action')
+@socketio.event
 def game_action(msg):
-    print('I have received the command from the command line ' + msg['data'])
     action = msg['data']
     print(action)
-    emit('game_event', {'data': 'Why is this not working?'})
+    emit('game_event', {'data': action})
     print(rooms())
 #    current_user.character_1.room = world.tile_exists(x=current_user.character_1.location_x, y=current_user.character_1.location_y, area=current_user.character_1.area)
 #    start_room_number = current_user.character_1.room.room_number

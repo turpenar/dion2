@@ -13,7 +13,7 @@ import threading as threading
 import textwrap as textwrap
 import logging as logging
 
-from app.main import config, events, items, enemies, actions, world, mixins, objects, shops, npcs
+from app.main import config, items, enemies, actions, world, mixins, objects, shops, npcs
 
 
 wrapper = textwrap.TextWrapper(width=config.TEXT_WRAPPER_WIDTH)

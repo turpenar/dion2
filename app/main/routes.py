@@ -2,16 +2,17 @@ from flask import session, redirect, url_for, render_template, request, flash
 from datetime import datetime
 import threading as threading
 import pathlib as pathlib
-import pickle as pickle
 import abc as abc
 import json as json
 from sqlalchemy.orm import sessionmaker
-from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, login_required, logout_user, current_user
+import logging
 
 from app import socketio, login_manager, db
 from app.main import datadef, main, events, world, player, skills, config, items, tiles
 from app.main.forms import LoginForm, SignUpForm, NewCharacterForm, SkillsForm
+
+logging.basicConfig(filename='record.log', level=logging.DEBUG, format=f'%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s')
 
 
 @login_manager.user_loader
@@ -21,7 +22,7 @@ def load_user(user_id):
 @main.route('/')
 @login_required
 def index():
-    return render_template('/index.html', async_mode=socketio.async_mode, user=current_user.username)
+    return render_template('/index.html', user=current_user.username)
 
 @main.route('/login', methods=['POST', 'GET'])
 def login():
@@ -31,7 +32,7 @@ def login():
     if form.validate_on_submit():
         user = datadef.User.query.filter_by(username=form.username.data).first()
         if user:
-            if check_password_hash(user.password, form.password.data):
+            if user.check_password(form.password.data):
                 login_user(user, remember=form.remember.data)
                 return redirect(url_for('main.index'))
 
@@ -49,19 +50,20 @@ def signup():
     form = SignUpForm()
     
     if form.validate_on_submit():
-        hashed_password = generate_password_hash(form.password.data, method='sha256')
-        new_user = datadef.User(username=form.username.data, password=hashed_password)
-        db.session.add(new_user)
-        db.session.commit()
-        
-        return '<h1>New user has been created!</h1>'
-    
+        existing_user = datadef.User.query.filter_by(username=form.username.data).first()
+        if existing_user == None:
+            new_user = datadef.User(username=form.username.data)
+            new_user.set_password(form.password.data)
+            db.session.add(new_user)
+            db.session.commit()
+            return '<h1>New user has been created!</h1>'
+        return '<h1>User already exists!</h1>'
     return render_template('/signup.html', form=form)
 
 @main.route('/play')
 @login_required
 def play():
-    return render_template('/play.html', async_mode=socketio.async_mode, user=current_user.username)
+    return render_template('/play.html', user=current_user.username)
 
 @main.route('/characters', methods=['POST', 'GET'])
 @login_required
@@ -86,7 +88,7 @@ def characters():
 
     if request.method == "POST":
         
-        return render_template('/play.html', async_mode=socketio.async_mode, user=current_user.username)
+        return render_template('/play.html', user=current_user.username)
     
     return render_template('/characters.html', Characters=character_names)
     
@@ -131,37 +133,37 @@ def new_character():
         new_character.set_gender(new_character.gender)
         new_character.level_up_skill_points()
 
-        character_print  = '''
-*** You have created a new character! ***
-First Name:  {}
-Last Name:  {}
-Gender:  {}
-Profession:  {}
-            '''.format(first_name,
-                       last_name,
-                       gender,
-                       profession)
-        stat_print = ""
-        for stat in stats:
-            stat_print = stat_print + "\n" + stat + ":  " + str(stats_initial[stat.lower()])
-        character_print = character_print + "\n" + stat_print
+#         character_print  = '''
+# *** You have created a new character! ***
+# First Name:  {}
+# Last Name:  {}
+# Gender:  {}
+# Profession:  {}
+#             '''.format(first_name,
+#                        last_name,
+#                        gender,
+#                        profession)
+#         stat_print = ""
+#         for stat in stats:
+#             stat_print = stat_print + "\n" + stat + ":  " + str(stats_initial[stat.lower()])
+#         character_print = character_print + "\n" + stat_print
 
-        events.game_event(character_print)
+#        events.game_event(character_print)
         
-        game_intro = '''
-    The beast becomes restless...  hungry and tired...
+    #     game_intro = '''
+    # The beast becomes restless...  hungry and tired...
 
-                        ...it trembles with anger, and the earth shakes...
+    #                     ...it trembles with anger, and the earth shakes...
 
-    Far away, you lay in a field surrounded by trees.    
-    You close your eyes and an unsettling feeling comes over you. You dread having to go back into town and resume a 
-    day you already know is going to be a waste. But you know that people rely on you and your resolve. They trust you,
-    at least that's what they say. "{} really knows how to get things done," they would say.
+    # Far away, you lay in a field surrounded by trees.    
+    # You close your eyes and an unsettling feeling comes over you. You dread having to go back into town and resume a 
+    # day you already know is going to be a waste. But you know that people rely on you and your resolve. They trust you,
+    # at least that's what they say. "{} really knows how to get things done," they would say.
 
-    You open your eyes...
-            '''.format(new_character.object_pronoun)
+    # You open your eyes...
+    #         '''.format(new_character.object_pronoun)
             
-        events.game_event(game_intro)
+    #     events.game_event(game_intro)
         
         new_character.room = world.tile_exists(x=new_character.location_x, y=new_character.location_y, area=new_character.area)
         

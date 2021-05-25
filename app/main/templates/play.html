@@ -9,7 +9,7 @@
 </head>
 
 <div class="topnav">
-	<div class="page_title">Dion</div>
+	<div class="page_title">Play</div>
 </div>
 
 <div class="topnav">
@@ -50,16 +50,16 @@
 	$(document).ready(function(){
 		// sending a connect request to the server.
         var socket = io.connect('http://127.0.0.1:5000');
+
+		socket.on('after_connect', function(msg) {			
+			$("#game-window-id").prepend('<li>'+msg.data+'</li>');
+			scrollBottom("#game-window-id");
+		});
 		 
  		function scrollBottom(id) {
 			var objDiv = document.getElementById(id);
 			objDiv.scrollTop = objDiv.scrollHeight;
 		};
-		
-		
-		socket.on('connect', function() {
-			socket.emit('msg', {'data': 'I am connected to the server.'});
-		});
 		
 		socket.on('message', function(msg) {			
 			$("#game-window-id").prepend('<li>'+msg.data+'</li>');
@@ -82,7 +82,6 @@
 		$("#enter-button").on('click', function(event) {
 			socket.emit('game_action', {'data': document.getElementById('action').value});
 			$('#action').val('');
-			return false;
 		});
 		
 	});
